@@ -20,6 +20,9 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadProjects = useCallback(async () => {
     setLoading(true);
@@ -52,6 +55,49 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
       createdAt: project.created_at,
     });
   }, [onSelectProject]);
+
+  const handleStartEdit = (e: React.MouseEvent, project: ProjectRow) => {
+    e.stopPropagation();
+    setEditingId(project.id);
+    setEditName(project.name);
+  };
+
+  const handleSaveEdit = async (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.stopPropagation();
+    if (!editingId || !editName.trim()) return;
+
+    const result = await projectService.updateName(editingId, editName.trim());
+    if (result.success) {
+      setProjects(projects.map(p => p.id === editingId ? { ...p, name: editName.trim() } : p));
+      setEditingId(null);
+      setEditName('');
+    } else {
+      setError(result.error); // Show error, maybe add timeout to clear
+    }
+  };
+
+  const handleCancelEdit = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setEditingId(null);
+    setEditName('');
+  };
+
+  const handleStartDelete = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setDeletingId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+
+    const result = await projectService.delete(deletingId);
+    if (result.success) {
+      setProjects(projects.filter(p => p.id !== deletingId));
+      setDeletingId(null);
+    } else {
+      setError(result.error);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -99,18 +145,62 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
             <ul className={styles.list}>
               {projects.map(project => (
                 <li key={project.id} className={styles.item}>
-                  <button
+                  <div
                     onClick={() => handleSelectProject(project)}
                     className={styles.projectButton}
+                    role="button"
+                    tabIndex={0}
                   >
                     <div className={styles.projectInfo}>
-                      <span className={styles.projectName}>{project.name}</span>
+                      {editingId === project.id ? (
+                        <input
+                          autoFocus
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSaveEdit(e);
+                            if (e.key === 'Escape') handleCancelEdit();
+                          }}
+                          onBlur={() => handleCancelEdit()}
+                          className={styles.editInput}
+                        />
+                      ) : (
+                        <span className={styles.projectName}>{project.name}</span>
+                      )}
+
                       <span className={styles.projectDate}>
                         Created {formatDate(project.created_at)}
                       </span>
                     </div>
-                    <span className={styles.arrow}>→</span>
-                  </button>
+
+                    <div className={styles.actions}>
+                      {editingId === project.id ? (
+                        // If editing, we rely on Enter/Blur/Escape usually, or we could add a save button icon.
+                        // For simplicity with the input taking full width potentially or focus, we'll stick to keyboard + blur for now
+                        // or we can add a small checkmark button.
+                        null
+                      ) : (
+                        <>
+                          <button
+                            onClick={(e) => handleStartEdit(e, project)}
+                            className={styles.actionButton}
+                            title="Rename"
+                          >
+                            ✎
+                          </button>
+                          <button
+                            onClick={(e) => handleStartDelete(e, project.id)}
+                            className={`${styles.actionButton} ${styles.deleteButton}`}
+                            title="Delete"
+                          >
+                            ×
+                          </button>
+                        </>
+                      )}
+                      <span className={styles.arrow}>→</span>
+                    </div>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -123,8 +213,35 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
         >
           + Create New Project
         </button>
+
+        {deletingId && (
+          <div className={styles.modalOverlay} onClick={() => setDeletingId(null)}>
+            <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+              <h3 className={styles.modalTitle}>Delete Project</h3>
+              <p className={styles.modalText}>
+                Are you sure you want to delete this project? This action cannot be undone and will delete all files and folders inside.
+              </p>
+              <div className={styles.modalActions}>
+                <button
+                  onClick={() => setDeletingId(null)}
+                  className={`${styles.modalButton} ${styles.cancelButton}`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  className={`${styles.modalButton} ${styles.confirmDeleteButton}`}
+                >
+                  Delete Project
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
 }
+
+
 
