@@ -51,6 +51,7 @@ export interface ItemRow {
   sort_order: number;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 }
 
 /**
@@ -77,6 +78,7 @@ export interface ItemUpdate {
   content?: string;
   sort_order?: number;
   updated_at?: string;
+  deleted_at?: string | null;
 }
 
 /**

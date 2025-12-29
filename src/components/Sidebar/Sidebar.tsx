@@ -5,6 +5,7 @@ import type { SidebarItem as SidebarItemData, DropPosition, SidebarItemType, Ite
 import type { Project } from '@/types/project';
 import { itemService } from '@/lib/services/itemService';
 import { SidebarItem } from './SidebarItem/SidebarItem';
+import { TrashPanel } from '@/components/TrashPanel/TrashPanel';
 import styles from './Sidebar.module.css';
 
 interface SidebarProps {
@@ -74,6 +75,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem }: SidebarProps)
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [showTrash, setShowTrash] = useState(false);
 
   // Load items from database
   useEffect(() => {
@@ -215,11 +217,11 @@ export function Sidebar({ project, selectedItemId, onSelectItem }: SidebarProps)
     };
     collectChildren(id);
 
-    // Optimistic update
+    // Optimistic update - remove from view
     setItems(prev => prev.filter(i => !idsToDelete.has(i.id)));
 
-    // Delete from database (cascades automatically)
-    const result = await itemService.delete(id);
+    // Soft delete (move to trash) instead of permanent delete
+    const result = await itemService.softDelete(id);
     if (!result.success) {
       setError(result.error);
       // Reload items on error
@@ -327,6 +329,12 @@ export function Sidebar({ project, selectedItemId, onSelectItem }: SidebarProps)
         />
       </nav>
 
+      <div className={styles.trashButton}>
+        <button onClick={() => setShowTrash(true)} className={styles.trashBtn}>
+          🗑️ Trash
+        </button>
+      </div>
+
       {editingId && (
         <div className={styles.modal} onClick={() => setEditingId(null)}>
           <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -349,6 +357,12 @@ export function Sidebar({ project, selectedItemId, onSelectItem }: SidebarProps)
           </div>
         </div>
       )}
+
+      <TrashPanel
+        projectId={project.id}
+        isOpen={showTrash}
+        onClose={() => setShowTrash(false)}
+      />
     </aside>
   );
 }

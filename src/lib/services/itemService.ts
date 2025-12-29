@@ -13,13 +13,14 @@ type ServiceResult<T> =
  */
 export const itemService = {
   /**
-   * Get all items for a project.
+   * Get all items for a project (excluding deleted items).
    */
   async getByProject(projectId: string): Promise<ServiceResult<ItemRow[]>> {
     const { data, error } = await supabase
       .from('items')
       .select('*')
       .eq('project_id', projectId)
+      .is('deleted_at', null)
       .order('sort_order', { ascending: true });
 
     if (error) {
@@ -30,12 +31,14 @@ export const itemService = {
 
   /**
    * Get direct children of a parent (or root items if parentId is null).
+   * Excludes deleted items.
    */
   async getChildren(projectId: string, parentId: string | null): Promise<ServiceResult<ItemRow[]>> {
     let query = supabase
       .from('items')
       .select('*')
       .eq('project_id', projectId)
+      .is('deleted_at', null)
       .order('sort_order', { ascending: true });
 
     if (parentId === null) {
@@ -61,11 +64,12 @@ export const itemService = {
     name: string,
     type: ItemType
   ): Promise<ServiceResult<ItemRow>> {
-    // Get next sort order
+    // Get next sort order (only from non-deleted items)
     let query = supabase
       .from('items')
       .select('sort_order')
       .eq('project_id', projectId)
+      .is('deleted_at', null)
       .order('sort_order', { ascending: false })
       .limit(1);
 
@@ -130,6 +134,7 @@ export const itemService = {
       .from('items')
       .select('id, sort_order')
       .eq('project_id', projectId)
+      .is('deleted_at', null)
       .neq('id', id)
       .gte('sort_order', sortOrder);
 
@@ -140,7 +145,7 @@ export const itemService = {
     }
 
     const { data: toShift } = await shiftQuery;
-    
+
     // Shift each sibling's order by 1
     if (toShift && toShift.length > 0) {
       for (const item of toShift) {
@@ -152,9 +157,9 @@ export const itemService = {
     }
 
     // Now update the moved item
-    const updateData: ItemUpdate = { 
-      parent_id: newParentId, 
-      sort_order: sortOrder 
+    const updateData: ItemUpdate = {
+      parent_id: newParentId,
+      sort_order: sortOrder
     };
 
     const { data, error } = await supabase
@@ -188,9 +193,52 @@ export const itemService = {
   },
 
   /**
-   * Delete an item (and all children if folder, via cascade).
+   * Soft delete an item (move to trash).
+   * Sets deleted_at timestamp. Children are also marked as deleted.
    */
-  async delete(id: string): Promise<ServiceResult<null>> {
+  async softDelete(id: string): Promise<ServiceResult<null>> {
+    const { error } = await supabase.rpc('soft_delete_item', { item_id: id });
+
+    if (error) {
+      // Fallback if the function doesn't exist yet
+      const now = new Date().toISOString();
+      const { error: updateError } = await supabase
+        .from('items')
+        .update({ deleted_at: now })
+        .eq('id', id);
+
+      if (updateError) {
+        return { success: false, error: updateError.message };
+      }
+    }
+    return { success: true, data: null };
+  },
+
+  /**
+   * Restore an item from trash.
+   * Clears deleted_at timestamp. Children are also restored.
+   */
+  async restore(id: string): Promise<ServiceResult<null>> {
+    const { error } = await supabase.rpc('restore_item', { item_id: id });
+
+    if (error) {
+      // Fallback if the function doesn't exist yet
+      const { error: updateError } = await supabase
+        .from('items')
+        .update({ deleted_at: null })
+        .eq('id', id);
+
+      if (updateError) {
+        return { success: false, error: updateError.message };
+      }
+    }
+    return { success: true, data: null };
+  },
+
+  /**
+   * Permanently delete an item (bypass trash).
+   */
+  async permanentDelete(id: string): Promise<ServiceResult<null>> {
     const { error } = await supabase
       .from('items')
       .delete()
@@ -203,12 +251,70 @@ export const itemService = {
   },
 
   /**
+   * Get all items in trash for a project.
+   */
+  async getTrash(projectId: string): Promise<ServiceResult<ItemRow[]>> {
+    const { data, error } = await supabase
+      .from('items')
+      .select('*')
+      .eq('project_id', projectId)
+      .not('deleted_at', 'is', null)
+      .order('deleted_at', { ascending: false });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true, data };
+  },
+
+  /**
+   * Empty the trash (permanently delete all trashed items for a project).
+   */
+  async emptyTrash(projectId: string): Promise<ServiceResult<null>> {
+    const { error } = await supabase
+      .from('items')
+      .delete()
+      .eq('project_id', projectId)
+      .not('deleted_at', 'is', null);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true, data: null };
+  },
+
+  /**
+   * Cleanup old trash items (older than 14 days).
+   * This should be called periodically.
+   */
+  async cleanupOldTrash(): Promise<ServiceResult<number>> {
+    const { data, error } = await supabase.rpc('cleanup_old_trash_items');
+
+    if (error) {
+      // Fallback if the function doesn't exist
+      const fourteenDaysAgo = new Date();
+      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+      const { error: deleteError } = await supabase
+        .from('items')
+        .delete()
+        .not('deleted_at', 'is', null)
+        .lt('deleted_at', fourteenDaysAgo.toISOString());
+
+      if (deleteError) {
+        return { success: false, error: deleteError.message };
+      }
+      return { success: true, data: 0 }; // Can't get count in fallback
+    }
+    return { success: true, data: data ?? 0 };
+  },
+
+  /**
    * Batch update sort orders (for reordering multiple items).
    */
   async batchReorder(
     updates: Array<{ id: string; sort_order: number }>
   ): Promise<ServiceResult<null>> {
-    // Supabase doesn't support batch updates natively, so we use a transaction-like approach
     for (const update of updates) {
       const { error } = await supabase
         .from('items')
@@ -255,4 +361,5 @@ export const itemService = {
     return { success: true, data };
   },
 };
+
 
