@@ -18,14 +18,20 @@
 
 .header {
   margin-bottom: 24px;
-  text-align: center;
+}
+
+.headerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 .title {
   font-size: 28px;
   font-weight: 600;
   color: #e0e0e0;
-  margin: 0 0 8px 0;
+  margin: 0;
 }
 
 .subtitle {
@@ -155,4 +161,3 @@
   font-size: 14px;
   padding: 48px;
 }
-

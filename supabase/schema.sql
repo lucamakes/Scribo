@@ -38,6 +38,7 @@ CREATE TABLE items (
     parent_id UUID REFERENCES items(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     type item_type NOT NULL,
+    content TEXT DEFAULT '',
     sort_order INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

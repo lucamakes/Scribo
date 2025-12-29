@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { ProjectRow } from '@/types/database';
 import { projectService } from '@/lib/services/projectService';
 import { ProjectSetup } from '@/components/ProjectSetup/ProjectSetup';
+import { UserMenu } from '@/components/UserMenu/UserMenu';
 import styles from './ProjectList.module.css';
 
 interface ProjectListProps {
@@ -24,7 +25,7 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
     setLoading(true);
     setError(null);
     const result = await projectService.getAll();
-    
+
     if (!result.success) {
       setError(result.error);
       setLoading(false);
@@ -54,10 +55,10 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   };
 
@@ -79,7 +80,10 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
     <main className={styles.container}>
       <div className={styles.card}>
         <header className={styles.header}>
-          <h1 className={styles.title}>Projects</h1>
+          <div className={styles.headerTop}>
+            <h1 className={styles.title}>Projects</h1>
+            <UserMenu />
+          </div>
           <p className={styles.subtitle}>Select a project or create a new one</p>
         </header>
 

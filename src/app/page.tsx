@@ -1,40 +1,31 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import type { Project } from '@/types/project';
-import { ProjectList } from '@/components/ProjectList/ProjectList';
-import { Sidebar } from '@/components/Sidebar/Sidebar';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/context/AuthContext';
 import styles from './page.module.css';
 
 /**
- * Main page with project list and file explorer.
+ * Landing page - redirects to projects if logged in, otherwise to login.
  */
 export default function Home() {
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const { user, loading } = useAuth();
+  const router = useRouter();
 
-  const handleSelectProject = useCallback((project: Project) => {
-    setSelectedProject(project);
-  }, []);
-
-  const handleBackToProjects = useCallback(() => {
-    setSelectedProject(null);
-  }, []);
-
-  if (!selectedProject) {
-    return <ProjectList onSelectProject={handleSelectProject} />;
-  }
+  useEffect(() => {
+    if (!loading) {
+      if (user) {
+        router.replace('/projects');
+      } else {
+        router.replace('/auth/login');
+      }
+    }
+  }, [user, loading, router]);
 
   return (
-    <main className={styles.main}>
-      <Sidebar project={selectedProject} />
-      <section className={styles.content}>
-        <div className={styles.contentHeader}>
-          <button onClick={handleBackToProjects} className={styles.backButton}>
-            ← Back to Projects
-          </button>
-        </div>
-        <p className={styles.hint}>Drag and drop files and folders in the sidebar</p>
-      </section>
-    </main>
+    <div className={styles.loadingContainer}>
+      <div className={styles.spinner}></div>
+      <p className={styles.loadingText}>Loading...</p>
+    </div>
   );
 }

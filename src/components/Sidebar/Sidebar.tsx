@@ -9,6 +9,8 @@ import styles from './Sidebar.module.css';
 
 interface SidebarProps {
   project: Project;
+  selectedItemId: string | null;
+  onSelectItem: (item: SidebarItemData | null) => void;
 }
 
 function wouldCreateCycle(items: SidebarItemData[], draggedId: string, targetId: string): boolean {
@@ -33,7 +35,7 @@ function getChildren(items: SidebarItemData[], parentId: string | null): Sidebar
  * Maps null parent_id to ROOT_ID for UI consistency.
  */
 function dbItemToSidebarItem(
-  dbItem: { id: string; name: string; type: 'file' | 'folder'; parent_id: string | null; sort_order: number; created_at: string; updated_at: string },
+  dbItem: { id: string; name: string; type: 'file' | 'folder'; parent_id: string | null; content: string; sort_order: number; created_at: string; updated_at: string },
   rootId: string
 ): SidebarItemData {
   return {
@@ -42,6 +44,7 @@ function dbItemToSidebarItem(
     type: dbItem.type,
     // Map null to ROOT_ID for UI (root-level items appear under project folder)
     parentId: dbItem.parent_id === null ? rootId : dbItem.parent_id,
+    content: dbItem.content ?? '',
     order: dbItem.sort_order,
     createdAt: dbItem.created_at,
     updatedAt: dbItem.updated_at,
@@ -63,7 +66,7 @@ function uiParentIdToDb(parentId: string, rootId: string): string | null {
  * Database uses NULL for root-level items.
  * UI uses ROOT_ID (project.id) for root-level items.
  */
-export function Sidebar({ project }: SidebarProps) {
+export function Sidebar({ project, selectedItemId, onSelectItem }: SidebarProps) {
   const ROOT_ID = project.id;
 
   const [items, setItems] = useState<SidebarItemData[]>([]);
@@ -78,7 +81,7 @@ export function Sidebar({ project }: SidebarProps) {
       setLoading(true);
       setError(null);
       const result = await itemService.getByProject(project.id);
-      
+
       if (!result.success) {
         setError(result.error);
         setLoading(false);
@@ -158,11 +161,11 @@ export function Sidebar({ project }: SidebarProps) {
 
     // Save to database (convert ROOT_ID to null)
     const dbParentId = uiParentIdToDb(uiParentId, ROOT_ID);
-    
+
     // Find the final order after normalization
     const finalItem = newItems.find(i => i.id === draggedId);
     const finalOrder = finalItem?.order ?? 0;
-    
+
     const moveResult = await itemService.move(draggedId, dbParentId, project.id, finalOrder);
     if (!moveResult.success) {
       setError(moveResult.error);
@@ -189,7 +192,7 @@ export function Sidebar({ project }: SidebarProps) {
 
   const handleSaveEdit = useCallback(async () => {
     if (!editingId || !editName.trim()) return;
-    
+
     const result = await itemService.rename(editingId, editName.trim());
     if (!result.success) {
       setError(result.error);
@@ -204,7 +207,7 @@ export function Sidebar({ project }: SidebarProps) {
 
   const handleDelete = useCallback(async (id: string) => {
     if (id === ROOT_ID) return;
-    
+
     const idsToDelete = new Set<string>();
     const collectChildren = (parentId: string) => {
       idsToDelete.add(parentId);
@@ -230,14 +233,14 @@ export function Sidebar({ project }: SidebarProps) {
   const handleAdd = useCallback(async (parentId: string, type: SidebarItemType) => {
     // Convert ROOT_ID to null for database
     const dbParentId = uiParentIdToDb(parentId, ROOT_ID);
-    
+
     const result = await itemService.create(
-      project.id, 
-      dbParentId, 
-      type === 'folder' ? 'New Folder' : 'New File', 
+      project.id,
+      dbParentId,
+      type === 'folder' ? 'New Folder' : 'New File',
       type
     );
-    
+
     if (!result.success) {
       setError(result.error);
       return;
@@ -249,11 +252,16 @@ export function Sidebar({ project }: SidebarProps) {
     setEditName(newItem.name);
   }, [project.id, ROOT_ID]);
 
+  const handleSelect = useCallback((item: SidebarItemData) => {
+    onSelectItem(item);
+  }, [onSelectItem]);
+
   const actions: ItemActions = useMemo(() => ({
     onEdit: handleEdit,
     onDelete: handleDelete,
     onAdd: handleAdd,
-  }), [handleEdit, handleDelete, handleAdd]);
+    onSelect: handleSelect,
+  }), [handleEdit, handleDelete, handleAdd, handleSelect]);
 
   const renderItem = useCallback((item: SidebarItemData, depth: number) => {
     const children = items.filter(i => i.parentId === item.id).sort((a, b) => a.order - b.order);
@@ -269,15 +277,17 @@ export function Sidebar({ project }: SidebarProps) {
         renderItem={renderItem}
         actions={actions}
         isRoot={isRoot}
+        selectedItemId={selectedItemId}
       />
     );
-  }, [items, handleDrop, actions, ROOT_ID]);
+  }, [items, handleDrop, actions, ROOT_ID, selectedItemId]);
 
   const rootItem: SidebarItemData = useMemo(() => ({
     id: ROOT_ID,
     name: project.name,
     type: 'folder',
     parentId: null,
+    content: '',
     order: 0,
     createdAt: project.createdAt,
     updatedAt: project.createdAt,
@@ -313,6 +323,7 @@ export function Sidebar({ project }: SidebarProps) {
           renderItem={renderItem}
           actions={actions}
           isRoot={true}
+          selectedItemId={selectedItemId}
         />
       </nav>
 

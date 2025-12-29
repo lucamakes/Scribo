@@ -47,6 +47,7 @@ export interface ItemRow {
   parent_id: string | null;
   name: string;
   type: ItemType;
+  content: string;
   sort_order: number;
   created_at: string;
   updated_at: string;
@@ -61,6 +62,7 @@ export interface ItemInsert {
   parent_id?: string | null;
   name: string;
   type: ItemType;
+  content?: string;
   sort_order?: number;
   created_at?: string;
   updated_at?: string;
@@ -72,6 +74,7 @@ export interface ItemInsert {
 export interface ItemUpdate {
   parent_id?: string | null;
   name?: string;
+  content?: string;
   sort_order?: number;
   updated_at?: string;
 }

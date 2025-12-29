@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect, type FormEvent, type ChangeEvent } from 'react';
+import { useState, useCallback, type FormEvent, type ChangeEvent } from 'react';
 import type { Project } from '@/types/project';
-import { useAuth } from '@/lib/hooks/useAuth';
+import { useAuth } from '@/lib/context/AuthContext';
 import { projectService } from '@/lib/services/projectService';
 import styles from './ProjectSetup.module.css';
 
@@ -18,17 +18,7 @@ export function ProjectSetup({ onCreateProject }: ProjectSetupProps) {
   const [projectName, setProjectName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { user, loading: authLoading, signInAnonymously } = useAuth();
-
-  // Auto-sign in anonymously if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      signInAnonymously().catch(err => {
-        setError('Failed to authenticate. Please refresh the page.');
-        console.error('Auth error:', err);
-      });
-    }
-  }, [authLoading, user, signInAnonymously]);
+  const { user, loading: authLoading } = useAuth();
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setProjectName(e.target.value);
@@ -37,7 +27,7 @@ export function ProjectSetup({ onCreateProject }: ProjectSetupProps) {
 
   const handleSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
       setError('Please wait for authentication...');
       return;
@@ -48,7 +38,7 @@ export function ProjectSetup({ onCreateProject }: ProjectSetupProps) {
       setError('Project name is required');
       return;
     }
-    
+
     if (trimmedName.length < 2) {
       setError('Project name must be at least 2 characters');
       return;

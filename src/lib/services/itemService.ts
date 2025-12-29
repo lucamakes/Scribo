@@ -221,5 +221,38 @@ export const itemService = {
     }
     return { success: true, data: null };
   },
+
+  /**
+   * Get a single item by ID.
+   */
+  async getById(id: string): Promise<ServiceResult<ItemRow>> {
+    const { data, error } = await supabase
+      .from('items')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true, data };
+  },
+
+  /**
+   * Update file content.
+   */
+  async updateContent(id: string, content: string): Promise<ServiceResult<ItemRow>> {
+    const { data, error } = await supabase
+      .from('items')
+      .update({ content })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true, data };
+  },
 };
 

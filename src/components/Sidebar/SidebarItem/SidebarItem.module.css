@@ -1,115 +1,125 @@
+/* ============================================
+   SIDEBAR ITEM STYLES
+   ============================================ */
+
 .itemWrapper {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+  gap: 8px;
+  padding: 6px 12px;
   cursor: pointer;
-  user-select: none;
   border-radius: 4px;
-  transition: background-color 0.1s ease;
+  color: #a0a0a0;
+  transition: all 0.1s ease;
   position: relative;
+  user-select: none;
   border: 1px solid transparent;
+  /* Prevent layout shift */
 }
 
 .item:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: #1a1a1a;
+  color: #e0e0e0;
 }
 
-.item:hover .actions {
-  opacity: 1;
+.selected {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  color: #60a5fa !important;
 }
 
 .dragging {
-  opacity: 0.4;
+  opacity: 0.5;
+  background-color: #262626;
 }
 
-.dropBefore::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 8px;
-  right: 8px;
-  height: 2px;
-  background-color: #3b82f6;
-  border-radius: 1px;
+/* Root item specific styles */
+.rootItem {
+  font-weight: 600;
+  color: #e0e0e0;
+  margin-bottom: 4px;
 }
 
-.dropAfter::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 8px;
-  right: 8px;
-  height: 2px;
-  background-color: #3b82f6;
-  border-radius: 1px;
+.rootName {
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.05em;
 }
 
-.dropInside {
-  background-color: rgba(59, 130, 246, 0.15);
-  border-color: rgba(59, 130, 246, 0.4);
-}
-
+/* Icons and Text */
 .chevron {
-  font-size: 8px;
+  font-size: 10px;
   width: 12px;
-  color: #888;
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
 }
 
 .icon {
   font-size: 14px;
-  flex-shrink: 0;
 }
 
 .name {
   font-size: 13px;
-  color: #e0e0e0;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
   flex: 1;
 }
 
-.rootItem {
-  cursor: default;
+
+/* Drop Targets */
+.dropBefore {
+  border-top: 2px solid #3b82f6;
 }
 
-.rootName {
-  font-weight: 600;
-  color: #fff;
+.dropAfter {
+  border-bottom: 2px solid #3b82f6;
 }
 
+.dropInside {
+  background-color: rgba(59, 130, 246, 0.15);
+  border: 1px dashed #3b82f6;
+}
+
+/* Actions */
 .actions {
-  display: flex;
+  display: none;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   margin-left: auto;
-  opacity: 0;
-  transition: opacity 0.1s ease;
+}
+
+.item:hover .actions,
+.selected .actions {
+  display: flex;
 }
 
 .actionBtn {
-  background: none;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
   border: none;
-  color: #888;
-  cursor: pointer;
-  padding: 2px 6px;
-  font-size: 14px;
   border-radius: 3px;
-  line-height: 1;
-  transition: all 0.1s ease;
+  color: #666;
+  font-size: 12px;
+  cursor: pointer;
 }
 
 .actionBtn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #333;
   color: #e0e0e0;
 }
 
+/* Add Menu */
 .addWrapper {
   position: relative;
 }
@@ -118,13 +128,13 @@
   position: absolute;
   top: 100%;
   right: 0;
-  background-color: #252525;
+  background-color: #1a1a1a;
   border: 1px solid #333;
-  border-radius: 4px;
-  padding: 4px 0;
+  border-radius: 6px;
+  padding: 4px;
   min-width: 100px;
-  z-index: 100;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 50;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
 }
 
 .menuItem {
@@ -132,39 +142,38 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 6px 12px;
-  background: none;
+  padding: 6px 10px;
+  background: transparent;
   border: none;
-  color: #e0e0e0;
-  font-size: 12px;
+  border-radius: 4px;
+  color: #a0a0a0;
+  font-size: 13px;
   cursor: pointer;
   text-align: left;
-  transition: background-color 0.1s ease;
 }
 
 .menuItem:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #2a2a2a;
+  color: #e0e0e0;
 }
 
-.children {
-  width: 100%;
-}
-
+/* Empty Zone */
 .emptyZone {
-  padding: 4px 8px;
-  min-height: 24px;
-  border-radius: 4px;
+  padding: 8px;
+  color: #444;
+  font-size: 12px;
+  font-style: italic;
   border: 1px dashed transparent;
-  transition: all 0.1s ease;
+  margin: 2px 0;
+  border-radius: 4px;
 }
 
 .emptyZoneActive {
   background-color: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.3);
+  border-color: #3b82f6;
+  color: #60a5fa;
 }
 
 .emptyText {
-  font-size: 11px;
-  color: #666;
-  font-style: italic;
+  display: block;
 }

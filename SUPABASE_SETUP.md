@@ -1,14 +1,18 @@
 # Supabase Setup Guide
 
-## 1. Enable Anonymous Authentication
+## 1. Configure Authentication
 
-Since the app uses anonymous authentication, you need to enable it in Supabase:
+The app uses email/password authentication. By default, Supabase requires email confirmation.
+
+**To disable email confirmation (for development):**
 
 1. Go to your Supabase project dashboard
 2. Navigate to **Authentication** → **Providers**
-3. Find **Anonymous** provider
-4. Enable it by toggling the switch
+3. Click on **Email**
+4. Toggle off **Confirm email**
 5. Save the changes
+
+**Note:** For production, keep email confirmation enabled for security.
 
 ## 2. Verify Environment Variables
 

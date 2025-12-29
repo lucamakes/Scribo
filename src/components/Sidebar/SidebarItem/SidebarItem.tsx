@@ -13,6 +13,7 @@ interface SidebarItemProps {
   renderItem: (item: SidebarItemData, depth: number) => React.ReactNode;
   actions: ItemActions;
   isRoot?: boolean;
+  selectedItemId?: string | null;
 }
 
 /**
@@ -27,6 +28,7 @@ export function SidebarItem({
   renderItem,
   actions,
   isRoot = false,
+  selectedItemId,
 }: SidebarItemProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [dropPosition, setDropPosition] = useState<DropPosition | null>(null);
@@ -35,6 +37,7 @@ export function SidebarItem({
 
   const isFolder = item.type === 'folder';
   const hasChildren = children.length > 0;
+  const isSelected = selectedItemId === item.id;
 
   const handleDragStart = useCallback((e: DragEvent<HTMLDivElement>) => {
     if (isRoot) {
@@ -91,10 +94,15 @@ export function SidebarItem({
     setDropPosition(null);
   }, [item.id, dropPosition, onDrop, isRoot]);
 
-  const toggleExpanded = useCallback((e: MouseEvent) => {
+  const handleItemClick = useCallback((e: MouseEvent) => {
     if ((e.target as HTMLElement).closest(`.${styles.actions}`)) return;
+    // Toggle expand for folders
     if (isFolder) setIsExpanded(prev => !prev);
-  }, [isFolder]);
+    // Select the item (unless it's root)
+    if (!isRoot) {
+      actions.onSelect(item);
+    }
+  }, [isFolder, isRoot, actions, item]);
 
   const handleEdit = useCallback((e: MouseEvent) => {
     e.stopPropagation();
@@ -133,7 +141,7 @@ export function SidebarItem({
   return (
     <div className={styles.itemWrapper}>
       <div
-        className={`${styles.item} ${isRoot ? styles.rootItem : ''} ${isDragging ? styles.dragging : ''} ${getDropClass()}`}
+        className={`${styles.item} ${isRoot ? styles.rootItem : ''} ${isDragging ? styles.dragging : ''} ${isSelected ? styles.selected : ''} ${getDropClass()}`}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
         draggable={!isRoot}
         onDragStart={handleDragStart}
@@ -141,7 +149,7 @@ export function SidebarItem({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={toggleExpanded}
+        onClick={handleItemClick}
         role="treeitem"
         aria-expanded={isFolder ? isExpanded : undefined}
       >

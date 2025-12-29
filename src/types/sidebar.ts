@@ -13,6 +13,8 @@ export interface SidebarItem {
   type: SidebarItemType;
   /** Parent folder ID. Null means root level. */
   parentId: string | null;
+  /** File content (only for files) */
+  content: string;
   /** Sort order within parent */
   order: number;
   /** Creation timestamp */
@@ -41,5 +43,6 @@ export interface ItemActions {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onAdd: (parentId: string, type: SidebarItemType) => void;
+  onSelect: (item: SidebarItem) => void;
 }
 
