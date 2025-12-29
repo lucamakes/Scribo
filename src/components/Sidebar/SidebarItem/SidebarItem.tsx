@@ -66,14 +66,19 @@ export function SidebarItem({
       return;
     }
 
+    // For expanded empty folders, don't show 'after' indicator
+    // (the Empty drop zone below handles that case)
+    const isExpandedEmptyFolder = isFolder && isExpanded && !hasChildren;
+
     if (isFolder && y > height * 0.25 && y < height * 0.75) {
       setDropPosition('inside');
     } else if (y < height * 0.5) {
       setDropPosition('before');
     } else {
-      setDropPosition('after');
+      // If it's an expanded empty folder, treat bottom half as 'inside' too
+      setDropPosition(isExpandedEmptyFolder ? 'inside' : 'after');
     }
-  }, [isFolder, isRoot]);
+  }, [isFolder, isRoot, isExpanded, hasChildren]);
 
   const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -84,10 +89,10 @@ export function SidebarItem({
     e.preventDefault();
     e.stopPropagation();
     const draggedId = e.dataTransfer.getData('text/plain');
-    
+
     // Root can only receive 'inside' drops
     const finalPosition = isRoot ? 'inside' : dropPosition;
-    
+
     if (draggedId && draggedId !== item.id && finalPosition) {
       onDrop(draggedId, item.id, finalPosition);
     }
