@@ -1,0 +1,170 @@
+.itemWrapper {
+  width: 100%;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 4px;
+  transition: background-color 0.1s ease;
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.item:hover .actions {
+  opacity: 1;
+}
+
+.dragging {
+  opacity: 0.4;
+}
+
+.dropBefore::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  background-color: #3b82f6;
+  border-radius: 1px;
+}
+
+.dropAfter::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  background-color: #3b82f6;
+  border-radius: 1px;
+}
+
+.dropInside {
+  background-color: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.chevron {
+  font-size: 8px;
+  width: 12px;
+  color: #888;
+  flex-shrink: 0;
+}
+
+.icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.name {
+  font-size: 13px;
+  color: #e0e0e0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.rootItem {
+  cursor: default;
+}
+
+.rootName {
+  font-weight: 600;
+  color: #fff;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 14px;
+  border-radius: 3px;
+  line-height: 1;
+  transition: all 0.1s ease;
+}
+
+.actionBtn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+}
+
+.addWrapper {
+  position: relative;
+}
+
+.addMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #252525;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 4px 0;
+  min-width: 100px;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.1s ease;
+}
+
+.menuItem:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.children {
+  width: 100%;
+}
+
+.emptyZone {
+  padding: 4px 8px;
+  min-height: 24px;
+  border-radius: 4px;
+  border: 1px dashed transparent;
+  transition: all 0.1s ease;
+}
+
+.emptyZoneActive {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.emptyText {
+  font-size: 11px;
+  color: #666;
+  font-style: italic;
+}

@@ -1,0 +1,158 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0f0f0f;
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 600px;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 32px;
+}
+
+.header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #e0e0e0;
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #888;
+  margin: 0;
+}
+
+.error {
+  padding: 12px;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  color: #ef4444;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.projects {
+  margin-bottom: 24px;
+}
+
+.empty {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.emptyText {
+  font-size: 16px;
+  color: #888;
+  margin: 0 0 8px 0;
+}
+
+.emptySubtext {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item {
+  margin: 0;
+}
+
+.projectButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background-color: #252525;
+  border: 1px solid #333;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.projectButton:hover {
+  background-color: #2a2a2a;
+  border-color: #444;
+  transform: translateX(2px);
+}
+
+.projectInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.projectName {
+  font-size: 16px;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+.projectDate {
+  font-size: 12px;
+  color: #888;
+}
+
+.arrow {
+  font-size: 18px;
+  color: #666;
+  margin-left: 16px;
+  transition: transform 0.15s ease;
+}
+
+.projectButton:hover .arrow {
+  transform: translateX(4px);
+  color: #888;
+}
+
+.createButton {
+  width: 100%;
+  padding: 14px 20px;
+  background-color: #3b82f6;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.createButton:hover {
+  background-color: #2563eb;
+}
+
+.createButton:active {
+  transform: scale(0.98);
+}
+
+.loading {
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+  padding: 48px;
+}
+
