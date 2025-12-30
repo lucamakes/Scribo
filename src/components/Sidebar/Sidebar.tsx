@@ -40,17 +40,31 @@ function dbItemToSidebarItem(
   dbItem: { id: string; name: string; type: 'file' | 'folder'; parent_id: string | null; content: string; sort_order: number; created_at: string; updated_at: string },
   rootId: string
 ): SidebarItemData {
-  return {
+  const baseItem = {
     id: dbItem.id,
     name: dbItem.name,
     type: dbItem.type,
     // Map null to ROOT_ID for UI (root-level items appear under project folder)
     parentId: dbItem.parent_id === null ? rootId : dbItem.parent_id,
-    content: dbItem.content ?? '',
     order: dbItem.sort_order,
     createdAt: dbItem.created_at,
     updatedAt: dbItem.updated_at,
   };
+
+  // Use discriminated union: files require content, folders have optional content
+  if (dbItem.type === 'file') {
+    return {
+      ...baseItem,
+      type: 'file',
+      content: dbItem.content ?? '',
+    };
+  } else {
+    return {
+      ...baseItem,
+      type: 'folder',
+      ...(dbItem.content ? { content: dbItem.content } : {}),
+    };
+  }
 }
 
 /**

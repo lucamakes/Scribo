@@ -4,17 +4,16 @@
  */
 export type SidebarItemType = 'file' | 'folder';
 
-export interface SidebarItem {
+/**
+ * Base properties shared by both files and folders
+ */
+interface BaseSidebarItem {
   /** Unique identifier (UUID-like for database realism) */
   readonly id: string;
   /** Display name of the file or folder */
   name: string;
-  /** Type discriminator */
-  type: SidebarItemType;
   /** Parent folder ID. Null means root level. */
   parentId: string | null;
-  /** File content (only for files) */
-  content: string;
   /** Sort order within parent */
   order: number;
   /** Creation timestamp */
@@ -22,6 +21,29 @@ export interface SidebarItem {
   /** Last update timestamp */
   updatedAt: string;
 }
+
+/**
+ * File item with required content
+ */
+interface FileSidebarItem extends BaseSidebarItem {
+  type: 'file';
+  /** File content */
+  content: string;
+}
+
+/**
+ * Folder item without content
+ */
+interface FolderSidebarItem extends BaseSidebarItem {
+  type: 'folder';
+  /** Folder content (optional, typically empty) */
+  content?: string;
+}
+
+/**
+ * Discriminated union for sidebar items
+ */
+export type SidebarItem = FileSidebarItem | FolderSidebarItem;
 
 /**
  * Drop position relative to target element
