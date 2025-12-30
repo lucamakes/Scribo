@@ -80,7 +80,12 @@ export const itemService = {
     }
 
     const { data: siblings } = await query;
-    const sortOrder = siblings && siblings.length > 0 ? siblings[0].sort_order + 1 : 0;
+    // Type assertion needed because Supabase partial select types can be tricky
+    type SortOrderResult = Array<{ sort_order: number }> | null;
+    const typedSiblings = siblings as SortOrderResult;
+    const sortOrder = typedSiblings && typedSiblings.length > 0 
+      ? typedSiblings[0].sort_order + 1 
+      : 0;
 
     const item: ItemInsert = {
       project_id: projectId,
@@ -147,8 +152,11 @@ export const itemService = {
     const { data: toShift } = await shiftQuery;
 
     // Shift each sibling's order by 1
-    if (toShift && toShift.length > 0) {
-      for (const item of toShift) {
+    // Type assertion needed because Supabase partial select types can be tricky
+    type ShiftItem = { id: string; sort_order: number };
+    const typedToShift = toShift as ShiftItem[] | null;
+    if (typedToShift && typedToShift.length > 0) {
+      for (const item of typedToShift) {
         await supabase
           .from('items')
           .update({ sort_order: item.sort_order + 1 })
