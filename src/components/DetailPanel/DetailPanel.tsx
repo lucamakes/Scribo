@@ -99,7 +99,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                 setSaveStatus('idle');
             }, 2000);
         } else {
-            setError(result.error);
+            setError((result as { success: false; error: string }).error);
             setSaveStatus('error');
         }
     }, [selectedItem, onContentSaved]);

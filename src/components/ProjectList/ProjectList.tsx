@@ -72,7 +72,7 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
       setEditingId(null);
       setEditName('');
     } else {
-      setError(result.error); // Show error, maybe add timeout to clear
+      setError((result as { success: false; error: string }).error); // Show error, maybe add timeout to clear
     }
   };
 
@@ -95,7 +95,7 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
       setProjects(projects.filter(p => p.id !== deletingId));
       setDeletingId(null);
     } else {
-      setError(result.error);
+      setError((result as { success: false; error: string }).error);
     }
   };
 

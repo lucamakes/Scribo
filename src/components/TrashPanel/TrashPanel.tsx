@@ -31,7 +31,7 @@ export function TrashPanel({ projectId, isOpen, onClose }: TrashPanelProps) {
         if (result.success) {
             setItems(result.data);
         } else {
-            setError(result.error);
+            setError((result as { success: false; error: string }).error);
         }
         setLoading(false);
     }, [projectId]);
@@ -47,7 +47,7 @@ export function TrashPanel({ projectId, isOpen, onClose }: TrashPanelProps) {
         if (result.success) {
             setItems(prev => prev.filter(item => item.id !== id));
         } else {
-            setError(result.error);
+            setError((result as { success: false; error: string }).error);
         }
     };
 
@@ -56,7 +56,7 @@ export function TrashPanel({ projectId, isOpen, onClose }: TrashPanelProps) {
         if (result.success) {
             setItems(prev => prev.filter(item => item.id !== id));
         } else {
-            setError(result.error);
+            setError((result as { success: false; error: string }).error);
         }
     };
 
@@ -69,7 +69,7 @@ export function TrashPanel({ projectId, isOpen, onClose }: TrashPanelProps) {
         if (result.success) {
             setItems([]);
         } else {
-            setError(result.error);
+            setError((result as { success: false; error: string }).error);
         }
     };
 
