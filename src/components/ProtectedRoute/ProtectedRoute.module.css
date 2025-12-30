@@ -4,7 +4,7 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+    background: #ffffff;
     gap: 16px;
 }
 
@@ -24,7 +24,7 @@
 }
 
 .loadingText {
-    color: #888;
+    color: #666;
     font-size: 14px;
     margin: 0;
 }

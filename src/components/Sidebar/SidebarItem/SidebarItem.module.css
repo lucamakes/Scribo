@@ -14,7 +14,7 @@
   padding: 6px 12px;
   cursor: pointer;
   border-radius: 4px;
-  color: #a0a0a0;
+  color: #666;
   transition: all 0.1s ease;
   position: relative;
   user-select: none;
@@ -23,24 +23,24 @@
 }
 
 .item:hover {
-  background-color: #1a1a1a;
-  color: #e0e0e0;
+  background-color: #f5f5f5;
+  color: #1a1a1a;
 }
 
 .selected {
   background-color: rgba(59, 130, 246, 0.1) !important;
-  color: #60a5fa !important;
+  color: #2563eb !important;
 }
 
 .dragging {
   opacity: 0.5;
-  background-color: #262626;
+  background-color: #e5e5e5;
 }
 
 /* Root item specific styles */
 .rootItem {
   font-weight: 600;
-  color: #e0e0e0;
+  color: #1a1a1a;
   margin-bottom: 4px;
 }
 
@@ -57,7 +57,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #666;
+  color: #999;
 }
 
 .icon {
@@ -109,14 +109,14 @@
   background: transparent;
   border: none;
   border-radius: 3px;
-  color: #666;
+  color: #999;
   font-size: 12px;
   cursor: pointer;
 }
 
 .actionBtn:hover {
-  background-color: #333;
-  color: #e0e0e0;
+  background-color: #e5e5e5;
+  color: #1a1a1a;
 }
 
 /* Add Menu */
@@ -128,13 +128,13 @@
   position: absolute;
   top: 100%;
   right: 0;
-  background-color: #1a1a1a;
-  border: 1px solid #333;
+  background-color: #ffffff;
+  border: 1px solid #d4d4d4;
   border-radius: 6px;
   padding: 4px;
   min-width: 100px;
   z-index: 50;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .menuItem {
@@ -146,21 +146,21 @@
   background: transparent;
   border: none;
   border-radius: 4px;
-  color: #a0a0a0;
+  color: #666;
   font-size: 13px;
   cursor: pointer;
   text-align: left;
 }
 
 .menuItem:hover {
-  background-color: #2a2a2a;
-  color: #e0e0e0;
+  background-color: #f5f5f5;
+  color: #1a1a1a;
 }
 
 /* Empty Zone */
 .emptyZone {
   padding: 8px;
-  color: #444;
+  color: #999;
   font-size: 12px;
   font-style: italic;
   border: 1px dashed transparent;
@@ -171,7 +171,7 @@
 .emptyZoneActive {
   background-color: rgba(59, 130, 246, 0.1);
   border-color: #3b82f6;
-  color: #60a5fa;
+  color: #2563eb;
 }
 
 .emptyText {

@@ -3,15 +3,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #0f0f0f;
+  background-color: #ffffff;
   padding: 24px;
 }
 
 .card {
   width: 100%;
   max-width: 600px;
-  background-color: #1a1a1a;
-  border: 1px solid #2a2a2a;
+  background-color: #ffffff;
+  border: 1px solid #e5e5e5;
   border-radius: 12px;
   padding: 32px;
 }
@@ -30,13 +30,13 @@
 .title {
   font-size: 28px;
   font-weight: 600;
-  color: #e0e0e0;
+  color: #1a1a1a;
   margin: 0;
 }
 
 .subtitle {
   font-size: 14px;
-  color: #888;
+  color: #666;
   margin: 0;
 }
 
@@ -45,7 +45,7 @@
   background-color: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 6px;
-  color: #ef4444;
+  color: #dc2626;
   font-size: 13px;
   margin-bottom: 20px;
 }
@@ -61,13 +61,13 @@
 
 .emptyText {
   font-size: 16px;
-  color: #888;
+  color: #666;
   margin: 0 0 8px 0;
 }
 
 .emptySubtext {
   font-size: 14px;
-  color: #666;
+  color: #999;
   margin: 0;
 }
 
@@ -90,8 +90,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  background-color: #252525;
-  border: 1px solid #333;
+  background-color: #fafafa;
+  border: 1px solid #e5e5e5;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -99,8 +99,8 @@
 }
 
 .projectButton:hover {
-  background-color: #2a2a2a;
-  border-color: #444;
+  background-color: #f5f5f5;
+  border-color: #d4d4d4;
   transform: translateX(2px);
 }
 
@@ -114,24 +114,24 @@
 .projectName {
   font-size: 16px;
   font-weight: 500;
-  color: #e0e0e0;
+  color: #1a1a1a;
 }
 
 .projectDate {
   font-size: 12px;
-  color: #888;
+  color: #666;
 }
 
 .arrow {
   font-size: 18px;
-  color: #666;
+  color: #999;
   margin-left: 16px;
   transition: transform 0.15s ease;
 }
 
 .projectButton:hover .arrow {
   transform: translateX(4px);
-  color: #888;
+  color: #666;
 }
 
 .createButton {
@@ -157,7 +157,7 @@
 
 .loading {
   text-align: center;
-  color: #888;
+  color: #666;
   font-size: 14px;
   padding: 48px;
 }
@@ -180,30 +180,30 @@
   border-radius: 6px;
   border: 1px solid transparent;
   background-color: transparent;
-  color: #666;
+  color: #999;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .actionButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #e0e0e0;
-  border-color: rgba(255, 255, 255, 0.1);
+  background-color: #f5f5f5;
+  color: #1a1a1a;
+  border-color: #e5e5e5;
 }
 
 .deleteButton:hover {
   background-color: rgba(239, 68, 68, 0.1);
-  color: #f87171;
-  border-color: rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 /* Edit Input */
 .editInput {
   font-size: 16px;
   font-weight: 500;
-  color: #e0e0e0;
-  background-color: #0f0f0f;
+  color: #1a1a1a;
+  background-color: #ffffff;
   border: 1px solid #3b82f6;
   border-radius: 4px;
   padding: 4px 8px;
@@ -218,7 +218,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -228,26 +228,26 @@
 }
 
 .modalContent {
-  background-color: #1a1a1a;
+  background-color: #ffffff;
   padding: 24px;
   border-radius: 12px;
-  border: 1px solid #2a2a2a;
+  border: 1px solid #e5e5e5;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   animation: slideUp 0.2s ease-out;
 }
 
 .modalTitle {
   font-size: 18px;
   font-weight: 600;
-  color: #e0e0e0;
+  color: #1a1a1a;
   margin: 0 0 12px 0;
 }
 
 .modalText {
   font-size: 14px;
-  color: #888;
+  color: #666;
   margin: 0 0 24px 0;
   line-height: 1.5;
 }
@@ -269,13 +269,13 @@
 
 .cancelButton {
   background-color: transparent;
-  border: 1px solid #333;
-  color: #888;
+  border: 1px solid #d4d4d4;
+  color: #666;
 }
 
 .cancelButton:hover {
-  border-color: #444;
-  color: #e0e0e0;
+  border-color: #999;
+  color: #1a1a1a;
 }
 
 .confirmDeleteButton {

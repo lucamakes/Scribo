@@ -11,6 +11,8 @@ interface DetailPanelProps {
     selectedItem: SidebarItemData | null;
     /** Callback when file content is saved */
     onContentSaved?: (itemId: string, content: string) => void;
+    /** If true, opens the file in fullscreen mode */
+    openInFullscreen?: boolean;
 }
 
 /**
@@ -19,7 +21,7 @@ interface DetailPanelProps {
  * - Rich text editor when a file is selected
  * - Empty state when nothing is selected
  */
-export function DetailPanel({ selectedItem, onContentSaved }: DetailPanelProps) {
+export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, onFullscreenOpened }: DetailPanelProps) {
     const [content, setContent] = useState('');
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [error, setError] = useState<string | null>(null);
@@ -39,10 +41,22 @@ export function DetailPanel({ selectedItem, onContentSaved }: DetailPanelProps) 
                 setSaveStatus('idle');
                 setError(null);
             }
+            
+            // If openInFullscreen is true, set fullscreen mode
+            // Use a separate effect to handle this after content is loaded
         } else {
             selectedItemIdRef.current = null;
         }
     }, [selectedItem]);
+    
+    // Handle fullscreen request when opening from Constellation
+    useEffect(() => {
+        if (openInFullscreen && selectedItem?.type === 'file') {
+            setIsFullscreen(true);
+            // Notify parent that fullscreen has been opened so it can reset the flag
+            onFullscreenOpened?.();
+        }
+    }, [openInFullscreen, selectedItem, onFullscreenOpened]);
 
     // Handle Escape key to exit fullscreen
     useEffect(() => {

@@ -1,13 +1,17 @@
 'use client';
 
-import { useState, useEffect, useCallback, use } from 'react';
+import { useState, useEffect, useCallback, use, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Project } from '@/types/project';
 import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
+import type { ItemRow } from '@/types/database';
 import { Sidebar } from '@/components/Sidebar/Sidebar';
 import { DetailPanel } from '@/components/DetailPanel/DetailPanel';
+import Constellation from '@/example-files/Constellation';
 import { UserMenu } from '@/components/UserMenu/UserMenu';
 import { projectService } from '@/lib/services/projectService';
+import { itemService } from '@/lib/services/itemService';
+import { itemsToChildData } from '@/lib/utils/sidebarToConstellation';
 import styles from './ProjectPage.module.css';
 
 interface ProjectPageProps {
@@ -23,8 +27,12 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     const router = useRouter();
     const [project, setProject] = useState<Project | null>(null);
     const [selectedItem, setSelectedItem] = useState<SidebarItemData | null>(null);
+    const [showBlankView, setShowBlankView] = useState(false);
+    const [items, setItems] = useState<ItemRow[]>([]);
+    const [itemsLoading, setItemsLoading] = useState(true);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [openInFullscreen, setOpenInFullscreen] = useState(false);
 
     // Load project data
     useEffect(() => {
@@ -47,6 +55,28 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         loadProject();
     }, [id]);
 
+    // Load items for Constellation
+    useEffect(() => {
+        const loadItems = async () => {
+            if (!project) return;
+            
+            setItemsLoading(true);
+            const result = await itemService.getByProject(project.id);
+
+            if (result.success) {
+                setItems(result.data);
+            }
+            setItemsLoading(false);
+        };
+
+        loadItems();
+    }, [project]);
+
+    // Convert items to Constellation format
+    const constellationData = useMemo(() => {
+        return itemsToChildData(items);
+    }, [items]);
+
     const handleBackToProjects = useCallback(() => {
         router.push('/projects');
     }, [router]);
@@ -60,6 +90,32 @@ export default function ProjectPage({ params }: ProjectPageProps) {
             setSelectedItem(prev => prev ? { ...prev, content } : null);
         }
     }, [selectedItem]);
+
+    const toggleBlankView = useCallback(() => {
+        setShowBlankView(prev => !prev);
+    }, []);
+
+    const handleConstellationFileClick = useCallback((fileId: string) => {
+        // Find the item by ID from the items array
+        const clickedItem = items.find(item => item.id === fileId);
+        if (clickedItem && clickedItem.type === 'file') {
+            // Convert ItemRow to SidebarItem format
+            const sidebarItem: SidebarItemData = {
+                id: clickedItem.id,
+                name: clickedItem.name,
+                type: clickedItem.type,
+                parentId: clickedItem.parent_id === null ? project!.id : clickedItem.parent_id,
+                content: clickedItem.content,
+                order: clickedItem.sort_order,
+                createdAt: clickedItem.created_at,
+                updatedAt: clickedItem.updated_at,
+            };
+            // Select the item, request fullscreen, and switch back to editor view
+            setOpenInFullscreen(true);
+            setSelectedItem(sidebarItem);
+            setShowBlankView(false);
+        }
+    }, [items, project]);
 
     if (loading) {
         return (
@@ -82,23 +138,54 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         );
     }
 
+    if (showBlankView) {
+        return (
+            <div className={styles.blankView}>
+                <button 
+                    onClick={toggleBlankView}
+                    className={styles.blankToggleButton}
+                    type="button"
+                    aria-label="Show editor"
+                >
+                    📝
+                </button>
+                {itemsLoading ? (
+                    <div className={styles.loadingContainer}>
+                        <div className={styles.spinner}></div>
+                        <p>Loading constellation...</p>
+                    </div>
+                ) : (
+                    <Constellation 
+                        children={constellationData}
+                        onFileClick={handleConstellationFileClick}
+                    />
+                )}
+            </div>
+        );
+    }
+
     return (
         <main className={styles.main}>
             <Sidebar
                 project={project}
                 selectedItemId={selectedItem?.id ?? null}
                 onSelectItem={handleSelectItem}
+                onToggleBlankView={toggleBlankView}
             />
             <section className={styles.content}>
                 <div className={styles.contentHeader}>
                     <button onClick={handleBackToProjects} className={styles.backButton}>
                         ← Back to Projects
                     </button>
-                    <UserMenu />
+                    <div className={styles.headerActions}>
+                        <UserMenu />
+                    </div>
                 </div>
                 <DetailPanel
                     selectedItem={selectedItem}
                     onContentSaved={handleContentSaved}
+                    openInFullscreen={openInFullscreen}
+                    onFullscreenOpened={() => setOpenInFullscreen(false)}
                 />
             </section>
         </main>
