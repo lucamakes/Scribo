@@ -47,7 +47,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                     createdAt: result.data.created_at,
                 });
             } else {
-                setError(result.error);
+                setError((result as { success: false; error: string }).error);
             }
             setLoading(false);
         };
