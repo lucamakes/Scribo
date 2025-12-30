@@ -13,7 +13,6 @@ interface SidebarProps {
   selectedItemId: string | null;
   onSelectItem: (item: SidebarItemData | null) => void;
   onToggleBlankView?: () => void;
-  onItemsChange?: (items: SidebarItemData[]) => void;
 }
 
 function wouldCreateCycle(items: SidebarItemData[], draggedId: string, targetId: string): boolean {
@@ -63,31 +62,13 @@ function uiParentIdToDb(parentId: string, rootId: string): string | null {
 }
 
 /**
- * Converts SidebarItemData back to ItemRow format for Constellation.
- */
-function sidebarItemToItemRow(item: SidebarItemData, projectId: string, rootId: string): any {
-  return {
-    id: item.id,
-    project_id: projectId,
-    parent_id: uiParentIdToDb(item.parentId, rootId),
-    name: item.name,
-    type: item.type,
-    content: item.content,
-    sort_order: item.order,
-    created_at: item.createdAt,
-    updated_at: item.updatedAt,
-    deleted_at: null,
-  };
-}
-
-/**
  * Main sidebar component with project root folder.
  * Loads and saves items from Supabase.
  * 
  * Database uses NULL for root-level items.
  * UI uses ROOT_ID (project.id) for root-level items.
  */
-export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankView, onItemsChange }: SidebarProps) {
+export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankView }: SidebarProps) {
   const ROOT_ID = project.id;
 
   const [items, setItems] = useState<SidebarItemData[]>([]);
@@ -114,11 +95,10 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
       const sidebarItems = result.data.map(item => dbItemToSidebarItem(item, ROOT_ID));
       setItems(sidebarItems);
       setLoading(false);
-      onItemsChange?.(sidebarItems);
     };
 
     loadItems();
-  }, [project.id, ROOT_ID, onItemsChange]);
+  }, [project.id, ROOT_ID]);
 
   const handleDrop = useCallback(async (draggedId: string, targetId: string, position: DropPosition) => {
     const draggedItem = items.find(i => i.id === draggedId);
@@ -181,7 +161,6 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
     });
 
     setItems(newItems);
-    onItemsChange?.(newItems);
 
     // Save to database (convert ROOT_ID to null)
     const dbParentId = uiParentIdToDb(uiParentId, ROOT_ID);
@@ -196,17 +175,14 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
       // Revert optimistic update by reloading from server
       const reloadResult = await itemService.getByProject(project.id);
       if (reloadResult.success) {
-        const reloadedItems = reloadResult.data.map(item => dbItemToSidebarItem(item, ROOT_ID));
-        setItems(reloadedItems);
-        onItemsChange?.(reloadedItems);
+        setItems(reloadResult.data.map(item => dbItemToSidebarItem(item, ROOT_ID)));
       } else {
         setItems(items);
-        onItemsChange?.(items);
       }
     }
     // Don't update from server response - keep optimistic update
     // Server has the same data now
-  }, [items, project.id, ROOT_ID, onItemsChange]);
+  }, [items, project.id, ROOT_ID]);
 
   const handleEdit = useCallback((id: string) => {
     if (id === ROOT_ID) return;
@@ -227,14 +203,10 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
     }
 
     const updatedItem = dbItemToSidebarItem(result.data as any, ROOT_ID);
-    setItems(prev => {
-      const newItems = prev.map(item => item.id === editingId ? updatedItem : item);
-      onItemsChange?.(newItems);
-      return newItems;
-    });
+    setItems(prev => prev.map(item => item.id === editingId ? updatedItem : item));
     setEditingId(null);
     setEditName('');
-  }, [editingId, editName, ROOT_ID, onItemsChange]);
+  }, [editingId, editName, ROOT_ID]);
 
   const handleDelete = useCallback(async (id: string) => {
     if (id === ROOT_ID) return;
@@ -247,11 +219,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
     collectChildren(id);
 
     // Optimistic update - remove from view
-    setItems(prev => {
-      const newItems = prev.filter(i => !idsToDelete.has(i.id));
-      onItemsChange?.(newItems);
-      return newItems;
-    });
+    setItems(prev => prev.filter(i => !idsToDelete.has(i.id)));
 
     // Soft delete (move to trash) instead of permanent delete
     const result = await itemService.softDelete(id);
@@ -260,12 +228,10 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
       // Reload items on error
       const reloadResult = await itemService.getByProject(project.id);
       if (reloadResult.success) {
-        const reloadedItems = reloadResult.data.map(item => dbItemToSidebarItem(item, ROOT_ID));
-        setItems(reloadedItems);
-        onItemsChange?.(reloadedItems);
+        setItems(reloadResult.data.map(item => dbItemToSidebarItem(item, ROOT_ID)));
       }
     }
-  }, [ROOT_ID, items, project.id, onItemsChange]);
+  }, [ROOT_ID, items, project.id]);
 
   const handleAdd = useCallback(async (parentId: string, type: SidebarItemType) => {
     // Convert ROOT_ID to null for database
@@ -284,14 +250,10 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
     }
 
     const newItem = dbItemToSidebarItem(result.data as any, ROOT_ID);
-    setItems(prev => {
-      const newItems = [...prev, newItem];
-      onItemsChange?.(newItems);
-      return newItems;
-    });
+    setItems(prev => [...prev, newItem]);
     setEditingId(newItem.id);
     setEditName(newItem.name);
-  }, [project.id, ROOT_ID, onItemsChange]);
+  }, [project.id, ROOT_ID]);
 
   const handleSelect = useCallback((item: SidebarItemData) => {
     onSelectItem(item);

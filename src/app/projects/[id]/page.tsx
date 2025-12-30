@@ -56,21 +56,29 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     }, [id]);
 
     // Load items for Constellation
-    useEffect(() => {
-        const loadItems = async () => {
-            if (!project) return;
-            
-            setItemsLoading(true);
-            const result = await itemService.getByProject(project.id);
+    const loadItems = useCallback(async () => {
+        if (!project) return;
+        
+        setItemsLoading(true);
+        const result = await itemService.getByProject(project.id);
 
-            if (result.success) {
-                setItems(result.data);
-            }
-            setItemsLoading(false);
-        };
-
-        loadItems();
+        if (result.success) {
+            setItems(result.data);
+        }
+        setItemsLoading(false);
     }, [project]);
+
+    // Initial load and reload when project changes
+    useEffect(() => {
+        loadItems();
+    }, [loadItems]);
+
+    // Reload items when switching to Constellation view to get latest changes
+    useEffect(() => {
+        if (showBlankView && project) {
+            loadItems();
+        }
+    }, [showBlankView, project, loadItems]);
 
     // Convert items to Constellation format
     const constellationData = useMemo(() => {
