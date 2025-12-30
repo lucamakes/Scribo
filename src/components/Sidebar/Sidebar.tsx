@@ -100,7 +100,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
       const result = await itemService.getByProject(project.id);
 
       if (!result.success) {
-        setError(result.error);
+        setError((result as { success: false; error: string }).error);
         setLoading(false);
         return;
       }
@@ -185,7 +185,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
 
     const moveResult = await itemService.move(draggedId, dbParentId, project.id, finalOrder);
     if (!moveResult.success) {
-      setError(moveResult.error);
+      setError((moveResult as { success: false; error: string }).error);
       // Revert optimistic update by reloading from server
       const reloadResult = await itemService.getByProject(project.id);
       if (reloadResult.success) {
@@ -212,7 +212,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
 
     const result = await itemService.rename(editingId, editName.trim());
     if (!result.success) {
-      setError(result.error);
+      setError((result as { success: false; error: string }).error);
       return;
     }
 
@@ -238,7 +238,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
     // Soft delete (move to trash) instead of permanent delete
     const result = await itemService.softDelete(id);
     if (!result.success) {
-      setError(result.error);
+      setError((result as { success: false; error: string }).error);
       // Reload items on error
       const reloadResult = await itemService.getByProject(project.id);
       if (reloadResult.success) {
@@ -259,7 +259,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
     );
 
     if (!result.success) {
-      setError(result.error);
+      setError((result as { success: false; error: string }).error);
       return;
     }
 

@@ -30,7 +30,7 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
     const result = await projectService.getAll();
 
     if (!result.success) {
-      setError(result.error);
+      setError((result as { success: false; error: string }).error);
       setLoading(false);
       return;
     }
