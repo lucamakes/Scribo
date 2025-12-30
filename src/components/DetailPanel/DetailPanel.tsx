@@ -13,6 +13,8 @@ interface DetailPanelProps {
     onContentSaved?: (itemId: string, content: string) => void;
     /** If true, opens the file in fullscreen mode */
     openInFullscreen?: boolean;
+    /** Callback invoked when fullscreen mode has been opened */
+    onFullscreenOpened?: () => void;
 }
 
 /**
