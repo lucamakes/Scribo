@@ -49,7 +49,7 @@ export const projectService = {
   async create(project: ProjectInsert): Promise<ServiceResult<ProjectRow>> {
     const { data, error } = await supabase
       .from('projects')
-      .insert(project)
+      .insert(project as any)
       .select()
       .single();
 

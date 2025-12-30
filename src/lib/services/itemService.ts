@@ -97,7 +97,7 @@ export const itemService = {
 
     const { data, error } = await supabase
       .from('items')
-      .insert(item)
+      .insert(item as any)
       .select()
       .single();
 
