@@ -113,7 +113,7 @@ export const itemService = {
   async rename(id: string, name: string): Promise<ServiceResult<ItemRow>> {
     const { data, error } = await supabase
       .from('items')
-      .update({ name })
+      .update({ name } as any)
       .eq('id', id)
       .select()
       .single();
@@ -159,7 +159,7 @@ export const itemService = {
       for (const item of typedToShift) {
         await supabase
           .from('items')
-          .update({ sort_order: item.sort_order + 1 })
+          .update({ sort_order: item.sort_order + 1 } as any)
           .eq('id', item.id);
       }
     }
@@ -172,7 +172,7 @@ export const itemService = {
 
     const { data, error } = await supabase
       .from('items')
-      .update(updateData)
+      .update(updateData as any)
       .eq('id', id)
       .select()
       .single();
@@ -189,7 +189,7 @@ export const itemService = {
   async reorder(id: string, newOrder: number): Promise<ServiceResult<ItemRow>> {
     const { data, error } = await supabase
       .from('items')
-      .update({ sort_order: newOrder })
+      .update({ sort_order: newOrder } as any)
       .eq('id', id)
       .select()
       .single();
@@ -212,7 +212,7 @@ export const itemService = {
       const now = new Date().toISOString();
       const { error: updateError } = await supabase
         .from('items')
-        .update({ deleted_at: now })
+        .update({ deleted_at: now } as any)
         .eq('id', id);
 
       if (updateError) {
@@ -233,7 +233,7 @@ export const itemService = {
       // Fallback if the function doesn't exist yet
       const { error: updateError } = await supabase
         .from('items')
-        .update({ deleted_at: null })
+        .update({ deleted_at: null } as any)
         .eq('id', id);
 
       if (updateError) {
@@ -326,7 +326,7 @@ export const itemService = {
     for (const update of updates) {
       const { error } = await supabase
         .from('items')
-        .update({ sort_order: update.sort_order })
+        .update({ sort_order: update.sort_order } as any)
         .eq('id', update.id);
 
       if (error) {
@@ -358,7 +358,7 @@ export const itemService = {
   async updateContent(id: string, content: string): Promise<ServiceResult<ItemRow>> {
     const { data, error } = await supabase
       .from('items')
-      .update({ content })
+      .update({ content } as any)
       .eq('id', id)
       .select()
       .single();

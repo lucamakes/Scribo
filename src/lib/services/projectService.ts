@@ -66,7 +66,7 @@ export const projectService = {
   async updateName(id: string, name: string): Promise<ServiceResult<ProjectRow>> {
     const { data, error } = await supabase
       .from('projects')
-      .update({ name })
+      .update({ name } as any)
       .eq('id', id)
       .select()
       .single();
