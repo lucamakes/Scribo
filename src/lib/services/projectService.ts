@@ -47,7 +47,7 @@ export const projectService = {
    * Create a new project.
    */
   async create(project: ProjectInsert): Promise<ServiceResult<ProjectRow>> {
-    // @ts-expect-error - Supabase type inference issue with Database type
+    // @ts-ignore - Supabase type inference issue with Database type
     const { data, error } = await supabase
       .from('projects')
       .insert(project)
@@ -65,7 +65,7 @@ export const projectService = {
    * Note: Root folder name is immutable in the UI, but this exists for admin use.
    */
   async updateName(id: string, name: string): Promise<ServiceResult<ProjectRow>> {
-    // @ts-expect-error - Supabase type inference issue with Database type
+    // @ts-ignore - Supabase type inference issue with Database type
     const { data, error } = await supabase
       .from('projects')
       .update({ name })

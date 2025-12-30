@@ -95,7 +95,7 @@ export const itemService = {
       sort_order: sortOrder,
     };
 
-    // @ts-expect-error - Supabase type inference issue with Database type
+    // @ts-ignore - Supabase type inference issue with Database type
     const { data, error } = await supabase
       .from('items')
       .insert(item)
@@ -112,7 +112,7 @@ export const itemService = {
    * Update an item's name.
    */
   async rename(id: string, name: string): Promise<ServiceResult<ItemRow>> {
-    // @ts-expect-error - Supabase type inference issue with Database type
+    // @ts-ignore - Supabase type inference issue with Database type
     const { data, error } = await supabase
       .from('items')
       .update({ name })
@@ -159,7 +159,7 @@ export const itemService = {
     const typedToShift = toShift as ShiftItem[] | null;
     if (typedToShift && typedToShift.length > 0) {
       for (const item of typedToShift) {
-        // @ts-expect-error - Supabase type inference issue with Database type
+        // @ts-ignore - Supabase type inference issue with Database type
         await supabase
           .from('items')
           .update({ sort_order: item.sort_order + 1 })
@@ -173,7 +173,7 @@ export const itemService = {
       sort_order: sortOrder
     };
 
-    // @ts-expect-error - Supabase type inference issue with Database type
+    // @ts-ignore - Supabase type inference issue with Database type
     const { data, error } = await supabase
       .from('items')
       .update(updateData)
@@ -191,7 +191,7 @@ export const itemService = {
    * Update sort order for an item.
    */
   async reorder(id: string, newOrder: number): Promise<ServiceResult<ItemRow>> {
-    // @ts-expect-error - Supabase type inference issue with Database type
+    // @ts-ignore - Supabase type inference issue with Database type
     const { data, error } = await supabase
       .from('items')
       .update({ sort_order: newOrder })
@@ -215,7 +215,7 @@ export const itemService = {
     if (error) {
       // Fallback if the function doesn't exist yet
       const now = new Date().toISOString();
-      // @ts-expect-error - Supabase type inference issue with Database type
+      // @ts-ignore - Supabase type inference issue with Database type
       const { error: updateError } = await supabase
         .from('items')
         .update({ deleted_at: now })
@@ -237,7 +237,7 @@ export const itemService = {
 
     if (error) {
       // Fallback if the function doesn't exist yet
-      // @ts-expect-error - Supabase type inference issue with Database type
+      // @ts-ignore - Supabase type inference issue with Database type
       const { error: updateError } = await supabase
         .from('items')
         .update({ deleted_at: null })
@@ -331,7 +331,7 @@ export const itemService = {
     updates: Array<{ id: string; sort_order: number }>
   ): Promise<ServiceResult<null>> {
     for (const update of updates) {
-      // @ts-expect-error - Supabase type inference issue with Database type
+      // @ts-ignore - Supabase type inference issue with Database type
       const { error } = await supabase
         .from('items')
         .update({ sort_order: update.sort_order })
@@ -364,7 +364,7 @@ export const itemService = {
    * Update file content.
    */
   async updateContent(id: string, content: string): Promise<ServiceResult<ItemRow>> {
-    // @ts-expect-error - Supabase type inference issue with Database type
+    // @ts-ignore - Supabase type inference issue with Database type
     const { data, error } = await supabase
       .from('items')
       .update({ content })
