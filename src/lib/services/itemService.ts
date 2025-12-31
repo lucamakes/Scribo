@@ -210,6 +210,7 @@ export const itemService = {
    * Sets deleted_at timestamp. Children are also marked as deleted.
    */
   async softDelete(id: string): Promise<ServiceResult<null>> {
+    // @ts-ignore - Supabase type inference issue with RPC
     const { error } = await supabase.rpc('soft_delete_item', { item_id: id });
 
     if (error) {
@@ -233,6 +234,7 @@ export const itemService = {
    * Clears deleted_at timestamp. Children are also restored.
    */
   async restore(id: string): Promise<ServiceResult<null>> {
+    // @ts-ignore - Supabase type inference issue with RPC
     const { error } = await supabase.rpc('restore_item', { item_id: id });
 
     if (error) {
@@ -303,6 +305,7 @@ export const itemService = {
    * This should be called periodically.
    */
   async cleanupOldTrash(): Promise<ServiceResult<number>> {
+    // @ts-ignore - Supabase type inference issue with RPC
     const { data, error } = await supabase.rpc('cleanup_old_trash_items');
 
     if (error) {
