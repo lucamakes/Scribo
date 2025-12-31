@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { ItemRow } from '@/types/database';
 import { itemService } from '@/lib/services/itemService';
 import styles from './TrashPanel.module.css';
+import { Trash2, X, Folder, File, Undo } from 'lucide-react';
 
 interface TrashPanelProps {
     projectId: string;
@@ -92,10 +93,12 @@ export function TrashPanel({ projectId, isOpen, onClose }: TrashPanelProps) {
             <div className={styles.panel} onClick={e => e.stopPropagation()}>
                 <header className={styles.header}>
                     <div className={styles.headerLeft}>
-                        <span className={styles.icon}>🗑️</span>
+                        <Trash2 size={20} strokeWidth={1} className={styles.icon} />
                         <h2 className={styles.title}>Trash</h2>
                     </div>
-                    <button onClick={onClose} className={styles.closeButton}>×</button>
+                    <button onClick={onClose} className={styles.closeButton}>
+                        <X size={20} strokeWidth={1} />
+                    </button>
                 </header>
 
                 <p className={styles.subtitle}>
@@ -109,7 +112,7 @@ export function TrashPanel({ projectId, isOpen, onClose }: TrashPanelProps) {
                         <div className={styles.loading}>Loading...</div>
                     ) : items.length === 0 ? (
                         <div className={styles.empty}>
-                            <span className={styles.emptyIcon}>🗑️</span>
+                            <Trash2 size={48} strokeWidth={1} className={styles.emptyIcon} />
                             <p>Trash is empty</p>
                         </div>
                     ) : (
@@ -118,7 +121,10 @@ export function TrashPanel({ projectId, isOpen, onClose }: TrashPanelProps) {
                                 <li key={item.id} className={styles.item}>
                                     <div className={styles.itemInfo}>
                                         <span className={styles.itemIcon}>
-                                            {item.type === 'folder' ? '📁' : '📄'}
+                                            {item.type === 'folder'
+                                                ? <Folder size={16} strokeWidth={1} data-type="folder" />
+                                                : <File size={16} strokeWidth={1} data-type="file" />
+                                            }
                                         </span>
                                         <span className={styles.itemName}>{item.name}</span>
                                         <span className={styles.itemExpiry}>
@@ -131,14 +137,14 @@ export function TrashPanel({ projectId, isOpen, onClose }: TrashPanelProps) {
                                             className={styles.restoreButton}
                                             title="Restore"
                                         >
-                                            ↩
+                                            <Undo size={16} strokeWidth={1} />
                                         </button>
                                         <button
                                             onClick={() => handlePermanentDelete(item.id)}
                                             className={styles.deleteButton}
                                             title="Delete permanently"
                                         >
-                                            ×
+                                            <X size={16} strokeWidth={1} />
                                         </button>
                                     </div>
                                 </li>

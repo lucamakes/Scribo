@@ -9,8 +9,10 @@
   flex-direction: column;
   background: #ffffff;
   height: 100%;
-  padding: 24px;
+  padding: 0 0 24px 0;
   overflow: hidden;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ============================================
@@ -71,7 +73,8 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  max-width: 600px;
+  max-width: 500px;
+  width: 100%;
   animation: fadeSlideIn 0.3s ease-out;
 }
 
@@ -90,14 +93,10 @@
 .folderHeader {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 16px;
   padding-bottom: 20px;
   border-bottom: 1px solid #e5e5e5;
-}
-
-.folderIcon {
-  font-size: 48px;
-  filter: drop-shadow(0 4px 12px rgba(255, 200, 87, 0.2));
 }
 
 .folderName {
@@ -107,6 +106,7 @@
   margin: 0;
   letter-spacing: -0.03em;
   word-break: break-word;
+  text-align: center;
 }
 
 /* Info Card */
@@ -189,7 +189,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 16px;
+  width: 100%;
   min-height: 0;
   animation: fadeSlideIn 0.3s ease-out;
 }
@@ -199,8 +199,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding-bottom: 16px;
+  padding: 24px 24px 24px 24px;
   border-bottom: 1px solid #e5e5e5;
+  width: 100%;
 }
 
 .fileHeaderLeft {
@@ -231,6 +232,77 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  gap: 12px;
+}
+
+/* Statistics */
+.statistics {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px;
+  background: #f1f1f1;
+  border-radius: 6px;
+  border: none;
+  box-shadow: none;
+}
+
+.stat {
+  font-size: 12px;
+  color: #4a4a4a;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.statDivider {
+  color: #d4d4d4;
+  font-size: 12px;
+}
+
+/* Save Button */
+.saveButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: #f1f1f1;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  box-shadow: none;
+}
+
+.saveButton.saved {
+  color: #16a34a;
+  background: rgba(74, 222, 128, 0.1);
+  border: none;
+}
+
+.saveButton.unsaved {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  border: none;
+}
+
+.saveButton.unsaved:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.unsavedDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f59e0b;
 }
 
 /* Save Indicator */
@@ -290,16 +362,16 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border-radius: 12px;
+  border-radius: 0;
   overflow: hidden;
-  background: #fafafa;
-  border: 1px solid #e5e5e5;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: transparent;
+  border: none;
+  transition: none;
 }
 
 .editorContainer:focus-within {
-  border-color: rgba(99, 102, 241, 0.4);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .editor {
@@ -386,23 +458,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  margin-left: 12px;
-  background: #fafafa;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  color: #666;
-  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: #f1f1f1;
+  border: none;
+  border-radius: 6px;
+  color: #4a4a4a;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: none;
 }
 
 .fullscreenButton:hover {
-  background: rgba(99, 102, 241, 0.1);
-  border-color: rgba(99, 102, 241, 0.3);
-  color: #6366f1;
-  transform: scale(1.05);
+  background: #e5e5e5;
+  color: #1a1a1a;
 }
 
 .fullscreenOverlay {
@@ -431,7 +501,6 @@
   flex-direction: column;
   height: 100%;
   padding: 24px;
-  gap: 16px;
 }
 
 .fullscreenEditor .fileHeader {

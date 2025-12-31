@@ -1,11 +1,12 @@
 'use client';
 
 import { useRef } from 'react';
+import { Orbit, CircleDot, ZoomIn, ZoomOut, RotateCcw, ChevronRight } from 'lucide-react';
 import styles from './Constellation.module.css';
 import { DEFAULT_CHILDREN, ROOT_SIZE } from './constants';
 import { type ConstellationProps } from './types';
 import { useConstellation } from './useConstellation';
-import { calculateReadingTime } from './utils';
+import { calculateReadingTime, calculateTotalWords } from './utils';
 
 /**
  * Story Constellation visualization component.
@@ -15,6 +16,7 @@ import { calculateReadingTime } from './utils';
 export default function Constellation({
   children: childrenData = DEFAULT_CHILDREN,
   onFileClick,
+  rootName = 'Root Folder',
 }: ConstellationProps): React.JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const {
@@ -25,10 +27,13 @@ export default function Constellation({
     isRootHovered,
     zoom,
     isDragging,
+    isAnimating,
     nodes,
     currentLevelName,
     canNavigateBack,
     showOnlyTwoCircles,
+    currentChildren,
+    navigationStack,
     handleWheel,
     handleNodeMouseEnter,
     handleNodeMouseLeave,
@@ -39,25 +44,54 @@ export default function Constellation({
     handleMouseUp,
     navigateInto,
     navigateBack,
+    navigateToLevel,
     toggleShowOnlyTwoCircles,
-  } = useConstellation(childrenData, canvasRef);
+    zoomIn,
+    zoomOut,
+    resetView,
+  } = useConstellation(childrenData, canvasRef, rootName);
 
   const isAnyHovered = hoveredIndex !== null || isRootHovered;
+  
+  // Calculate total words for current level
+  const totalWords = calculateTotalWords(currentChildren);
+  const totalReadingTime = calculateReadingTime(totalWords);
 
   return (
     <section
-      className={`${styles.visualizationSection} ${
-        isDragging ? styles.dragging : ''
-      }`}
+      className={`${styles.visualizationSection} ${isDragging ? styles.dragging : ''
+        }`}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
+      <div className={styles.breadcrumb}>
+        {navigationStack.map((level, index) => (
+          <div key={index} className={styles.breadcrumbItem}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (index < navigationStack.length - 1) {
+                  navigateToLevel(index);
+                }
+              }}
+              className={`${styles.breadcrumbButton} ${index === navigationStack.length - 1 ? styles.breadcrumbCurrent : ''}`}
+              type="button"
+            >
+              {level.name}
+            </button>
+            {index < navigationStack.length - 1 && (
+              <ChevronRight size={14} strokeWidth={1.5} className={styles.breadcrumbSeparator} />
+            )}
+          </div>
+        ))}
+      </div>
+
       <div className={styles.controls}>
-        <button 
-          className={styles.toggleButton} 
+        <button
+          className={styles.toggleButton}
           onClick={(e) => {
             e.stopPropagation();
             toggleShowOnlyTwoCircles();
@@ -66,23 +100,64 @@ export default function Constellation({
           aria-label={showOnlyTwoCircles ? 'Show All Orbits' : 'Simplify View (2 Orbits)'}
           title={showOnlyTwoCircles ? 'Show All Orbits' : 'Simplify View (2 Orbits)'}
         >
-          {showOnlyTwoCircles ? '🔍' : '⚡'}
+          {showOnlyTwoCircles ? <Orbit size={16} strokeWidth={1} /> : <CircleDot size={16} strokeWidth={1} />}
+        </button>
+
+        <div className={styles.divider} />
+
+        <button
+          className={styles.toggleButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            zoomIn();
+          }}
+          type="button"
+          aria-label="Zoom In"
+          title="Zoom In"
+        >
+          <ZoomIn size={16} strokeWidth={1} />
+        </button>
+
+        <span className={styles.zoomLevel}>{Math.round(zoom * 100)}%</span>
+
+        <button
+          className={styles.toggleButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            zoomOut();
+          }}
+          type="button"
+          aria-label="Zoom Out"
+          title="Zoom Out"
+        >
+          <ZoomOut size={16} strokeWidth={1} />
+        </button>
+
+        <button
+          className={styles.toggleButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            resetView();
+          }}
+          type="button"
+          aria-label="Reset View"
+          title="Reset View"
+        >
+          <RotateCcw size={16} strokeWidth={1} />
         </button>
       </div>
 
-      <canvas ref={canvasRef} className={styles.canvas} />
-      <div className={styles.container}>
+      <canvas ref={canvasRef} className={`${styles.canvas} ${isAnyHovered ? styles.dimmed : ''} ${isAnimating ? styles.fadeOut : styles.fadeIn}`} />
+      <div className={`${styles.container} ${isAnimating ? styles.fadeOut : styles.fadeIn}`}>
         {/* Root Node */}
         <div
-          className={`${styles.node} ${styles.rootNode} ${
-            hoveredIndex !== null ? styles.dimmed : ''
-          } ${canNavigateBack ? styles.canGoBack : ''}`}
+          className={`${styles.node} ${styles.rootNode} ${hoveredIndex !== null ? styles.dimmed : ''
+            } ${canNavigateBack ? styles.canGoBack : ''}`}
           style={{
             width: ROOT_SIZE * zoom,
             height: ROOT_SIZE * zoom,
-            transform: `translate(${centerX - (ROOT_SIZE * zoom) / 2}px, ${
-              centerY - (ROOT_SIZE * zoom) / 2
-            }px)`,
+            transform: `translate(${centerX - (ROOT_SIZE * zoom) / 2}px, ${centerY - (ROOT_SIZE * zoom) / 2
+              }px)`,
           }}
           onMouseEnter={handleRootMouseEnter}
           onMouseLeave={handleRootMouseLeave}
@@ -108,7 +183,9 @@ export default function Constellation({
               className={styles.nodeLabel}
               style={{ fontSize: 13 * zoom, top: `calc(100% + ${12 * zoom}px)` }}
             >
-              Main Story Collection
+              <div>{totalWords.toLocaleString()} words</div>
+              <div>{totalReadingTime} min read</div>
+              <div>{currentChildren.length} item{currentChildren.length !== 1 ? 's' : ''}</div>
             </span>
           )}
         </div>
@@ -125,15 +202,13 @@ export default function Constellation({
           return (
             <div
               key={`${node.data.id}-${index}`}
-              className={`${styles.node} ${styles.childNode} ${
-                styles[node.data.color]
-              } ${isDimmed ? styles.dimmed : ''} ${isFolder ? styles.isFolder : ''}`}
+              className={`${styles.node} ${styles.childNode} ${styles[node.data.color]
+                } ${isDimmed ? styles.dimmed : ''} ${isFolder ? styles.isFolder : ''}`}
               style={{
                 width: scaledSize,
                 height: scaledSize,
-                transform: `translate(${position.x - scaledSize / 2}px, ${
-                  position.y - scaledSize / 2
-                }px)`,
+                transform: `translate(${position.x - scaledSize / 2}px, ${position.y - scaledSize / 2
+                  }px)`,
               }}
               onMouseEnter={() => handleNodeMouseEnter(index)}
               onMouseLeave={handleNodeMouseLeave}

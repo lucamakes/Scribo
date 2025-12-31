@@ -39,6 +39,19 @@ export function calculateReadingTime(words: number): number {
 }
 
 /**
+ * Calculates total words from all children recursively
+ */
+export function calculateTotalWords(children: readonly ChildData[]): number {
+  return children.reduce((total, child) => {
+    let childTotal = child.words;
+    if (child.children) {
+      childTotal += calculateTotalWords(child.children);
+    }
+    return total + childTotal;
+  }, 0);
+}
+
+/**
  * Generates dynamic circle radii and limits based on total node count.
  * Each new circle increases capacity by LIMIT_STEP.
  */
@@ -163,10 +176,17 @@ export function initializeNodes(
   );
 
   const orbitAssignments = distributeNodesAcrossOrbits(nodesWithSize, radii, limits);
+  
+  // Calculate speed based on radius (Kepler's law: outer orbits move slower)
+  const innerRadius = radii[0];
 
   const nodes: NodeState[] = dataToProcess.map((child, index) => {
     const size = calculateNodeSize(child.words, minWords, maxWords);
     const radius = orbitAssignments.get(index) ?? radii[0];
+    
+    // Speed decreases with square root of radius ratio (like real orbital mechanics)
+    const speedMultiplier = Math.sqrt(innerRadius / radius);
+    const baseSpeed = BASE_SPEED * speedMultiplier;
 
     return {
       data: child,
@@ -174,7 +194,8 @@ export function initializeNodes(
       textSize: calculateTextSize(size),
       originalIndex: index,
       radius,
-      speed: BASE_SPEED,
+      baseSpeed,
+      speed: baseSpeed,
       angle: 0,
       isDecelerating: false,
     };

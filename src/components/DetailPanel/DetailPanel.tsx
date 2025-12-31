@@ -4,6 +4,18 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
 import { itemService } from '@/lib/services/itemService';
 import { TiptapEditor } from '@/components/TiptapEditor/TiptapEditor';
+import {
+    Folder,
+    FileText,
+    Lightbulb,
+    Check,
+    X,
+    Maximize2,
+    Minimize2,
+    AlertTriangle,
+    Save,
+    Pencil
+} from 'lucide-react';
 import styles from './DetailPanel.module.css';
 
 interface DetailPanelProps {
@@ -43,14 +55,14 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                 setSaveStatus('idle');
                 setError(null);
             }
-            
+
             // If openInFullscreen is true, set fullscreen mode
             // Use a separate effect to handle this after content is loaded
         } else {
             selectedItemIdRef.current = null;
         }
     }, [selectedItem]);
-    
+
     // Handle fullscreen request when opening from Constellation
     useEffect(() => {
         if (openInFullscreen && selectedItem?.type === 'file') {
@@ -138,7 +150,9 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
         return (
             <div className={styles.panel}>
                 <div className={styles.emptyState}>
-                    <div className={styles.emptyIcon}>📂</div>
+                    <div className={styles.emptyIcon}>
+                        <Folder size={48} strokeWidth={1} />
+                    </div>
                     <h3 className={styles.emptyTitle}>No item selected</h3>
                     <p className={styles.emptyDescription}>
                         Select a file or folder from the sidebar to view its details
@@ -170,7 +184,6 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             <div className={styles.panel}>
                 <div className={styles.folderView}>
                     <div className={styles.folderHeader}>
-                        <div className={styles.folderIcon}>📁</div>
                         <h2 className={styles.folderName}>{selectedItem.name}</h2>
                     </div>
 
@@ -197,7 +210,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                     </div>
 
                     <div className={styles.tipCard}>
-                        <span className={styles.tipIcon}>💡</span>
+                        <Lightbulb size={24} strokeWidth={1} className={styles.tipIcon} />
                         <p className={styles.tipText}>
                             Use the + button in the sidebar to add files or subfolders to this folder.
                         </p>
@@ -208,43 +221,59 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
     }
 
     // File view - rich text editor
+    // Calculate statistics
+    const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+    const readingTime = Math.ceil(wordCount / 225); // 225 words per minute average
+    const pageCount = (wordCount / 250).toFixed(1); // ~250 words per page
+    
     const editorContent = (
         <>
             <div className={styles.fileHeader}>
                 <div className={styles.fileHeaderLeft}>
-                    <span className={styles.fileIcon}>📄</span>
                     <h2 className={styles.fileName}>{selectedItem.name}</h2>
                 </div>
                 <div className={styles.fileHeaderRight}>
-                    {saveStatus === 'saving' && (
-                        <span className={styles.saveIndicator}>
-                            <span className={styles.savingSpinner}></span>
-                            Saving...
+                    <button
+                        onClick={() => saveContent(content)}
+                        className={`${styles.saveButton} ${content === lastSavedContent.current ? styles.saved : styles.unsaved}`}
+                        disabled={saveStatus === 'saving' || content === lastSavedContent.current}
+                        title={content === lastSavedContent.current ? 'All changes saved' : 'Save now (Ctrl+S)'}
+                    >
+                        {content === lastSavedContent.current ? (
+                            <Check size={16} strokeWidth={2} />
+                        ) : (
+                            <div className={styles.unsavedDot} />
+                        )}
+                    </button>
+                    <div className={styles.statistics}>
+                        <span className={styles.stat}>
+                            {wordCount.toLocaleString()} words
                         </span>
-                    )}
-                    {saveStatus === 'saved' && (
-                        <span className={`${styles.saveIndicator} ${styles.saved}`}>
-                            ✓ Saved
+                        <span className={styles.statDivider}>•</span>
+                        <span className={styles.stat}>
+                            {readingTime} min read
                         </span>
-                    )}
-                    {saveStatus === 'error' && (
-                        <span className={`${styles.saveIndicator} ${styles.error}`}>
-                            ✗ Error
+                        <span className={styles.statDivider}>•</span>
+                        <span className={styles.stat}>
+                            {pageCount} pages
                         </span>
-                    )}
+                    </div>
                     <button
                         onClick={toggleFullscreen}
                         className={styles.fullscreenButton}
                         title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
                     >
-                        {isFullscreen ? '⤓' : '⤢'}
+                        {isFullscreen
+                            ? <Minimize2 size={18} strokeWidth={1} />
+                            : <Maximize2 size={18} strokeWidth={1} />
+                        }
                     </button>
                 </div>
             </div>
 
             {error && (
                 <div className={styles.errorBanner}>
-                    <span>⚠️ {error}</span>
+                    <span><AlertTriangle size={16} strokeWidth={1} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> {error}</span>
                 </div>
             )}
 
@@ -255,13 +284,6 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                     placeholder="Start writing your story..."
                 />
             </div>
-
-            <div className={styles.editorFooter}>
-                <span className={styles.footerHint}>
-                    💾 Press <kbd>Ctrl</kbd> + <kbd>S</kbd> to save • Auto-saves after 1.5s of inactivity
-                    {isFullscreen && ' • Press Esc to exit'}
-                </span>
-            </div>
         </>
     );
 
@@ -271,7 +293,9 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             <>
                 <div className={styles.panel}>
                     <div className={styles.emptyState}>
-                        <div className={styles.emptyIcon}>✏️</div>
+                        <div className={styles.emptyIcon}>
+                            <Pencil size={48} strokeWidth={1} />
+                        </div>
                         <h3 className={styles.emptyTitle}>Editing in fullscreen</h3>
                         <p className={styles.emptyDescription}>
                             Press Esc or click the button to exit fullscreen mode

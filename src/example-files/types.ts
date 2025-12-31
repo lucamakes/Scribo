@@ -13,6 +13,7 @@ export interface NodeState {
   readonly size: number;
   readonly textSize: number;
   readonly originalIndex: number;
+  readonly baseSpeed: number;
   radius: number;
   speed: number;
   angle: number;
@@ -25,4 +26,6 @@ export interface ConstellationProps {
   readonly children?: readonly ChildData[];
   /** Callback when a file node is clicked */
   onFileClick?: (fileId: string) => void;
+  /** Name for the root folder (typically project name) */
+  rootName?: string;
 }

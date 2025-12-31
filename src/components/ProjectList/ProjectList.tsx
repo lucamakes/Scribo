@@ -5,6 +5,7 @@ import type { ProjectRow } from '@/types/database';
 import { projectService } from '@/lib/services/projectService';
 import { ProjectSetup } from '@/components/ProjectSetup/ProjectSetup';
 import { UserMenu } from '@/components/UserMenu/UserMenu';
+import { Pencil, X, Plus, ChevronRight } from 'lucide-react';
 import styles from './ProjectList.module.css';
 
 interface ProjectListProps {
@@ -187,18 +188,18 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
                             className={styles.actionButton}
                             title="Rename"
                           >
-                            ✎
+                            <Pencil size={14} strokeWidth={1} />
                           </button>
                           <button
                             onClick={(e) => handleStartDelete(e, project.id)}
                             className={`${styles.actionButton} ${styles.deleteButton}`}
                             title="Delete"
                           >
-                            ×
+                            <X size={14} strokeWidth={1} />
                           </button>
                         </>
                       )}
-                      <span className={styles.arrow}>→</span>
+                      <ChevronRight size={18} strokeWidth={1} className={styles.arrow} />
                     </div>
                   </div>
                 </li>
@@ -211,7 +212,7 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
           onClick={() => setShowCreate(true)}
           className={styles.createButton}
         >
-          + Create New Project
+          <Plus size={16} strokeWidth={1} style={{ marginRight: '6px' }} /> Create New Project
         </button>
 
         {deletingId && (

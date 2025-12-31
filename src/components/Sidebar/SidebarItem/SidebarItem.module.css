@@ -5,72 +5,119 @@
 .itemWrapper {
   display: flex;
   flex-direction: column;
+  padding: 2px 8px;
 }
 
 .item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
+  justify-content: space-between;
+  /* To push actions to the right */
+  padding: 12px 12px;
   cursor: pointer;
   border-radius: 4px;
-  color: #666;
+  color: #555;
+  /* Darker gray for text */
   transition: all 0.1s ease;
   position: relative;
   user-select: none;
   border: 1px solid transparent;
-  /* Prevent layout shift */
+  width: 100%;
+}
+
+.itemContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
 }
 
 .item:hover {
-  background-color: #f5f5f5;
-  color: #1a1a1a;
+  background-color: #f3f4f6;
+  color: #111;
 }
 
 .selected {
-  background-color: rgba(59, 130, 246, 0.1) !important;
+  background-color: rgba(59, 130, 246, 0.08) !important;
   color: #2563eb !important;
 }
 
+
+
 .dragging {
   opacity: 0.5;
-  background-color: #e5e5e5;
+  background-color: #f3f4f6;
 }
 
 /* Root item specific styles */
 .rootItem {
   font-weight: 600;
-  color: #1a1a1a;
+  color: #111;
+  margin-top: 12px;
   margin-bottom: 4px;
 }
 
 .rootName {
-  text-transform: uppercase;
-  font-size: 11px;
-  letter-spacing: 0.05em;
+  font-size: 13px;
 }
 
 /* Icons and Text */
 .chevron {
-  font-size: 10px;
-  width: 12px;
+  width: 16px;
+  height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #999;
+  color: #9CA3AF;
+  /* Light gray */
+  flex-shrink: 0;
+}
+
+.invisible {
+  visibility: hidden;
 }
 
 .icon {
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 2px;
+}
+
+.folderColor {
+  color: #F59E0B;
+  /* Amber-500 */
+}
+
+.fileColor {
+  color: #3B82F6;
+  /* Blue-500 */
+}
+
+.rootFolderColor {
+  color: #EF4444;
+  /* Red-500 */
 }
 
 .name {
-  font-size: 13px;
+  font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
+  line-height: 1.5;
 }
+
+/* Tree Lines (The Vertical Line) */
+.children {
+  display: flex;
+  flex-direction: column;
+  margin-left: 21px;
+  /* Align with the icon center approximately */
+  border-left: 1px solid #e5e5e5;
+  padding-left: 4px;
+}
+
+
 
 
 /* Drop Targets */
@@ -83,16 +130,16 @@
 }
 
 .dropInside {
-  background-color: rgba(59, 130, 246, 0.15);
+  background-color: rgba(59, 130, 246, 0.1);
   border: 1px dashed #3b82f6;
 }
 
-/* Actions */
+/* Actions - Appearing on Hover */
 .actions {
   display: none;
   align-items: center;
-  gap: 4px;
-  margin-left: auto;
+  gap: 2px;
+  margin-left: 8px;
 }
 
 .item:hover .actions,
@@ -109,14 +156,14 @@
   background: transparent;
   border: none;
   border-radius: 3px;
-  color: #999;
-  font-size: 12px;
+  color: #9CA3AF;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .actionBtn:hover {
   background-color: #e5e5e5;
-  color: #1a1a1a;
+  color: #111;
 }
 
 /* Add Menu */
@@ -129,12 +176,12 @@
   top: 100%;
   right: 0;
   background-color: #ffffff;
-  border: 1px solid #d4d4d4;
+  border: 1px solid #e5e5e5;
   border-radius: 6px;
   padding: 4px;
-  min-width: 100px;
+  min-width: 120px;
   z-index: 50;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .menuItem {
@@ -142,35 +189,33 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 6px 10px;
+  padding: 8px 10px;
   background: transparent;
   border: none;
   border-radius: 4px;
-  color: #666;
+  color: #555;
   font-size: 13px;
   cursor: pointer;
   text-align: left;
 }
 
 .menuItem:hover {
-  background-color: #f5f5f5;
-  color: #1a1a1a;
+  background-color: #f3f4f6;
+  color: #111;
 }
 
 /* Empty Zone */
 .emptyZone {
-  padding: 8px;
-  color: #999;
+  padding: 4px 8px;
+  margin-left: 12px;
+  color: #9CA3AF;
   font-size: 12px;
   font-style: italic;
-  border: 1px dashed transparent;
-  margin: 2px 0;
   border-radius: 4px;
 }
 
 .emptyZoneActive {
   background-color: rgba(59, 130, 246, 0.1);
-  border-color: #3b82f6;
   color: #2563eb;
 }
 

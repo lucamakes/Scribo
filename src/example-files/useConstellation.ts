@@ -22,22 +22,24 @@ import { type ChildData, type NodeState } from './types';
  */
 export function useConstellation(
   initialChildren: readonly ChildData[],
-  canvasRef: RefObject<HTMLCanvasElement | null>
+  canvasRef: RefObject<HTMLCanvasElement | null>,
+  rootName: string = 'Root Folder'
 ) {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [nodePositions, setNodePositions] = useState<{ x: number; y: number }[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isRootHovered, setIsRootHovered] = useState(false);
-  const [zoom, setZoom] = useState(1.0);
+  const [zoom, setZoom] = useState(0.9);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [showOnlyTwoCircles, setShowOnlyTwoCircles] = useState(false);
-  
+  const [isAnimating, setIsAnimating] = useState(false);
+
   // Navigation state
   const [navigationStack, setNavigationStack] = useState<Array<{
     name: string;
     children: readonly ChildData[];
-  }>>([{ name: 'Root Folder', children: initialChildren }]);
+  }>>([{ name: rootName, children: initialChildren }]);
 
   const currentLevel = navigationStack[navigationStack.length - 1];
   const currentChildren = currentLevel.children;
@@ -64,7 +66,7 @@ export function useConstellation(
     // Reset decelerations when level changes
     nodesRef.current.forEach(n => {
       n.isDecelerating = false;
-      n.speed = BASE_SPEED;
+      n.speed = n.baseSpeed;
     });
   }, [initializedNodes, radii]);
 
@@ -125,8 +127,8 @@ export function useConstellation(
     if (!ctx) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = 'rgba(219, 219, 219, 0.43)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+    ctx.lineWidth = 1;
 
     radiiRef.current.forEach((radius) => {
       ctx.beginPath();
@@ -153,7 +155,7 @@ export function useConstellation(
     setHoveredIndex(null);
     nodesRef.current.forEach((n) => {
       n.isDecelerating = false;
-      n.speed = BASE_SPEED;
+      n.speed = n.baseSpeed;
     });
   }, []);
 
@@ -166,7 +168,7 @@ export function useConstellation(
     setIsRootHovered(false);
     nodesRef.current.forEach((n) => {
       n.isDecelerating = false;
-      n.speed = BASE_SPEED;
+      n.speed = n.baseSpeed;
     });
   }, []);
 
@@ -198,20 +200,53 @@ export function useConstellation(
     setIsDragging(false);
   }, []);
 
+  const zoomIn = useCallback(() => {
+    setZoom((prev) => Math.min(prev + 0.2, MAX_ZOOM));
+  }, []);
+
+  const zoomOut = useCallback(() => {
+    setZoom((prev) => Math.max(prev - 0.2, MIN_ZOOM));
+  }, []);
+
+  const resetView = useCallback(() => {
+    setZoom(0.9);
+    setOffset({ x: 0, y: 0 });
+  }, []);
+
   // Navigation Handlers
   const navigateInto = useCallback((node: ChildData) => {
     if (node.color === 'blue' && node.children && node.children.length > 0) {
-      setNavigationStack(prev => [...prev, { name: node.name, children: node.children! }]);
-      setHoveredIndex(null);
-      setOffset({ x: 0, y: 0 });
+      setIsAnimating(true);
+      setTimeout(() => {
+        setNavigationStack(prev => [...prev, { name: node.name, children: node.children! }]);
+        setHoveredIndex(null);
+        setOffset({ x: 0, y: 0 });
+        setIsAnimating(false);
+      }, 300);
     }
   }, []);
 
   const navigateBack = useCallback(() => {
     if (navigationStack.length > 1) {
-      setNavigationStack(prev => prev.slice(0, -1));
-      setHoveredIndex(null);
-      setOffset({ x: 0, y: 0 });
+      setIsAnimating(true);
+      setTimeout(() => {
+        setNavigationStack(prev => prev.slice(0, -1));
+        setHoveredIndex(null);
+        setOffset({ x: 0, y: 0 });
+        setIsAnimating(false);
+      }, 300);
+    }
+  }, [navigationStack.length]);
+
+  const navigateToLevel = useCallback((levelIndex: number) => {
+    if (levelIndex >= 0 && levelIndex < navigationStack.length) {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setNavigationStack(prev => prev.slice(0, levelIndex + 1));
+        setHoveredIndex(null);
+        setOffset({ x: 0, y: 0 });
+        setIsAnimating(false);
+      }, 300);
     }
   }, [navigationStack.length]);
 
@@ -227,8 +262,11 @@ export function useConstellation(
     isRootHovered,
     zoom,
     isDragging,
+    isAnimating,
     nodes: nodesRef.current,
     currentLevelName: currentLevel.name,
+    currentChildren: currentLevel.children,
+    navigationStack,
     canNavigateBack: navigationStack.length > 1,
     showOnlyTwoCircles,
     handleWheel,
@@ -241,6 +279,10 @@ export function useConstellation(
     handleMouseUp,
     navigateInto,
     navigateBack,
+    navigateToLevel,
     toggleShowOnlyTwoCircles,
+    zoomIn,
+    zoomOut,
+    resetView,
   };
 }

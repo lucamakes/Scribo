@@ -16,9 +16,12 @@ interface SidebarItemProps {
   selectedItemId?: string | null;
 }
 
+// Icons
+import { Folder, File, ChevronRight, Pencil, X, Plus } from 'lucide-react';
+
 /**
- * Recursive sidebar item component with drag-drop and action buttons.
- * Root items cannot be dragged, edited, or deleted.
+ * Sidebar item with updated styling matches.
+ * Uses CSS nesting for indentation and tree lines.
  */
 export function SidebarItem({
   item,
@@ -30,7 +33,8 @@ export function SidebarItem({
   isRoot = false,
   selectedItemId,
 }: SidebarItemProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  // Default to expanded for root; others can be toggled
+  const [isExpanded, setIsExpanded] = useState(isRoot ? true : false);
   const [dropPosition, setDropPosition] = useState<DropPosition | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
@@ -66,8 +70,7 @@ export function SidebarItem({
       return;
     }
 
-    // For expanded empty folders, don't show 'after' indicator
-    // (the Empty drop zone below handles that case)
+    // For expanded empty folders, treat more area as 'inside'
     const isExpandedEmptyFolder = isFolder && isExpanded && !hasChildren;
 
     if (isFolder && y > height * 0.25 && y < height * 0.75) {
@@ -75,7 +78,6 @@ export function SidebarItem({
     } else if (y < height * 0.5) {
       setDropPosition('before');
     } else {
-      // If it's an expanded empty folder, treat bottom half as 'inside' too
       setDropPosition(isExpandedEmptyFolder ? 'inside' : 'after');
     }
   }, [isFolder, isRoot, isExpanded, hasChildren]);
@@ -101,13 +103,15 @@ export function SidebarItem({
 
   const handleItemClick = useCallback((e: MouseEvent) => {
     if ((e.target as HTMLElement).closest(`.${styles.actions}`)) return;
-    // Toggle expand for folders
-    if (isFolder) setIsExpanded(prev => !prev);
+
+    // Toggle expand for folders - ONLY if they have children
+    if (isFolder && hasChildren) setIsExpanded(prev => !prev);
+
     // Select the item (unless it's root)
     if (!isRoot) {
       actions.onSelect(item);
     }
-  }, [isFolder, isRoot, actions, item]);
+  }, [isFolder, isRoot, actions, item, hasChildren]);
 
   const handleEdit = useCallback((e: MouseEvent) => {
     e.stopPropagation();
@@ -147,7 +151,6 @@ export function SidebarItem({
     <div className={styles.itemWrapper}>
       <div
         className={`${styles.item} ${isRoot ? styles.rootItem : ''} ${isDragging ? styles.dragging : ''} ${isSelected ? styles.selected : ''} ${getDropClass()}`}
-        style={{ paddingLeft: `${depth * 16 + 8}px` }}
         draggable={!isRoot}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
@@ -158,50 +161,64 @@ export function SidebarItem({
         role="treeitem"
         aria-expanded={isFolder ? isExpanded : undefined}
       >
-        {isFolder && (
-          <span className={styles.chevron}>{isExpanded ? '▼' : '▶'}</span>
-        )}
-        <span className={styles.icon}>{isFolder ? '📁' : '📄'}</span>
-        <span className={`${styles.name} ${isRoot ? styles.rootName : ''}`}>{item.name}</span>
+        {/* Indent content explicitly instead of using padding on container */}
+        <div className={styles.itemContent}>
+          {/* Chevron for all folders including root */}
+          <span className={`${styles.chevron} ${!isFolder || !hasChildren ? styles.invisible : ''}`}>
+            {isFolder && <ChevronRight size={14} strokeWidth={1} style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />}
+          </span>
+
+          <span className={`${styles.icon} ${isRoot
+            ? styles.rootFolderColor
+            : item.type === 'folder'
+              ? styles.folderColor
+              : styles.fileColor
+            }`}>
+            {item.type === 'folder'
+              ? <Folder size={16} strokeWidth={1} fill="currentColor" fillOpacity={0.2} />
+              : <File size={16} strokeWidth={1} fill="currentColor" fillOpacity={0.2} />
+            }
+          </span>
+
+          <span className={`${styles.name} ${isRoot ? styles.rootName : ''}`}>
+            {item.name}
+          </span>
+        </div>
 
         <div className={styles.actions}>
-          {!isRoot && (
-            <>
-              <button onClick={handleEdit} className={styles.actionBtn} aria-label="Edit">
-                ✎
-              </button>
-              <button onClick={handleDelete} className={styles.actionBtn} aria-label="Delete">
-                ×
-              </button>
-            </>
-          )}
           {isFolder && (
             <div className={styles.addWrapper}>
               <button onClick={toggleAddMenu} className={styles.actionBtn} aria-label="Add">
-                +
+                <Plus size={12} strokeWidth={1} />
               </button>
               {showAddMenu && (
                 <div className={styles.addMenu}>
                   <button onClick={handleAddFile} className={styles.menuItem}>
-                    📄 File
+                    <File size={14} strokeWidth={1} /> File
                   </button>
                   <button onClick={handleAddFolder} className={styles.menuItem}>
-                    📁 Folder
+                    <Folder size={14} strokeWidth={1} /> Folder
                   </button>
                 </div>
               )}
             </div>
           )}
+          {!isRoot && (
+            <>
+              <button onClick={handleEdit} className={styles.actionBtn} aria-label="Edit">
+                <Pencil size={12} strokeWidth={1} />
+              </button>
+              <button onClick={handleDelete} className={styles.actionBtn} aria-label="Delete">
+                <X size={12} strokeWidth={1} />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {isFolder && isExpanded && (
+      {isFolder && isExpanded && hasChildren && (
         <div className={styles.children} role="group">
-          {hasChildren ? (
-            children.sort((a, b) => a.order - b.order).map(child => renderItem(child, depth + 1))
-          ) : (
-            <EmptyFolderDropZone folderId={item.id} depth={depth + 1} onDrop={onDrop} />
-          )}
+          {children.sort((a, b) => a.order - b.order).map(child => renderItem(child, depth + 1))}
         </div>
       )}
     </div>
@@ -236,12 +253,11 @@ function EmptyFolderDropZone({ folderId, depth, onDrop }: EmptyFolderDropZonePro
   return (
     <div
       className={`${styles.emptyZone} ${isOver ? styles.emptyZoneActive : ''}`}
-      style={{ paddingLeft: `${depth * 16 + 8}px` }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <span className={styles.emptyText}>Empty</span>
+      <span className={styles.emptyText}></span>
     </div>
   );
 }

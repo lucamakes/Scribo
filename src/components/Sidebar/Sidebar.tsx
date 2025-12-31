@@ -7,12 +7,17 @@ import { itemService } from '@/lib/services/itemService';
 import { SidebarItem } from './SidebarItem/SidebarItem';
 import { TrashPanel } from '@/components/TrashPanel/TrashPanel';
 import styles from './Sidebar.module.css';
+import { Telescope, Trash2, ArrowLeft } from 'lucide-react';
+
+
+
 
 interface SidebarProps {
   project: Project;
   selectedItemId: string | null;
   onSelectItem: (item: SidebarItemData | null) => void;
   onToggleBlankView?: () => void;
+  onBackToProjects?: () => void;
 }
 
 function wouldCreateCycle(items: SidebarItemData[], draggedId: string, targetId: string): boolean {
@@ -82,7 +87,7 @@ function uiParentIdToDb(parentId: string, rootId: string): string | null {
  * Database uses NULL for root-level items.
  * UI uses ROOT_ID (project.id) for root-level items.
  */
-export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankView }: SidebarProps) {
+export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankView, onBackToProjects }: SidebarProps) {
   const ROOT_ID = project.id;
 
   const [items, setItems] = useState<SidebarItemData[]>([]);
@@ -328,15 +333,26 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
     <aside className={styles.sidebar} role="tree" aria-label="File explorer">
       <header className={styles.header}>
         <span className={styles.title}>{project.name}</span>
+        {onBackToProjects && (
+          <button
+            onClick={onBackToProjects}
+            className={styles.blankIconButton}
+            type="button"
+            aria-label="Back to projects"
+            title="Back to Projects"
+          >
+            <ArrowLeft size={18} strokeWidth={1} />
+          </button>
+        )}
         {onToggleBlankView && (
-          <button 
+          <button
             onClick={onToggleBlankView}
             className={styles.blankIconButton}
             type="button"
             aria-label="Show constellation view"
             title="Constellation View"
           >
-            ⭐
+            <Telescope size={18} strokeWidth={1} />
           </button>
         )}
       </header>
@@ -356,8 +372,8 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
       </nav>
 
       <div className={styles.trashButton}>
-        <button onClick={() => setShowTrash(true)} className={styles.trashBtn}>
-          🗑️ Trash
+        <button onClick={() => setShowTrash(true)} className={styles.trashBtn} title="Trash">
+          <Trash2 size={18} strokeWidth={1} />
         </button>
       </div>
 

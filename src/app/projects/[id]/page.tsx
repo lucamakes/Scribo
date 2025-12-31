@@ -8,10 +8,10 @@ import type { ItemRow } from '@/types/database';
 import { Sidebar } from '@/components/Sidebar/Sidebar';
 import { DetailPanel } from '@/components/DetailPanel/DetailPanel';
 import Constellation from '@/example-files/Constellation';
-import { UserMenu } from '@/components/UserMenu/UserMenu';
 import { projectService } from '@/lib/services/projectService';
 import { itemService } from '@/lib/services/itemService';
 import { itemsToChildData } from '@/lib/utils/sidebarToConstellation';
+import { X, ArrowLeft } from 'lucide-react';
 import styles from './ProjectPage.module.css';
 
 interface ProjectPageProps {
@@ -58,7 +58,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     // Load items for Constellation
     const loadItems = useCallback(async () => {
         if (!project) return;
-        
+
         setItemsLoading(true);
         const result = await itemService.getByProject(project.id);
 
@@ -140,7 +140,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                 <h2>Error loading project</h2>
                 <p>{error || 'Project not found'}</p>
                 <button onClick={handleBackToProjects} className={styles.backButton}>
-                    Back to Projects
+                    <ArrowLeft size={16} strokeWidth={1} /> Back to Projects
                 </button>
             </div>
         );
@@ -149,13 +149,13 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     if (showBlankView) {
         return (
             <div className={styles.blankView}>
-                <button 
+                <button
                     onClick={toggleBlankView}
                     className={styles.blankToggleButton}
                     type="button"
-                    aria-label="Show editor"
+                    aria-label="Close constellation view"
                 >
-                    📝
+                    <X size={18} strokeWidth={1} />
                 </button>
                 {itemsLoading ? (
                     <div className={styles.loadingContainer}>
@@ -163,9 +163,10 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                         <p>Loading constellation...</p>
                     </div>
                 ) : (
-                    <Constellation 
+                    <Constellation
                         children={constellationData}
                         onFileClick={handleConstellationFileClick}
+                        rootName={project.name}
                     />
                 )}
             </div>
@@ -179,16 +180,9 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                 selectedItemId={selectedItem?.id ?? null}
                 onSelectItem={handleSelectItem}
                 onToggleBlankView={toggleBlankView}
+                onBackToProjects={handleBackToProjects}
             />
             <section className={styles.content}>
-                <div className={styles.contentHeader}>
-                    <button onClick={handleBackToProjects} className={styles.backButton}>
-                        ← Back to Projects
-                    </button>
-                    <div className={styles.headerActions}>
-                        <UserMenu />
-                    </div>
-                </div>
                 <DetailPanel
                     selectedItem={selectedItem}
                     onContentSaved={handleContentSaved}
