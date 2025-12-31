@@ -83,8 +83,8 @@ export const itemService = {
     // Type assertion needed because Supabase partial select types can be tricky
     type SortOrderResult = Array<{ sort_order: number }> | null;
     const typedSiblings = siblings as SortOrderResult;
-    const sortOrder = typedSiblings && typedSiblings.length > 0 
-      ? typedSiblings[0].sort_order + 1 
+    const sortOrder = typedSiblings && typedSiblings.length > 0
+      ? typedSiblings[0].sort_order + 1
       : 0;
 
     const item: ItemInsert = {
@@ -95,9 +95,9 @@ export const itemService = {
       sort_order: sortOrder,
     };
 
-    // @ts-ignore - Supabase type inference issue with Database type
     const { data, error } = await supabase
       .from('items')
+      // @ts-ignore - Supabase type inference can be tricky with complex schemas
       .insert(item)
       .select()
       .single();
@@ -112,9 +112,9 @@ export const itemService = {
    * Update an item's name.
    */
   async rename(id: string, name: string): Promise<ServiceResult<ItemRow>> {
-    // @ts-ignore - Supabase type inference issue with Database type
     const { data, error } = await supabase
       .from('items')
+      // @ts-ignore - Supabase type inference issue
       .update({ name })
       .eq('id', id)
       .select()
@@ -159,9 +159,9 @@ export const itemService = {
     const typedToShift = toShift as ShiftItem[] | null;
     if (typedToShift && typedToShift.length > 0) {
       for (const item of typedToShift) {
-        // @ts-ignore - Supabase type inference issue with Database type
         await supabase
           .from('items')
+          // @ts-ignore - Supabase type inference issue
           .update({ sort_order: item.sort_order + 1 })
           .eq('id', item.id);
       }
@@ -173,9 +173,9 @@ export const itemService = {
       sort_order: sortOrder
     };
 
-    // @ts-ignore - Supabase type inference issue with Database type
     const { data, error } = await supabase
       .from('items')
+      // @ts-ignore - Supabase type inference issue
       .update(updateData)
       .eq('id', id)
       .select()
@@ -191,9 +191,9 @@ export const itemService = {
    * Update sort order for an item.
    */
   async reorder(id: string, newOrder: number): Promise<ServiceResult<ItemRow>> {
-    // @ts-ignore - Supabase type inference issue with Database type
     const { data, error } = await supabase
       .from('items')
+      // @ts-ignore - Supabase type inference issue
       .update({ sort_order: newOrder })
       .eq('id', id)
       .select()
@@ -215,9 +215,9 @@ export const itemService = {
     if (error) {
       // Fallback if the function doesn't exist yet
       const now = new Date().toISOString();
-      // @ts-ignore - Supabase type inference issue with Database type
       const { error: updateError } = await supabase
         .from('items')
+        // @ts-ignore - Supabase type inference issue
         .update({ deleted_at: now })
         .eq('id', id);
 
@@ -237,9 +237,9 @@ export const itemService = {
 
     if (error) {
       // Fallback if the function doesn't exist yet
-      // @ts-ignore - Supabase type inference issue with Database type
       const { error: updateError } = await supabase
         .from('items')
+        // @ts-ignore - Supabase type inference issue
         .update({ deleted_at: null })
         .eq('id', id);
 
@@ -331,9 +331,9 @@ export const itemService = {
     updates: Array<{ id: string; sort_order: number }>
   ): Promise<ServiceResult<null>> {
     for (const update of updates) {
-      // @ts-ignore - Supabase type inference issue with Database type
       const { error } = await supabase
         .from('items')
+        // @ts-ignore - Supabase type inference issue
         .update({ sort_order: update.sort_order })
         .eq('id', update.id);
 
@@ -364,9 +364,9 @@ export const itemService = {
    * Update file content.
    */
   async updateContent(id: string, content: string): Promise<ServiceResult<ItemRow>> {
-    // @ts-ignore - Supabase type inference issue with Database type
     const { data, error } = await supabase
       .from('items')
+      // @ts-ignore - Supabase type inference issue
       .update({ content })
       .eq('id', id)
       .select()

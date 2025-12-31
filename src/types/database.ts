@@ -67,6 +67,7 @@ export interface ItemInsert {
   sort_order?: number;
   created_at?: string;
   updated_at?: string;
+  deleted_at?: string | null;
 }
 
 /**
@@ -99,16 +100,21 @@ export interface Database {
         Row: ProjectRow;
         Insert: ProjectInsert;
         Update: ProjectUpdate;
+        Relationships: [];
       };
       items: {
         Row: ItemRow;
         Insert: ItemInsert;
         Update: ItemUpdate;
+        Relationships: [];
       };
     };
     Views: {
       items_with_path: {
         Row: ItemWithPath;
+        Insert: never;
+        Update: never;
+        Relationships: [];
       };
     };
     Functions: {
@@ -120,10 +126,23 @@ export interface Database {
         Args: { p_item_id: string; p_new_parent_id: string | null };
         Returns: boolean;
       };
+      soft_delete_item: {
+        Args: { item_id: string };
+        Returns: void;
+      };
+      restore_item: {
+        Args: { item_id: string };
+        Returns: void;
+      };
+      cleanup_old_trash_items: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
     };
     Enums: {
       item_type: ItemType;
     };
   };
 }
+
 
