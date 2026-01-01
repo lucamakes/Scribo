@@ -14,7 +14,8 @@ import {
     Minimize2,
     AlertTriangle,
     Save,
-    Pencil
+    Pencil,
+    Focus
 } from 'lucide-react';
 import styles from './DetailPanel.module.css';
 
@@ -40,6 +41,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [error, setError] = useState<string | null>(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [isFocusMode, setIsFocusMode] = useState(false);
     const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const lastSavedContent = useRef('');
     const selectedItemIdRef = useRef<string | null>(null);
@@ -75,12 +77,13 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
     // Handle Escape key to exit fullscreen
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && isFullscreen) {
+            if (e.key === 'Escape' && (isFullscreen || isFocusMode)) {
+                setIsFocusMode(false);
                 setIsFullscreen(false);
             }
         };
 
-        if (isFullscreen) {
+        if (isFullscreen || isFocusMode) {
             document.addEventListener('keydown', handleKeyDown);
             document.body.style.overflow = 'hidden';
         }
@@ -89,7 +92,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             document.removeEventListener('keydown', handleKeyDown);
             document.body.style.overflow = '';
         };
-    }, [isFullscreen]);
+    }, [isFullscreen, isFocusMode]);
 
     // Auto-save with debounce
     const saveContent = useCallback(async (newContent: string) => {
@@ -135,6 +138,18 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
     const toggleFullscreen = useCallback(() => {
         setIsFullscreen(prev => !prev);
     }, []);
+
+    // Toggle focus mode
+    const toggleFocusMode = useCallback(() => {
+        setIsFocusMode(prev => {
+            const newFocusMode = !prev;
+            // If entering focus mode and not in fullscreen, enable fullscreen
+            if (newFocusMode && !isFullscreen) {
+                setIsFullscreen(true);
+            }
+            return newFocusMode;
+        });
+    }, [isFullscreen]);
 
     // Cleanup timeout on unmount
     useEffect(() => {
@@ -228,48 +243,50 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
     
     const editorContent = (
         <>
-            <div className={styles.fileHeader}>
-                <div className={styles.fileHeaderLeft}>
-                    <h2 className={styles.fileName}>{selectedItem.name}</h2>
-                </div>
-                <div className={styles.fileHeaderRight}>
-                    <button
-                        onClick={() => saveContent(content)}
-                        className={`${styles.saveButton} ${content === lastSavedContent.current ? styles.saved : styles.unsaved}`}
-                        disabled={saveStatus === 'saving' || content === lastSavedContent.current}
-                        title={content === lastSavedContent.current ? 'All changes saved' : 'Save now (Ctrl+S)'}
-                    >
-                        {content === lastSavedContent.current ? (
-                            <Check size={16} strokeWidth={2} />
-                        ) : (
-                            <div className={styles.unsavedDot} />
-                        )}
-                    </button>
-                    <div className={styles.statistics}>
-                        <span className={styles.stat}>
-                            {wordCount.toLocaleString()} words
-                        </span>
-                        <span className={styles.statDivider}>•</span>
-                        <span className={styles.stat}>
-                            {readingTime} min read
-                        </span>
-                        <span className={styles.statDivider}>•</span>
-                        <span className={styles.stat}>
-                            {pageCount} pages
-                        </span>
+            {!isFocusMode && (
+                <div className={styles.fileHeader}>
+                    <div className={styles.fileHeaderLeft}>
+                        <h2 className={styles.fileName}>{selectedItem.name}</h2>
                     </div>
-                    <button
-                        onClick={toggleFullscreen}
-                        className={styles.fullscreenButton}
-                        title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
-                    >
-                        {isFullscreen
-                            ? <Minimize2 size={18} strokeWidth={1} />
-                            : <Maximize2 size={18} strokeWidth={1} />
-                        }
-                    </button>
+                    <div className={styles.fileHeaderRight}>
+                        <button
+                            onClick={() => saveContent(content)}
+                            className={`${styles.saveButton} ${content === lastSavedContent.current ? styles.saved : styles.unsaved}`}
+                            disabled={saveStatus === 'saving' || content === lastSavedContent.current}
+                            title={content === lastSavedContent.current ? 'All changes saved' : 'Save now (Ctrl+S)'}
+                        >
+                            {content === lastSavedContent.current ? (
+                                <Check size={16} strokeWidth={2} />
+                            ) : (
+                                <div className={styles.unsavedDot} />
+                            )}
+                        </button>
+                        <div className={styles.statistics}>
+                            <span className={styles.stat}>
+                                {wordCount.toLocaleString()} words
+                            </span>
+                            <span className={styles.statDivider}>•</span>
+                            <span className={styles.stat}>
+                                {readingTime} min read
+                            </span>
+                            <span className={styles.statDivider}>•</span>
+                            <span className={styles.stat}>
+                                {pageCount} pages
+                            </span>
+                        </div>
+                        <button
+                            onClick={toggleFullscreen}
+                            className={styles.fullscreenButton}
+                            title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
+                        >
+                            {isFullscreen
+                                ? <Minimize2 size={18} strokeWidth={1} />
+                                : <Maximize2 size={18} strokeWidth={1} />
+                            }
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {error && (
                 <div className={styles.errorBanner}>
@@ -284,6 +301,16 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                     placeholder="Start writing your story..."
                 />
             </div>
+
+            {isFullscreen && (
+                <button
+                    onClick={toggleFocusMode}
+                    className={styles.focusButton}
+                    title={isFocusMode ? 'Exit focus mode' : 'Enter focus mode (hide header)'}
+                >
+                    <Focus size={18} strokeWidth={1} />
+                </button>
+            )}
         </>
     );
 
