@@ -274,9 +274,20 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
     setEditName(newItem.name);
   }, [project.id, ROOT_ID]);
 
-  const handleSelect = useCallback((item: SidebarItemData) => {
+  const handleSelect = useCallback(async (item: SidebarItemData) => {
+    // For files, fetch fresh content from database to ensure we have latest saved content
+    if (item.type === 'file') {
+      const result = await itemService.getById(item.id);
+      if (result.success) {
+        const freshItem = dbItemToSidebarItem(result.data as any, ROOT_ID);
+        // Update local state with fresh content
+        setItems(prev => prev.map(i => i.id === item.id ? freshItem : i));
+        onSelectItem(freshItem);
+        return;
+      }
+    }
     onSelectItem(item);
-  }, [onSelectItem]);
+  }, [onSelectItem, ROOT_ID]);
 
   const actions: ItemActions = useMemo(() => ({
     onEdit: handleEdit,

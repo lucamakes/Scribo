@@ -94,9 +94,14 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     }, []);
 
     const handleContentSaved = useCallback((itemId: string, content: string) => {
+        // Update selectedItem
         if (selectedItem && selectedItem.id === itemId) {
             setSelectedItem(prev => prev ? { ...prev, content } : null);
         }
+        // Also update the items array so switching files preserves content
+        setItems(prev => prev.map(item => 
+            item.id === itemId ? { ...item, content } : item
+        ));
     }, [selectedItem]);
 
     const toggleBlankView = useCallback(() => {
