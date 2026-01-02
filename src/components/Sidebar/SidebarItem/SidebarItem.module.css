@@ -8,7 +8,7 @@
   --sidebar-hover-bg: #f0f0f0;
   --sidebar-icon-color: #9ca3af;
   --sidebar-btn-bg: #e5e7eb;
-  --sidebar-selected-bg: #e8e8e8;
+  --sidebar-selected-bg: rgba(99, 102, 241, 0.15);
 }
 
 /* ============================================
@@ -18,6 +18,12 @@
 .itemWrapper {
   position: relative;
   line-height: 28px;
+  margin-bottom: 16px;
+}
+
+/* Ensure first child also gets top margin */
+.itemWrapper:first-child {
+  margin-top: 12px;
 }
 
 /* Vertical line running down the left side */
@@ -27,7 +33,7 @@
   top: 0;
   left: -14px;
   border-left: 1px solid var(--sidebar-line-color);
-  height: 100%;
+  height: calc(100% + 16px);
   width: 1px;
 }
 
@@ -44,9 +50,21 @@
   border-bottom-left-radius: 10px;
 }
 
+/* Extend horizontal line for items without chevron (files and empty folders) */
+.itemWrapper.noChevron::after {
+  width: 30px;
+  transition: width 0.15s ease;
+}
+
+/* Shorten line when file item is hovered or selected (not folders) */
+.itemWrapper.noChevron:has(.item:hover .fileDot)::after,
+.itemWrapper.noChevron:has(.selected .fileDot)::after {
+  width: 15px;
+}
+
 /* Last child: vertical line stops at connector */
 .itemWrapper:last-child::before {
-  height: 28px;
+  height: calc(28px + 4px);
 }
 
 /* Hide lines for root level items */
@@ -63,6 +81,7 @@
   display: flex;
   align-items: center;
   padding: 4px 8px;
+  margin-left: 2px;
   border-radius: 4px;
   cursor: pointer;
   position: relative;
@@ -76,6 +95,16 @@
 
 .selected {
   background-color: var(--sidebar-selected-bg);
+}
+
+
+/* Folders don't get hover or selected styles */
+.item:has(.icon svg):hover {
+  background-color: transparent;
+}
+
+.item:has(.icon svg).selected {
+  background-color: transparent;
 }
 
 .itemContent {
@@ -119,11 +148,21 @@
   flex-shrink: 0;
 }
 
+/* Folder icons are yellow */
+.item:not(.rootItem) .icon {
+  color: #f59e0b;
+}
+
+/* Root folder icon is red */
+.rootItem .icon {
+  color: #ef4444;
+}
+
 .fileDot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: var(--sidebar-icon-color);
+  background-color: #3b82f6;
 }
 
 /* ============================================

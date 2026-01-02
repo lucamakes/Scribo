@@ -148,7 +148,7 @@ export function SidebarItem({
   };
 
   return (
-    <div className={styles.itemWrapper}>
+    <div className={`${styles.itemWrapper} ${!isFolder || !hasChildren ? styles.noChevron : ''}`}>
       <div
         className={`${styles.item} ${isRoot ? styles.rootItem : ''} ${isDragging ? styles.dragging : ''} ${isSelected ? styles.selected : ''} ${getDropClass()}`}
         draggable={!isRoot}
@@ -178,7 +178,7 @@ export function SidebarItem({
 
           <span className={styles.icon}>
             {item.type === 'folder'
-              ? <Folder size={14} strokeWidth={2} fill="currentColor" fillOpacity={0.1} />
+              ? <Folder size={14} strokeWidth={1} fill="currentColor" fillOpacity={0.1} />
               : <span className={styles.fileDot} />
             }
           </span>
@@ -197,7 +197,7 @@ export function SidebarItem({
                 aria-label="Add"
                 title="Add item"
               >
-                <Plus size={14} strokeWidth={2.5} />
+                <Plus size={14} strokeWidth={1} />
               </button>
               {showAddMenu && (
                 <div className={styles.addMenu}>
@@ -214,10 +214,10 @@ export function SidebarItem({
           {!isRoot && (
             <>
               <button onClick={handleEdit} className={styles.actionBtn} aria-label="Edit" title="Rename">
-                <Pencil size={12} strokeWidth={2} />
+                <Pencil size={12} strokeWidth={1} />
               </button>
               <button onClick={handleDelete} className={styles.actionBtn} aria-label="Delete" title="Delete">
-                <X size={12} strokeWidth={2} />
+                <X size={12} strokeWidth={1} />
               </button>
             </>
           )}
