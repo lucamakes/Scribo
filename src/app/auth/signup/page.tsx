@@ -77,7 +77,6 @@ export default function SignupPage() {
             <main className={styles.container}>
                 <div className={styles.card}>
                     <div className={styles.successSection}>
-                        <div className={styles.successIcon}>✓</div>
                         <h2 className={styles.successTitle}>Check your email</h2>
                         <p className={styles.successText}>
                             We've sent you a confirmation link. Please check your email to verify your account.
@@ -95,7 +94,6 @@ export default function SignupPage() {
         <main className={styles.container}>
             <div className={styles.card}>
                 <div className={styles.logoSection}>
-                    <div className={styles.logo}>📚</div>
                     <h1 className={styles.title}>Create Account</h1>
                     <p className={styles.subtitle}>Start organizing your projects today</p>
                 </div>
@@ -103,7 +101,7 @@ export default function SignupPage() {
                 <form onSubmit={handleSubmit} className={styles.form}>
                     {error && (
                         <div className={styles.errorBanner}>
-                            <span>⚠️ {error}</span>
+                            <span>{error}</span>
                         </div>
                     )}
 

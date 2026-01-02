@@ -54,7 +54,6 @@ export default function LoginPage() {
         <main className={styles.container}>
             <div className={styles.card}>
                 <div className={styles.logoSection}>
-                    <div className={styles.logo}>📚</div>
                     <h1 className={styles.title}>Welcome Back</h1>
                     <p className={styles.subtitle}>Sign in to continue to your projects</p>
                 </div>
@@ -62,7 +61,7 @@ export default function LoginPage() {
                 <form onSubmit={handleSubmit} className={styles.form}>
                     {error && (
                         <div className={styles.errorBanner}>
-                            <span>⚠️ {error}</span>
+                            <span>{error}</span>
                         </div>
                     )}
 
