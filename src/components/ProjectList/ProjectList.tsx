@@ -156,10 +156,6 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
     });
   };
 
-  if (showCreate) {
-    return <ProjectSetup onCreateProject={handleCreateProject} />;
-  }
-
   if (loading) {
     return (
       <main className={styles.container}>
@@ -280,6 +276,8 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
           onClose={() => setShowImport(false)}
           onProjectCreated={handleImportProject}
         />
+
+        {showCreate && <ProjectSetup onCreateProject={handleCreateProject} onClose={() => setShowCreate(false)} />}
 
         {deletingId && (
           <div className={styles.modalOverlay} onClick={() => setDeletingId(null)}>
