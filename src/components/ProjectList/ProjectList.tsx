@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import type { ProjectRow } from '@/types/database';
 import { projectService } from '@/lib/services/projectService';
 import { ProjectSetup } from '@/components/ProjectSetup/ProjectSetup';
+import { ProjectImportModal } from '@/components/ProjectImportModal';
 import { UserMenu } from '@/components/UserMenu/UserMenu';
-import { Pencil, X, Plus, ChevronRight } from 'lucide-react';
+import { Pencil, X, Plus, ChevronRight, Upload } from 'lucide-react';
 import styles from './ProjectList.module.css';
 
 interface ProjectListProps {
@@ -21,6 +22,7 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -46,6 +48,11 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
 
   const handleCreateProject = useCallback((project: { id: string; name: string; createdAt: string }) => {
     setShowCreate(false);
+    onSelectProject(project);
+  }, [onSelectProject]);
+
+  const handleImportProject = useCallback((project: { id: string; name: string; createdAt: string }) => {
+    setShowImport(false);
     onSelectProject(project);
   }, [onSelectProject]);
 
@@ -208,12 +215,26 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
           )}
         </div>
 
-        <button
-          onClick={() => setShowCreate(true)}
-          className={styles.createButton}
-        >
-          <Plus size={16} strokeWidth={1} style={{ marginRight: '6px' }} /> Create New Project
-        </button>
+        <div className={styles.buttonGroup}>
+          <button
+            onClick={() => setShowCreate(true)}
+            className={styles.createButton}
+          >
+            <Plus size={16} strokeWidth={1} style={{ marginRight: '6px' }} /> Create New Project
+          </button>
+          <button
+            onClick={() => setShowImport(true)}
+            className={styles.importButton}
+          >
+            <Upload size={16} strokeWidth={1} style={{ marginRight: '6px' }} /> Import Project
+          </button>
+        </div>
+
+        <ProjectImportModal
+          isOpen={showImport}
+          onClose={() => setShowImport(false)}
+          onProjectCreated={handleImportProject}
+        />
 
         {deletingId && (
           <div className={styles.modalOverlay} onClick={() => setDeletingId(null)}>

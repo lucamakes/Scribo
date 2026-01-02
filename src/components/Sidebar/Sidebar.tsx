@@ -6,8 +6,9 @@ import type { Project } from '@/types/project';
 import { itemService } from '@/lib/services/itemService';
 import { SidebarItem } from './SidebarItem/SidebarItem';
 import { TrashPanel } from '@/components/TrashPanel/TrashPanel';
+import { ImportModal, type ImportedFile } from '@/components/ImportModal/ImportModal';
 import styles from './Sidebar.module.css';
-import { Telescope, Trash2, ArrowLeft, Download, Search, X, Folder, File } from 'lucide-react';
+import { Telescope, Trash2, ArrowLeft, Download, Search, X, Folder, File, Upload } from 'lucide-react';
 
 
 
@@ -96,9 +97,10 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [showTrash, setShowTrash] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set([ROOT_ID])); // Track expanded folders for main sidebar
   const [searchQuery, setSearchQuery] = useState('');
-  const [showSearch, setShowSearch] = useState(true); // Open by default
+  const [showSearch, setShowSearch] = useState(false); // Closed by default
 
   // Expand all folders for search modal sidebar
   const searchExpandedIds = useMemo(() => {
@@ -328,6 +330,25 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
     setItems(prev => [...prev, newItem]);
     setEditingId(newItem.id);
     setEditName(newItem.name);
+  }, [project.id, ROOT_ID]);
+
+  const handleImport = useCallback(async (importedFiles: ImportedFile[]) => {
+    for (const file of importedFiles) {
+      const result = await itemService.create(
+        project.id,
+        null, // Import to root level
+        file.name,
+        'file',
+        file.content
+      );
+
+      if (result.success) {
+        const newItem = dbItemToSidebarItem(result.data as any, ROOT_ID);
+        setItems(prev => [...prev, newItem]);
+      } else {
+        setError((result as { success: false; error: string }).error);
+      }
+    }
   }, [project.id, ROOT_ID]);
 
   const handleSelect = useCallback(async (item: SidebarItemData) => {
