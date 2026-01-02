@@ -305,7 +305,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             {isFullscreen && (
                 <button
                     onClick={toggleFocusMode}
-                    className={styles.focusButton}
+                    className={`${styles.focusButton} ${isFocusMode ? styles.focusButtonTransparent : ''}`}
                     title={isFocusMode ? 'Exit focus mode' : 'Enter focus mode (hide header)'}
                 >
                     <Focus size={18} strokeWidth={1} />
@@ -318,17 +318,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
     if (isFullscreen) {
         return (
             <>
-                <div className={styles.panel}>
-                    <div className={styles.emptyState}>
-                        <div className={styles.emptyIcon}>
-                            <Pencil size={48} strokeWidth={1} />
-                        </div>
-                        <h3 className={styles.emptyTitle}>Editing in fullscreen</h3>
-                        <p className={styles.emptyDescription}>
-                            Press Esc or click the button to exit fullscreen mode
-                        </p>
-                    </div>
-                </div>
+              
                 <div className={styles.fullscreenOverlay}>
                     <div className={styles.fullscreenEditor}>
                         {editorContent}

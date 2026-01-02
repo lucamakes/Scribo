@@ -161,22 +161,25 @@ export function SidebarItem({
         role="treeitem"
         aria-expanded={isFolder ? isExpanded : undefined}
       >
-        {/* Indent content explicitly instead of using padding on container */}
         <div className={styles.itemContent}>
           {/* Chevron for all folders including root */}
           <span className={`${styles.chevron} ${!isFolder || !hasChildren ? styles.invisible : ''}`}>
-            {isFolder && <ChevronRight size={14} strokeWidth={1} style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />}
+            {isFolder && (
+              <ChevronRight
+                size={10}
+                strokeWidth={2.5}
+                style={{
+                  transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s'
+                }}
+              />
+            )}
           </span>
 
-          <span className={`${styles.icon} ${isRoot
-            ? styles.rootFolderColor
-            : item.type === 'folder'
-              ? styles.folderColor
-              : styles.fileColor
-            }`}>
+          <span className={styles.icon}>
             {item.type === 'folder'
-              ? <Folder size={16} strokeWidth={1} fill="currentColor" fillOpacity={0.2} />
-              : <File size={16} strokeWidth={1} fill="currentColor" fillOpacity={0.2} />
+              ? <Folder size={14} strokeWidth={2} fill="currentColor" fillOpacity={0.1} />
+              : <span className={styles.fileDot} />
             }
           </span>
 
@@ -188,16 +191,21 @@ export function SidebarItem({
         <div className={styles.actions}>
           {isFolder && (
             <div className={styles.addWrapper}>
-              <button onClick={toggleAddMenu} className={styles.actionBtn} aria-label="Add">
-                <Plus size={12} strokeWidth={1} />
+              <button
+                onClick={toggleAddMenu}
+                className={styles.actionBtn}
+                aria-label="Add"
+                title="Add item"
+              >
+                <Plus size={14} strokeWidth={2.5} />
               </button>
               {showAddMenu && (
                 <div className={styles.addMenu}>
                   <button onClick={handleAddFile} className={styles.menuItem}>
-                    <File size={14} strokeWidth={1} /> File
+                    <File size={14} strokeWidth={1.5} /> New File
                   </button>
                   <button onClick={handleAddFolder} className={styles.menuItem}>
-                    <Folder size={14} strokeWidth={1} /> Folder
+                    <Folder size={14} strokeWidth={1.5} /> New Folder
                   </button>
                 </div>
               )}
@@ -205,11 +213,11 @@ export function SidebarItem({
           )}
           {!isRoot && (
             <>
-              <button onClick={handleEdit} className={styles.actionBtn} aria-label="Edit">
-                <Pencil size={12} strokeWidth={1} />
+              <button onClick={handleEdit} className={styles.actionBtn} aria-label="Edit" title="Rename">
+                <Pencil size={12} strokeWidth={2} />
               </button>
-              <button onClick={handleDelete} className={styles.actionBtn} aria-label="Delete">
-                <X size={12} strokeWidth={1} />
+              <button onClick={handleDelete} className={styles.actionBtn} aria-label="Delete" title="Delete">
+                <X size={12} strokeWidth={2} />
               </button>
             </>
           )}

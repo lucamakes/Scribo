@@ -485,21 +485,30 @@
   width: 48px;
   height: 48px;
   padding: 0;
-  background: transparent;
+  background: #f1f1f1;
   border: none;
   border-radius: 6px;
   color: #4a4a4a;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 100;
-  opacity: 0.3;
 }
 
 .focusButton:hover {
-  background: #f1f1f1;
+  background: #e5e5e5;
   color: #1a1a1a;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.focusButtonTransparent {
+  background: transparent;
+  box-shadow: none;
+  opacity: 0.3;
+}
+
+.focusButtonTransparent:hover {
+  background: #f1f1f1;
   opacity: 1;
 }
 
@@ -528,7 +537,6 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 24px;
 }
 
 .fullscreenEditor .fileHeader {

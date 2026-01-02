@@ -1,172 +1,206 @@
 /* ============================================
-   SIDEBAR ITEM STYLES
+   SIDEBAR ITEM STYLES - Tree View Design
+   ============================================ */
+
+:root {
+  --sidebar-text-color: #37352f;
+  --sidebar-line-color: #e0e0e0;
+  --sidebar-hover-bg: #f0f0f0;
+  --sidebar-icon-color: #9ca3af;
+  --sidebar-btn-bg: #e5e7eb;
+  --sidebar-selected-bg: #e8e8e8;
+}
+
+/* ============================================
+   ITEM WRAPPER & HIERARCHY LINES
    ============================================ */
 
 .itemWrapper {
-  display: flex;
-  flex-direction: column;
-  padding: 2px 8px;
+  position: relative;
+  line-height: 28px;
 }
+
+/* Vertical line running down the left side */
+.itemWrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -14px;
+  border-left: 1px solid var(--sidebar-line-color);
+  height: 100%;
+  width: 1px;
+}
+
+/* Curved connector from vertical line to item */
+.itemWrapper::after {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: -10px;
+  width: 14px;
+  height: 28px;
+  border-left: 1px solid var(--sidebar-line-color);
+  border-bottom: 1px solid var(--sidebar-line-color);
+  border-bottom-left-radius: 10px;
+}
+
+/* Last child: vertical line stops at connector */
+.itemWrapper:last-child::before {
+  height: 28px;
+}
+
+/* Hide lines for root level items */
+.itemWrapper:has(.rootItem)::before,
+.itemWrapper:has(.rootItem)::after {
+  display: none;
+}
+
+/* ============================================
+   ITEM ROW
+   ============================================ */
 
 .item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  /* To push actions to the right */
-  padding: 12px 12px;
-  cursor: pointer;
+  padding: 4px 8px;
   border-radius: 4px;
-  color: #555;
-  /* Darker gray for text */
-  transition: all 0.1s ease;
+  cursor: pointer;
   position: relative;
-  user-select: none;
-  border: 1px solid transparent;
-  width: 100%;
+  min-height: 28px;
+  transition: background-color 0.15s ease;
+}
+
+.item:hover {
+  background-color: var(--sidebar-hover-bg);
+}
+
+.selected {
+  background-color: var(--sidebar-selected-bg);
 }
 
 .itemContent {
   display: flex;
   align-items: center;
-  gap: 8px;
+  flex: 1;
   overflow: hidden;
 }
 
-.item:hover {
-  background-color: #f3f4f6;
-  color: #111;
-}
+/* ============================================
+   TOGGLE ARROW (Chevron)
+   ============================================ */
 
-.selected {
-  background-color: rgba(59, 130, 246, 0.08) !important;
-  color: #2563eb !important;
-}
-
-
-
-.dragging {
-  opacity: 0.5;
-  background-color: #f3f4f6;
-}
-
-/* Root item specific styles */
-.rootItem {
-  font-weight: 600;
-  color: #111;
-  margin-top: 12px;
-  margin-bottom: 4px;
-}
-
-.rootName {
-  font-size: 13px;
-}
-
-/* Icons and Text */
 .chevron {
-  width: 16px;
-  height: 16px;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9CA3AF;
-  /* Light gray */
+  color: var(--sidebar-icon-color);
   flex-shrink: 0;
+  transition: transform 0.2s ease;
 }
 
 .invisible {
   visibility: hidden;
 }
 
+/* ============================================
+   ICONS
+   ============================================ */
+
 .icon {
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 2px;
+  color: var(--sidebar-icon-color);
+  flex-shrink: 0;
 }
 
-.folderColor {
-  color: #F59E0B;
-  /* Amber-500 */
+.fileDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--sidebar-icon-color);
 }
 
-.fileColor {
-  color: #3B82F6;
-  /* Blue-500 */
-}
-
-.rootFolderColor {
-  color: #EF4444;
-  /* Red-500 */
-}
+/* ============================================
+   LABEL / NAME
+   ============================================ */
 
 .name {
   font-size: 14px;
+  font-weight: 500;
+  margin-left: 8px;
+  color: var(--sidebar-text-color);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.5;
 }
 
-/* Tree Lines (The Vertical Line) */
+.rootItem {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.rootName {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ============================================
+   CHILDREN CONTAINER
+   ============================================ */
+
 .children {
-  display: flex;
-  flex-direction: column;
-  margin-left: 21px;
-  /* Align with the icon center approximately */
-  border-left: 1px solid #e5e5e5;
-  padding-left: 4px;
+  margin-left: 24px;
+  position: relative;
 }
 
+/* ============================================
+   ACTION BUTTONS (Add, Edit, Delete)
+   ============================================ */
 
-
-
-/* Drop Targets */
-.dropBefore {
-  border-top: 2px solid #3b82f6;
-}
-
-.dropAfter {
-  border-bottom: 2px solid #3b82f6;
-}
-
-.dropInside {
-  background-color: rgba(59, 130, 246, 0.1);
-  border: 1px dashed #3b82f6;
-}
-
-/* Actions - Appearing on Hover */
 .actions {
+  position: absolute;
+  right: 8px;
   display: none;
   align-items: center;
   gap: 2px;
-  margin-left: 8px;
 }
 
-.item:hover .actions,
-.selected .actions {
+.item:hover .actions {
   display: flex;
 }
 
 .actionBtn {
+  background: var(--sidebar-btn-bg);
+  border: none;
+  border-radius: 4px;
   width: 20px;
   height: 20px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  color: #4b5563;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border: none;
-  border-radius: 3px;
-  color: #9CA3AF;
-  cursor: pointer;
-  transition: all 0.2s;
+  padding: 0;
+  transition: background-color 0.15s, color 0.15s;
 }
 
 .actionBtn:hover {
-  background-color: #e5e5e5;
-  color: #111;
+  background-color: #d1d5db;
+  color: #000;
 }
 
-/* Add Menu */
+/* ============================================
+   ADD MENU DROPDOWN
+   ============================================ */
+
 .addWrapper {
   position: relative;
 }
@@ -176,12 +210,13 @@
   top: 100%;
   right: 0;
   background-color: #ffffff;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--sidebar-line-color);
   border-radius: 6px;
   padding: 4px;
-  min-width: 120px;
-  z-index: 50;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  min-width: 130px;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
 }
 
 .menuItem {
@@ -189,36 +224,70 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 8px 10px;
+  padding: 6px 10px;
   background: transparent;
   border: none;
   border-radius: 4px;
-  color: #555;
+  color: var(--sidebar-text-color);
   font-size: 13px;
   cursor: pointer;
   text-align: left;
+  transition: background-color 0.15s;
 }
 
 .menuItem:hover {
-  background-color: #f3f4f6;
-  color: #111;
+  background-color: var(--sidebar-hover-bg);
 }
 
-/* Empty Zone */
+/* ============================================
+   DRAG & DROP INDICATORS
+   ============================================ */
+
+.dragging {
+  opacity: 0.4;
+}
+
+.dropBefore::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #3b82f6;
+  border-radius: 1px;
+  z-index: 20;
+}
+
+.dropAfter::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #3b82f6;
+  border-radius: 1px;
+  z-index: 20;
+}
+
+.dropInside {
+  background-color: rgba(59, 130, 246, 0.08);
+  outline: 1px dashed #3b82f6;
+  outline-offset: -1px;
+}
+
+/* ============================================
+   EMPTY FOLDER DROP ZONE
+   ============================================ */
+
 .emptyZone {
-  padding: 4px 8px;
+  height: 8px;
   margin-left: 12px;
-  color: #9CA3AF;
-  font-size: 12px;
-  font-style: italic;
   border-radius: 4px;
+  transition: background-color 0.15s;
 }
 
 .emptyZoneActive {
   background-color: rgba(59, 130, 246, 0.1);
-  color: #2563eb;
-}
-
-.emptyText {
-  display: block;
 }

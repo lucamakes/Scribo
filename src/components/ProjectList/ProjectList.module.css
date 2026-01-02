@@ -5,6 +5,7 @@
   justify-content: center;
   background-color: #ffffff;
   padding: 24px;
+  font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .card {
@@ -32,6 +33,7 @@
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
@@ -41,7 +43,7 @@
 }
 
 .error {
-  padding: 12px;
+  padding: 12px 16px;
   background-color: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 6px;
@@ -61,6 +63,7 @@
 
 .emptyText {
   font-size: 16px;
+  font-weight: 500;
   color: #666;
   margin: 0 0 8px 0;
 }
@@ -92,7 +95,7 @@
   padding: 16px;
   background-color: #fafafa;
   border: 1px solid #e5e5e5;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
   text-align: left;
@@ -101,7 +104,6 @@
 .projectButton:hover {
   background-color: #f5f5f5;
   border-color: #d4d4d4;
-  transform: translateX(2px);
 }
 
 .projectInfo {
@@ -126,33 +128,31 @@
   font-size: 18px;
   color: #999;
   margin-left: 16px;
-  transition: transform 0.15s ease;
+  transition: color 0.15s ease;
 }
 
 .projectButton:hover .arrow {
-  transform: translateX(4px);
   color: #666;
 }
 
 .createButton {
   width: 100%;
   padding: 14px 20px;
-  background-color: #3b82f6;
+  background-color: #f1f1f1;
   border: none;
-  border-radius: 8px;
-  color: white;
+  border-radius: 6px;
+  color: #1a1a1a;
   font-size: 15px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.1s ease;
+  transition: background-color 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .createButton:hover {
-  background-color: #2563eb;
-}
-
-.createButton:active {
-  transform: scale(0.98);
+  background-color: #e5e5e5;
 }
 
 .loading {
@@ -178,24 +178,22 @@
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  border: 1px solid transparent;
-  background-color: transparent;
-  color: #999;
+  border: none;
+  background-color: #f1f1f1;
+  color: #4a4a4a;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .actionButton:hover {
-  background-color: #f5f5f5;
+  background-color: #e5e5e5;
   color: #1a1a1a;
-  border-color: #e5e5e5;
 }
 
 .deleteButton:hover {
   background-color: rgba(239, 68, 68, 0.1);
   color: #dc2626;
-  border-color: rgba(239, 68, 68, 0.3);
 }
 
 /* Edit Input */
@@ -205,10 +203,11 @@
   color: #1a1a1a;
   background-color: #ffffff;
   border: 1px solid #3b82f6;
-  border-radius: 4px;
-  padding: 4px 8px;
+  border-radius: 6px;
+  padding: 6px 10px;
   width: 100%;
   outline: none;
+  font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 /* Modal styles for delete confirmation */
@@ -243,6 +242,7 @@
   font-weight: 600;
   color: #1a1a1a;
   margin: 0 0 12px 0;
+  letter-spacing: -0.01em;
 }
 
 .modalText {
@@ -259,28 +259,32 @@
 }
 
 .modalButton {
-  padding: 8px 16px;
+  padding: 10px 18px;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cancelButton {
-  background-color: transparent;
-  border: 1px solid #d4d4d4;
-  color: #666;
+  background-color: #f1f1f1;
+  border: none;
+  color: #4a4a4a;
 }
 
 .cancelButton:hover {
-  border-color: #999;
+  background-color: #e5e5e5;
   color: #1a1a1a;
 }
 
 .confirmDeleteButton {
   background-color: #ef4444;
-  border: 1px solid #ef4444;
+  border: none;
   color: white;
 }
 

@@ -5,6 +5,7 @@
   justify-content: center;
   background-color: #ffffff;
   padding: 24px;
+  font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .card {
@@ -26,6 +27,7 @@
   font-weight: 600;
   color: #1a1a1a;
   margin: 0 0 8px 0;
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
@@ -62,6 +64,7 @@
   font-size: 15px;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .input::placeholder {
@@ -89,22 +92,18 @@
 
 .button {
   padding: 12px 20px;
-  background-color: #3b82f6;
+  background-color: #f1f1f1;
   border: none;
   border-radius: 6px;
-  color: white;
+  color: #1a1a1a;
   font-size: 15px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.1s ease;
+  transition: background-color 0.15s ease;
 }
 
 .button:hover {
-  background-color: #2563eb;
-}
-
-.button:active {
-  transform: scale(0.98);
+  background-color: #e5e5e5;
 }
 
 .button:disabled {
