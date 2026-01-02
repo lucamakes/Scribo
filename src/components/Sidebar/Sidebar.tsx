@@ -6,9 +6,9 @@ import type { Project } from '@/types/project';
 import { itemService } from '@/lib/services/itemService';
 import { SidebarItem } from './SidebarItem/SidebarItem';
 import { TrashPanel } from '@/components/TrashPanel/TrashPanel';
-import { ImportModal, type ImportedFile } from '@/components/ImportModal/ImportModal';
+import { ExportModal } from '@/components/ExportModal/ExportModal';
 import styles from './Sidebar.module.css';
-import { Telescope, Trash2, ArrowLeft, Download, Search, X, Folder, File, Upload } from 'lucide-react';
+import { Telescope, Trash2, ArrowLeft, Download, Search, X, Folder, File } from 'lucide-react';
 
 
 
@@ -97,7 +97,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [showTrash, setShowTrash] = useState(false);
-  const [showImport, setShowImport] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set([ROOT_ID])); // Track expanded folders for main sidebar
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false); // Closed by default
@@ -332,24 +332,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
     setEditName(newItem.name);
   }, [project.id, ROOT_ID]);
 
-  const handleImport = useCallback(async (importedFiles: ImportedFile[]) => {
-    for (const file of importedFiles) {
-      const result = await itemService.create(
-        project.id,
-        null, // Import to root level
-        file.name,
-        'file',
-        file.content
-      );
 
-      if (result.success) {
-        const newItem = dbItemToSidebarItem(result.data as any, ROOT_ID);
-        setItems(prev => [...prev, newItem]);
-      } else {
-        setError((result as { success: false; error: string }).error);
-      }
-    }
-  }, [project.id, ROOT_ID]);
 
   const handleSelect = useCallback(async (item: SidebarItemData) => {
     // For files, fetch fresh content from database to ensure we have latest saved content
@@ -511,6 +494,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
             className={styles.blankIconButton} 
             title="Export" 
             aria-label="Export"
+            onClick={() => setShowExport(true)}
           >
             <Download size={16} strokeWidth={1} />
           </button>
@@ -574,6 +558,13 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
         projectId={project.id}
         isOpen={showTrash}
         onClose={() => setShowTrash(false)}
+      />
+
+      <ExportModal
+        isOpen={showExport}
+        onClose={() => setShowExport(false)}
+        projectName={project.name}
+        projectId={project.id}
       />
 
       {showSearch && (

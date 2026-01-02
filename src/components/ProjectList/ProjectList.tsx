@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { ProjectRow } from '@/types/database';
 import { projectService } from '@/lib/services/projectService';
+import { itemService } from '@/lib/services/itemService';
 import { ProjectSetup } from '@/components/ProjectSetup/ProjectSetup';
 import { ProjectImportModal } from '@/components/ProjectImportModal';
 import { UserMenu } from '@/components/UserMenu/UserMenu';
@@ -13,12 +14,18 @@ interface ProjectListProps {
   onSelectProject: (project: { id: string; name: string; createdAt: string }) => void;
 }
 
+interface ProjectWithStats extends ProjectRow {
+  wordCount: number;
+  readingTime: number;
+  pageCount: string;
+}
+
 /**
  * Project list component showing all user projects.
  * Allows selecting a project or creating a new one.
  */
 export function ProjectList({ onSelectProject }: ProjectListProps) {
-  const [projects, setProjects] = useState<ProjectRow[]>([]);
+  const [projects, setProjects] = useState<ProjectWithStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -26,6 +33,13 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const calculateStats = (content: string) => {
+    const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+    const readingTime = Math.ceil(wordCount / 225);
+    const pageCount = (wordCount / 250).toFixed(1);
+    return { wordCount, readingTime, pageCount };
+  };
 
   const loadProjects = useCallback(async () => {
     setLoading(true);
@@ -38,7 +52,33 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
       return;
     }
 
-    setProjects(result.data);
+    // Load items for each project to calculate stats
+    const projectsWithStats = await Promise.all(
+      result.data.map(async (project) => {
+        const itemsResult = await itemService.getByProject(project.id);
+        let totalWords = 0;
+
+        if (itemsResult.success) {
+          totalWords = itemsResult.data.reduce((sum, item) => {
+            if (item.type === 'file' && item.content) {
+              const words = item.content.trim() ? item.content.trim().split(/\s+/).length : 0;
+              return sum + words;
+            }
+            return sum;
+          }, 0);
+        }
+
+        const stats = calculateStats(' '.repeat(totalWords)); // Create string with word count
+        return {
+          ...project,
+          wordCount: totalWords,
+          readingTime: Math.ceil(totalWords / 225),
+          pageCount: (totalWords / 250).toFixed(1),
+        };
+      })
+    );
+
+    setProjects(projectsWithStats);
     setLoading(false);
   }, []);
 
@@ -174,7 +214,12 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
                           className={styles.editInput}
                         />
                       ) : (
-                        <span className={styles.projectName}>{project.name}</span>
+                        <>
+                          <span className={styles.projectName}>{project.name}</span>
+                          <div className={styles.projectStats}>
+                            <span className={styles.stat}>{project.wordCount.toLocaleString()} words</span>
+                          </div>
+                        </>
                       )}
 
                       <span className={styles.projectDate}>

@@ -33,6 +33,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [openInFullscreen, setOpenInFullscreen] = useState(false);
+    const [showDetailOnMobile, setShowDetailOnMobile] = useState(false);
 
     // Load project data
     useEffect(() => {
@@ -91,6 +92,10 @@ export default function ProjectPage({ params }: ProjectPageProps) {
 
     const handleSelectItem = useCallback((item: SidebarItemData | null) => {
         setSelectedItem(item);
+        // On mobile, show detail panel when item is selected
+        if (item) {
+            setShowDetailOnMobile(true);
+        }
     }, []);
 
     const handleContentSaved = useCallback((itemId: string, content: string) => {
@@ -127,8 +132,13 @@ export default function ProjectPage({ params }: ProjectPageProps) {
             setOpenInFullscreen(true);
             setSelectedItem(sidebarItem);
             setShowBlankView(false);
+            setShowDetailOnMobile(true);
         }
     }, [items, project]);
+
+    const handleBackToMaster = useCallback(() => {
+        setShowDetailOnMobile(false);
+    }, []);
 
     if (loading) {
         return (
@@ -187,12 +197,13 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                 onToggleBlankView={toggleBlankView}
                 onBackToProjects={handleBackToProjects}
             />
-            <section className={styles.content}>
+            <section className={`${styles.content} ${showDetailOnMobile ? styles.showDetail : ''}`}>
                 <DetailPanel
                     selectedItem={selectedItem}
                     onContentSaved={handleContentSaved}
                     openInFullscreen={openInFullscreen}
                     onFullscreenOpened={() => setOpenInFullscreen(false)}
+                    onBackToMaster={handleBackToMaster}
                 />
             </section>
         </main>

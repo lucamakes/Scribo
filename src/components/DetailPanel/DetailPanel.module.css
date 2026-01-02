@@ -19,14 +19,21 @@
    EMPTY STATE
    ============================================ */
 
-.emptyState {
-  flex: 1;
+.emptyStateWrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 24px;
   padding: 48px;
+  max-width: 500px;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
   text-align: center;
 }
 
@@ -78,6 +85,50 @@
   animation: fadeSlideIn 0.3s ease-out;
 }
 
+.folderHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.folderHeader .mobileBackButton {
+  display: none;
+}
+
+.panel > .mobileBackButton {
+  display: none;
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.panel > .mobileBackButton:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+@media (max-width: 768px) {
+  .panel > .mobileBackButton {
+    display: flex;
+  }
+}
+
 @keyframes fadeSlideIn {
   from {
     opacity: 0;
@@ -88,15 +139,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.folderHeader {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #e5e5e5;
 }
 
 .folderName {
@@ -456,6 +498,34 @@
    FULLSCREEN MODE
    ============================================ */
 
+/* Mobile close button - only visible on mobile */
+.mobileCloseButton {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.mobileCloseButton:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+@media (max-width: 768px) {
+  .mobileCloseButton {
+    display: flex;
+  }
+}
+
 .fullscreenButton {
   display: flex;
   align-items: center;
@@ -478,6 +548,13 @@
   border-color: #d1d5db;
 }
 
+/* Hide fullscreen button on mobile - we use mobileCloseButton instead */
+@media (max-width: 768px) {
+  .fullscreenButton {
+    display: none;
+  }
+}
+
 .focusButton {
   position: fixed;
   bottom: 24px;
@@ -485,35 +562,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  background: transparent;
+  width: 40px;
+  height: 40px;
+  padding: 10px;
+  background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   color: #000000;
   cursor: pointer;
   transition: all 0.15s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 100;
+  flex-shrink: 0;
 }
 
 .focusButton:hover {
   background: #f3f4f6;
-  color: #000000;
   border-color: #d1d5db;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.focusButtonTransparent {
+.focusButtonActive {
   background: transparent;
-  box-shadow: none;
-  opacity: 0.3;
+  opacity: 0.4;
 }
 
-.focusButtonTransparent:hover {
-  background: #f1f1f1;
+.focusButtonActive:hover {
   opacity: 1;
+  background: #f3f4f6;
 }
 
 .fullscreenOverlay {
@@ -562,15 +636,103 @@
 
 @media (max-width: 768px) {
   .panel {
+    padding: 0;
+  }
+
+  .emptyStateWrapper {
+    padding: 32px 24px;
+    max-width: 100%;
+  }
+
+  .emptyState {
+    padding: 0;
+  }
+
+  .emptyIcon {
+    font-size: 48px;
+  }
+
+  .emptyTitle {
+    font-size: 18px;
+  }
+
+  .emptyDescription {
+    font-size: 13px;
+  }
+
+  .folderView {
+    padding: 24px;
+    max-width: 100%;
+  }
+
+  .folderHeader {
+    padding-bottom: 16px;
+  }
+
+  .folderName {
+    font-size: 20px;
+  }
+
+  .infoCard {
+    padding: 20px;
+  }
+
+  .infoCardTitle {
+    font-size: 12px;
+  }
+
+  .infoGrid {
+    gap: 16px;
+  }
+
+  .infoItem {
+    gap: 4px;
+  }
+
+  .infoLabel {
+    font-size: 11px;
+  }
+
+  .infoValue {
+    font-size: 13px;
+  }
+
+  .infoValueMono {
+    font-size: 11px;
+  }
+
+  .tipCard {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .tipIcon {
+    font-size: 20px;
+  }
+
+  .tipText {
+    font-size: 12px;
+  }
+
+  .fileHeader {
     padding: 16px;
+    flex-wrap: wrap;
+  }
+
+  .fileHeaderRight {
+    gap: 8px;
+  }
+
+  .statistics {
+    display: none;
+  }
+
+  .fileName {
+    font-size: 16px;
   }
 
   .folderName {
     font-size: 22px;
-  }
-
-  .fileName {
-    font-size: 18px;
   }
 
   .infoGrid {
@@ -584,6 +746,29 @@
   }
 
   .fullscreenEditor {
-    padding: 16px;
+    padding: 0;
+  }
+
+  .focusButton {
+    bottom: 16px;
+    left: 16px;
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fileHeader {
+    padding: 12px;
+  }
+
+  .fileName {
+    font-size: 15px;
+  }
+
+  .saveButton,
+  .fullscreenButton {
+    width: 36px;
+    height: 36px;
   }
 }

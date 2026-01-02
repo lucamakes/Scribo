@@ -240,8 +240,8 @@
   z-index: 20;
   display: flex;
   align-items: center;
-  background: #f1f1f1;
-  padding: 6px;
+  background: transparent;
+  padding: 0;
   border-radius: 6px;
   border: none;
   box-shadow: none;
@@ -275,34 +275,34 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 32px;
+  height: 28px;
   padding: 0 10px;
-  background: transparent;
-  border: none;
+  background: none;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
-  color: #4a4a4a;
+  color: #000000;
   font-size: 13px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .breadcrumbButton:hover {
-  background: #e5e5e5;
-  color: #1a1a1a;
+  background: #f3f4f6;
+  border-color: #d1d5db;
 }
 
 .breadcrumbCurrent {
-  color: #1a1a1a;
   font-weight: 600;
   cursor: default;
 }
 
 .breadcrumbCurrent:hover {
-  background: transparent;
-  color: #1a1a1a;
+  background: none;
+  border-color: #e5e7eb;
 }
 
 .breadcrumbSeparator {
@@ -320,8 +320,8 @@
   right: 24px;
   z-index: 20;
   display: flex;
-  background: #f1f1f1;
-  padding: 6px;
+  background: transparent;
+  padding: 0;
   border-radius: 6px;
   border: none;
   box-shadow: none;
@@ -333,33 +333,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   padding: 0;
-  background: transparent;
-  border: none;
+  background: none;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
   cursor: pointer;
-  color: #4a4a4a;
+  color: #000000;
   transition: all 0.15s ease;
-  box-shadow: none;
+  flex-shrink: 0;
 }
 
 .toggleButton:hover {
-  background: #e5e5e5;
-  color: #1a1a1a;
+  background: #f3f4f6;
+  border-color: #d1d5db;
 }
 
 .toggleButton:active {
-  background: #d4d4d4;
+  background: #e5e7eb;
 }
 
 .zoomLevel {
   font-size: 12px;
   font-weight: 500;
-  color: #4a4a4a;
+  color: #000000;
   min-width: 40px;
-  height: 32px;
+  height: 28px;
   text-align: center;
   padding: 0 4px;
   display: flex;
@@ -373,4 +373,82 @@
   background-color: #e5e5e5;
   align-self: center;
   margin: 0 4px;
+}
+
+/* ============================================
+   INFO PANEL
+   ============================================ */
+
+.infoButton {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  z-index: 20;
+  display: flex;
+  background: transparent;
+  padding: 0;
+  border-radius: 6px;
+  border: none;
+  box-shadow: none;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+.infoPanel {
+  position: absolute;
+  bottom: 72px;
+  left: 24px;
+  z-index: 20;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 360px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.infoTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.01em;
+}
+
+.infoText {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
+}
+
+.infoList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.infoList li {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.infoList li strong {
+  color: #1a1a1a;
+  font-weight: 600;
 }

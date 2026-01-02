@@ -15,7 +15,8 @@ import {
     AlertTriangle,
     Save,
     Pencil,
-    Focus
+    Eye,
+    EyeClosed
 } from 'lucide-react';
 import styles from './DetailPanel.module.css';
 
@@ -28,6 +29,8 @@ interface DetailPanelProps {
     openInFullscreen?: boolean;
     /** Callback invoked when fullscreen mode has been opened */
     onFullscreenOpened?: () => void;
+    /** Callback to return to master list on mobile */
+    onBackToMaster?: () => void;
 }
 
 /**
@@ -36,7 +39,7 @@ interface DetailPanelProps {
  * - Rich text editor when a file is selected
  * - Empty state when nothing is selected
  */
-export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, onFullscreenOpened }: DetailPanelProps) {
+export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, onFullscreenOpened, onBackToMaster }: DetailPanelProps) {
     const [content, setContent] = useState('');
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [error, setError] = useState<string | null>(null);
@@ -80,6 +83,10 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             if (e.key === 'Escape' && (isFullscreen || isFocusMode)) {
                 setIsFocusMode(false);
                 setIsFullscreen(false);
+                // On mobile, also go back to master
+                if (window.innerWidth <= 768) {
+                    onBackToMaster?.();
+                }
             }
         };
 
@@ -92,7 +99,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             document.removeEventListener('keydown', handleKeyDown);
             document.body.style.overflow = '';
         };
-    }, [isFullscreen, isFocusMode]);
+    }, [isFullscreen, isFocusMode, onBackToMaster]);
 
     // Auto-save with debounce
     const saveContent = useCallback(async (newContent: string) => {
@@ -136,8 +143,14 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
 
     // Toggle fullscreen
     const toggleFullscreen = useCallback(() => {
-        setIsFullscreen(prev => !prev);
-    }, []);
+        const newFullscreenState = !isFullscreen;
+        setIsFullscreen(newFullscreenState);
+        
+        // On mobile, if exiting fullscreen, go back to master
+        if (!newFullscreenState && window.innerWidth <= 768) {
+            onBackToMaster?.();
+        }
+    }, [isFullscreen, onBackToMaster]);
 
     // Toggle focus mode
     const toggleFocusMode = useCallback(() => {
@@ -164,14 +177,19 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
     if (!selectedItem) {
         return (
             <div className={styles.panel}>
-                <div className={styles.emptyState}>
-                    <div className={styles.emptyIcon}>
-                        <Folder size={48} strokeWidth={1} />
+                <div className={styles.emptyStateWrapper}>
+                    <div className={styles.emptyState}>
+                        <h3 className={styles.emptyTitle}>No item selected</h3>
+                        <p className={styles.emptyDescription}>
+                            Select a file or folder from the sidebar to view its details
+                        </p>
                     </div>
-                    <h3 className={styles.emptyTitle}>No item selected</h3>
-                    <p className={styles.emptyDescription}>
-                        Select a file or folder from the sidebar to view its details
-                    </p>
+                    <div className={styles.tipCard}>
+                        <Lightbulb size={24} strokeWidth={1} className={styles.tipIcon} />
+                        <p className={styles.tipText}>
+                            Hover over items in the sidebar to reveal buttons for renaming, deleting, or adding subfolders.
+                        </p>
+                    </div>
                 </div>
             </div>
         );
@@ -197,6 +215,13 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
 
         return (
             <div className={styles.panel}>
+                <button
+                    onClick={onBackToMaster}
+                    className={styles.mobileBackButton}
+                    aria-label="Back to files"
+                >
+                    <X size={20} strokeWidth={1.5} />
+                </button>
                 <div className={styles.folderView}>
                     <div className={styles.folderHeader}>
                         <h2 className={styles.folderName}>{selectedItem.name}</h2>
@@ -227,7 +252,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                     <div className={styles.tipCard}>
                         <Lightbulb size={24} strokeWidth={1} className={styles.tipIcon} />
                         <p className={styles.tipText}>
-                            Use the + button in the sidebar to add files or subfolders to this folder.
+                            Hover over items in the sidebar to reveal buttons for renaming, deleting, or adding subfolders.
                         </p>
                     </div>
                 </div>
@@ -279,14 +304,18 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                             </span>
                         </div>
                         <button
+                            onClick={onBackToMaster}
+                            className={styles.mobileCloseButton}
+                            title="Back to files"
+                        >
+                            <X size={18} strokeWidth={1.5} />
+                        </button>
+                        <button
                             onClick={toggleFullscreen}
                             className={styles.fullscreenButton}
                             title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
                         >
-                            {isFullscreen
-                                ? <Minimize2 size={18} strokeWidth={1} />
-                                : <Maximize2 size={18} strokeWidth={1} />
-                            }
+                            {isFullscreen ? <Minimize2 size={18} strokeWidth={1} /> : <Maximize2 size={18} strokeWidth={1} />}
                         </button>
                     </div>
                 </div>
@@ -309,10 +338,14 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             {isFullscreen && (
                 <button
                     onClick={toggleFocusMode}
-                    className={`${styles.focusButton} ${isFocusMode ? styles.focusButtonTransparent : ''}`}
+                    className={`${styles.focusButton} ${isFocusMode ? styles.focusButtonActive : ''}`}
                     title={isFocusMode ? 'Exit focus mode' : 'Enter focus mode (hide header)'}
                 >
-                    <Focus size={18} strokeWidth={1} />
+                    {isFocusMode ? (
+                        <EyeClosed size={18} strokeWidth={1} />
+                    ) : (
+                        <Eye size={18} strokeWidth={1} />
+                    )}
                 </button>
             )}
         </>

@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef } from 'react';
-import { Orbit, CircleDot, ZoomIn, ZoomOut, RotateCcw, ChevronRight } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Orbit, CircleDot, ZoomIn, ZoomOut, RotateCcw, ChevronRight, Info } from 'lucide-react';
 import styles from './Constellation.module.css';
 import { DEFAULT_CHILDREN, ROOT_SIZE } from './constants';
 import { type ConstellationProps } from './types';
@@ -50,6 +50,8 @@ export default function Constellation({
     zoomOut,
     resetView,
   } = useConstellation(childrenData, canvasRef, rootName);
+
+  const [showInfo, setShowInfo] = useState(false);
 
   const isAnyHovered = hoveredIndex !== null || isRootHovered;
   
@@ -146,6 +148,40 @@ export default function Constellation({
           <RotateCcw size={16} strokeWidth={1} />
         </button>
       </div>
+
+      <div className={styles.infoButton}>
+        <button
+          className={styles.toggleButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowInfo(!showInfo);
+          }}
+          type="button"
+          aria-label="Information"
+          title="Information"
+        >
+          <Info size={16} strokeWidth={1} />
+        </button>
+      </div>
+
+      {showInfo && (
+        <div className={styles.infoPanel}>
+          <h3 className={styles.infoTitle}>Constellation View</h3>
+          <p className={styles.infoText}>
+            Get a different kind of overview of your project. This visual representation helps you see the big picture and identify areas that need attention.
+          </p>
+          <p className={styles.infoText}>
+            <strong>Orb sizes:</strong> Smaller orbs represent files or folders with fewer words, while larger orbs contain more content. This makes it easy to spot which parts of your project need more work.
+          </p>
+          <ul className={styles.infoList}>
+            <li><strong>Navigate:</strong> Click folders to explore deeper levels</li>
+            <li><strong>Open files:</strong> Click file orbs to open them in the editor</li>
+            <li><strong>Zoom:</strong> Use mouse wheel or zoom buttons</li>
+            <li><strong>Pan:</strong> Click and drag to move around</li>
+            <li><strong>Go back:</strong> Click the center orb or use breadcrumbs</li>
+          </ul>
+        </div>
+      )}
 
       <canvas ref={canvasRef} className={`${styles.canvas} ${isAnyHovered ? styles.dimmed : ''} ${isAnimating ? styles.fadeOut : styles.fadeIn}`} />
       <div className={`${styles.container} ${isAnimating ? styles.fadeOut : styles.fadeIn}`}>
