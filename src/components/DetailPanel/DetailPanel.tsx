@@ -268,16 +268,15 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
     
     const editorContent = (
         <>
-            {!isFocusMode && (
-                <div className={styles.fileHeader}>
-                    <div className={styles.fileHeaderLeft}>
-                        <h2 className={styles.fileName}>
-                            {selectedItem.name.length > 25 
-                                ? selectedItem.name.slice(0, 25) + '...' 
-                                : selectedItem.name}
-                        </h2>
-                    </div>
-                    <div className={styles.fileHeaderRight}>
+            <div className={`${styles.fileHeader} ${isFocusMode ? styles.fileHeaderHidden : ''}`}>
+                <div className={styles.fileHeaderLeft}>
+                    <h2 className={styles.fileName}>
+                        {selectedItem.name.length > 25 
+                            ? selectedItem.name.slice(0, 25) + '...' 
+                            : selectedItem.name}
+                    </h2>
+                </div>
+                <div className={styles.fileHeaderRight}>
                         <button
                             onClick={() => saveContent(content)}
                             className={`${styles.saveButton} ${content === lastSavedContent.current ? styles.saved : styles.unsaved}`}
@@ -319,7 +318,6 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                         </button>
                     </div>
                 </div>
-            )}
 
             {error && (
                 <div className={styles.errorBanner}>
