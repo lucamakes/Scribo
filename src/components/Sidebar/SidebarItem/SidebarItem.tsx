@@ -16,6 +16,11 @@ interface SidebarItemProps {
   selectedItemId?: string | null;
   isExpanded?: boolean;
   onToggleExpand?: (id: string) => void;
+  editingId?: string | null;
+  editName?: string;
+  onEditNameChange?: (name: string) => void;
+  onSaveEdit?: () => void;
+  onCancelEdit?: () => void;
 }
 
 // Icons
@@ -36,6 +41,11 @@ export function SidebarItem({
   selectedItemId,
   isExpanded = false,
   onToggleExpand,
+  editingId,
+  editName,
+  onEditNameChange,
+  onSaveEdit,
+  onCancelEdit,
 }: SidebarItemProps) {
   const [dropPosition, setDropPosition] = useState<DropPosition | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -187,13 +197,34 @@ export function SidebarItem({
             }
           </span>
 
-          <span className={`${styles.name} ${isRoot ? styles.rootName : ''}`}>
-            {item.name.length > 15 ? item.name.slice(0, 15) + '...' : item.name}
-          </span>
+          {editingId === item.id ? (
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => onEditNameChange?.(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  onSaveEdit?.();
+                } else if (e.key === 'Escape') {
+                  e.preventDefault();
+                  onCancelEdit?.();
+                }
+              }}
+              onBlur={onSaveEdit}
+              onClick={(e) => e.stopPropagation()}
+              className={styles.editInput}
+              autoFocus
+            />
+          ) : (
+            <span className={`${styles.name} ${isRoot ? styles.rootName : ''}`}>
+              {item.name.length > 15 ? item.name.slice(0, 15) + '...' : item.name}
+            </span>
+          )}
         </div>
 
         <div className={styles.actions}>
-          {isFolder && (
+          {!editingId && isFolder && (
             <div className={styles.addWrapper}>
               <button
                 onClick={toggleAddMenu}
@@ -215,7 +246,7 @@ export function SidebarItem({
               )}
             </div>
           )}
-          {!isRoot && (
+          {!editingId && !isRoot && (
             <>
               <button onClick={handleEdit} className={styles.actionBtn} aria-label="Edit" title="Rename">
                 <Pencil size={12} strokeWidth={1} />

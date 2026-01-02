@@ -173,6 +173,24 @@
   text-overflow: ellipsis;
 }
 
+.editInput {
+  flex: 1;
+  font-size: 13px;
+  color: #1a1a1a;
+  background: #ffffff;
+  border: 1px solid #6366f1;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-left: 8px;
+  outline: none;
+  font-family: inherit;
+  min-width: 0;
+}
+
+.editInput:focus {
+  box-shadow: 0 0 0 2px #6366f126;
+}
+
 .rootItem {
   font-weight: 600;
   margin-bottom: 2px;

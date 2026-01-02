@@ -328,9 +328,15 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
 
     const newItem = dbItemToSidebarItem(result.data as any, ROOT_ID);
     setItems(prev => [...prev, newItem]);
+    
+    // Expand the parent folder if it's not already expanded
+    if (!expandedIds.has(parentId)) {
+      setExpandedIds(prev => new Set([...prev, parentId]));
+    }
+    
     setEditingId(newItem.id);
     setEditName(newItem.name);
-  }, [project.id, ROOT_ID]);
+  }, [project.id, ROOT_ID, expandedIds]);
 
 
 
@@ -373,9 +379,14 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
         selectedItemId={selectedItemId}
         isExpanded={expandedIds.has(item.id)}
         onToggleExpand={toggleExpanded}
+        editingId={editingId}
+        editName={editName}
+        onEditNameChange={setEditName}
+        onSaveEdit={handleSaveEdit}
+        onCancelEdit={() => setEditingId(null)}
       />
     );
-  }, [items, handleDrop, actions, ROOT_ID, selectedItemId, expandedIds, toggleExpanded]);
+  }, [items, handleDrop, actions, ROOT_ID, selectedItemId, expandedIds, toggleExpanded, editingId, editName, handleSaveEdit]);
 
   // Actions for search modal sidebar - closes modal on select
   const searchActions: ItemActions = useMemo(() => ({
@@ -407,9 +418,14 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
         selectedItemId={selectedItemId}
         isExpanded={searchExpandedIds.has(item.id)}
         onToggleExpand={toggleSearchExpanded}
+        editingId={editingId}
+        editName={editName}
+        onEditNameChange={setEditName}
+        onSaveEdit={handleSaveEdit}
+        onCancelEdit={() => setEditingId(null)}
       />
     );
-  }, [items, handleDrop, searchActions, ROOT_ID, selectedItemId, searchExpandedIds, toggleSearchExpanded]);
+  }, [items, handleDrop, searchActions, ROOT_ID, selectedItemId, searchExpandedIds, toggleSearchExpanded, editingId, editName, handleSaveEdit]);
 
   const rootItem: SidebarItemData = useMemo(() => ({
     id: ROOT_ID,
@@ -530,29 +546,6 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
           <Trash2 size={18} strokeWidth={1} />
         </button>
       </div>
-
-      {editingId && (
-        <div className={styles.modal} onClick={() => setEditingId(null)}>
-          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <input
-              type="text"
-              value={editName}
-              onChange={e => setEditName(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSaveEdit()}
-              className={styles.input}
-              autoFocus
-            />
-            <div className={styles.modalActions}>
-              <button onClick={() => setEditingId(null)} className={styles.cancelBtn}>
-                Cancel
-              </button>
-              <button onClick={handleSaveEdit} className={styles.saveBtn}>
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <TrashPanel
         projectId={project.id}
