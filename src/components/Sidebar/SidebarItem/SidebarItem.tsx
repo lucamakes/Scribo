@@ -152,7 +152,7 @@ export function SidebarItem({
   };
 
   return (
-    <div className={`${styles.itemWrapper} ${!isFolder || !hasChildren ? styles.noChevron : ''}`}>
+    <div className={`${styles.itemWrapper} ${!isFolder || !hasChildren ? styles.noChevron : ''}`} data-item-id={item.id}>
       <div
         className={`${styles.item} ${isRoot ? styles.rootItem : ''} ${isDragging ? styles.dragging : ''} ${isSelected ? styles.selected : ''} ${getDropClass()}`}
         draggable={!isRoot}
@@ -180,10 +180,10 @@ export function SidebarItem({
             )}
           </span>
 
-          <span className={styles.icon}>
+          <span className={`${styles.icon} ${item.type === 'folder' ? styles.folderIcon : styles.fileIcon}`}>
             {item.type === 'folder'
-              ? <Folder size={14} strokeWidth={1} fill="currentColor" fillOpacity={0.1} />
-              : <span className={styles.fileDot} />
+              ? <Folder size={14} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
+              : <File size={14} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
             }
           </span>
 

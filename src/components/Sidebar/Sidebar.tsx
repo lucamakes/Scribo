@@ -7,7 +7,7 @@ import { itemService } from '@/lib/services/itemService';
 import { SidebarItem } from './SidebarItem/SidebarItem';
 import { TrashPanel } from '@/components/TrashPanel/TrashPanel';
 import styles from './Sidebar.module.css';
-import { Telescope, Trash2, ArrowLeft } from 'lucide-react';
+import { Telescope, Trash2, ArrowLeft, Download, Search, X, Folder, File } from 'lucide-react';
 
 
 
@@ -96,9 +96,25 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [showTrash, setShowTrash] = useState(false);
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set([ROOT_ID])); // Track expanded folders
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set([ROOT_ID])); // Track expanded folders for main sidebar
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(true); // Open by default
 
-  // Toggle folder expansion
+  // Expand all folders for search modal sidebar
+  const searchExpandedIds = useMemo(() => {
+    const allFolderIds = new Set([ROOT_ID]);
+    items.forEach(item => {
+      if (item.type === 'folder') {
+        allFolderIds.add(item.id);
+      }
+    });
+    return allFolderIds;
+  }, [items, ROOT_ID]);
+
+  // No-op toggle for search modal (always expanded)
+  const toggleSearchExpanded = useCallback(() => {}, []);
+
+  // Toggle folder expansion for main sidebar
   const toggleExpanded = useCallback((id: string) => {
     setExpandedIds(prev => {
       const next = new Set(prev);
@@ -110,6 +126,32 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
       return next;
     });
   }, []);
+
+  // Filter items based on search query - include content matches
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    
+    const query = searchQuery.toLowerCase();
+    return items
+      .filter(item => item.id !== ROOT_ID)
+      .map(item => {
+        const nameMatch = item.name.toLowerCase().includes(query);
+        const content = item.type === 'file' && 'content' in item ? (item.content || '') : '';
+        const contentMatch = content.toLowerCase().includes(query);
+        
+        // Get content snippet around the match
+        let snippet = '';
+        if (contentMatch && content) {
+          const index = content.toLowerCase().indexOf(query);
+          const start = Math.max(0, index - 30);
+          const end = Math.min(content.length, index + query.length + 50);
+          snippet = (start > 0 ? '...' : '') + content.slice(start, end).trim() + (end < content.length ? '...' : '');
+        }
+        
+        return { item, nameMatch, contentMatch, snippet };
+      })
+      .filter(({ nameMatch, contentMatch }) => nameMatch || contentMatch);
+  }, [items, searchQuery, ROOT_ID]);
 
   // Load items from database
   useEffect(() => {
@@ -331,6 +373,40 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
     );
   }, [items, handleDrop, actions, ROOT_ID, selectedItemId, expandedIds, toggleExpanded]);
 
+  // Actions for search modal sidebar - closes modal on select
+  const searchActions: ItemActions = useMemo(() => ({
+    onEdit: handleEdit,
+    onDelete: handleDelete,
+    onAdd: handleAdd,
+    onSelect: (item: SidebarItemData) => {
+      handleSelect(item);
+      setShowSearch(false);
+      setSearchQuery('');
+    },
+  }), [handleEdit, handleDelete, handleAdd, handleSelect]);
+
+  // Render item for search modal sidebar
+  const renderSearchItem = useCallback((item: SidebarItemData, depth: number) => {
+    const children = items.filter(i => i.parentId === item.id).sort((a, b) => a.order - b.order);
+    const isRoot = item.id === ROOT_ID;
+    return (
+      <SidebarItem
+        key={item.id}
+        item={item}
+        children={children}
+        allItems={items}
+        depth={depth}
+        onDrop={handleDrop}
+        renderItem={renderSearchItem}
+        actions={searchActions}
+        isRoot={isRoot}
+        selectedItemId={selectedItemId}
+        isExpanded={searchExpandedIds.has(item.id)}
+        onToggleExpand={toggleSearchExpanded}
+      />
+    );
+  }, [items, handleDrop, searchActions, ROOT_ID, selectedItemId, searchExpandedIds, toggleSearchExpanded]);
+
   const rootItem: SidebarItemData = useMemo(() => ({
     id: ROOT_ID,
     name: project.name,
@@ -366,7 +442,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
 
   // Calculate dynamic width: base width + additional width per nesting level
   const sidebarWidth = useMemo(() => {
-    const baseWidth = 220;
+    const baseWidth = 260;
     const widthPerLevel = 24; // matches the margin-left in .children
     return Math.min(baseWidth + (maxDepth * widthPerLevel), 500); // cap at 500px
   }, [maxDepth]);
@@ -386,28 +462,46 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
     <aside className={styles.sidebar} style={{ width: `${sidebarWidth}px` }} role="tree" aria-label="File explorer">
       <header className={styles.header}>
         <span className={styles.title}>{project.name}</span>
-        {onBackToProjects && (
-          <button
-            onClick={onBackToProjects}
-            className={styles.blankIconButton}
-            type="button"
-            aria-label="Back to projects"
-            title="Back to Projects"
+        <div className={styles.headerActions}>
+          {onBackToProjects && (
+            <button
+              onClick={onBackToProjects}
+              className={styles.blankIconButton}
+              type="button"
+              aria-label="Back to projects"
+              title="Back to Projects"
+            >
+              <ArrowLeft size={18} strokeWidth={1} />
+            </button>
+          )}
+          {onToggleBlankView && (
+            <button
+              onClick={onToggleBlankView}
+              className={styles.blankIconButton}
+              type="button"
+              aria-label="Show constellation view"
+              title="Constellation View"
+            >
+              <Telescope size={18} strokeWidth={1} />
+            </button>
+          )}
+          <div className={styles.divider}></div>
+          <button 
+            className={styles.blankIconButton} 
+            title="Export" 
+            aria-label="Export"
           >
-            <ArrowLeft size={18} strokeWidth={1} />
+            <Download size={16} strokeWidth={1} />
           </button>
-        )}
-        {onToggleBlankView && (
-          <button
-            onClick={onToggleBlankView}
-            className={styles.blankIconButton}
-            type="button"
-            aria-label="Show constellation view"
-            title="Constellation View"
+          <button 
+            className={styles.blankIconButton} 
+            title="Search" 
+            aria-label="Search"
+            onClick={() => setShowSearch(prev => !prev)}
           >
-            <Telescope size={18} strokeWidth={1} />
+            <Search size={16} strokeWidth={1} />
           </button>
-        )}
+        </div>
       </header>
       {error && <div className={styles.error}>{error}</div>}
       <nav className={styles.content}>
@@ -460,6 +554,113 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
         isOpen={showTrash}
         onClose={() => setShowTrash(false)}
       />
+
+      {showSearch && (
+        <div className={styles.searchModal} onClick={() => { setShowSearch(false); setSearchQuery(''); }}>
+          <div 
+            className={styles.searchModalContent} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.searchInputWrapper}>
+              <Search size={18} strokeWidth={1.5} className={styles.searchIcon} />
+              <input
+                type="text"
+                placeholder="Search files and folders..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={styles.searchInput}
+                autoFocus
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className={styles.clearButton}
+                  aria-label="Clear search"
+                >
+                  <X size={16} strokeWidth={1.5} />
+                </button>
+              )}
+            </div>
+            
+            <div className={styles.searchResultsContainer}>
+              {searchQuery ? (
+                <div className={styles.searchResults}>
+                  {filteredItems.length > 0 ? (
+                    filteredItems.map(({ item, snippet }) => {
+                      // Get path to item
+                      const getPath = (itemId: string): string => {
+                        const currentItem = items.find(i => i.id === itemId);
+                        if (!currentItem || currentItem.parentId === ROOT_ID) return '';
+                        const parent = items.find(i => i.id === currentItem.parentId);
+                        if (!parent) return '';
+                        const parentPath = getPath(parent.id);
+                        return parentPath ? `${parentPath} / ${parent.name}` : parent.name;
+                      };
+
+                      return (
+                        <div
+                          key={item.id}
+                          className={styles.searchResultItem}
+                          onClick={() => {
+                            if (item.type === 'file') {
+                              actions.onSelect(item);
+                              setShowSearch(false);
+                              setSearchQuery('');
+                            }
+                          }}
+                        >
+                          <div className={`${styles.resultIcon} ${item.type === 'folder' ? styles.resultFolderIcon : styles.resultFileIcon}`}>
+                            {item.type === 'folder' ? (
+                              <Folder size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
+                            ) : (
+                              <File size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
+                            )}
+                          </div>
+                          <div className={styles.resultInfo}>
+                            <div className={styles.resultName}>{item.name}</div>
+                            <div className={styles.resultPath}>
+                              {getPath(item.id) || project.name}
+                            </div>
+                            {snippet && (
+                              <div className={styles.resultSnippet}>{snippet}</div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className={styles.noResults}>No results found</div>
+                  )}
+                </div>
+              ) : (
+                <div className={styles.searchPlaceholder}>
+                  <Search size={48} strokeWidth={1} className={styles.placeholderIcon} />
+                  <div className={styles.placeholderText}>Start typing to search</div>
+                  <div className={styles.placeholderSubtext}>Search through all your files and folders</div>
+                </div>
+              )}
+              
+              <div className={styles.miniSidebar}>
+                <nav className={styles.miniSidebarContent}>
+                  <SidebarItem
+                    item={rootItem}
+                    children={rootChildren}
+                    allItems={items}
+                    depth={0}
+                    onDrop={handleDrop}
+                    renderItem={renderSearchItem}
+                    actions={searchActions}
+                    isRoot={true}
+                    selectedItemId={selectedItemId}
+                    isExpanded={searchExpandedIds.has(ROOT_ID)}
+                    onToggleExpand={toggleSearchExpanded}
+                  />
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }

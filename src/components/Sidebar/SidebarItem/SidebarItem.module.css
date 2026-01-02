@@ -6,7 +6,7 @@
   --sidebar-text-color: #37352f;
   --sidebar-line-color: #e0e0e0;
   --sidebar-hover-bg: #f0f0f0;
-  --sidebar-icon-color: #9ca3af;
+  --sidebar-icon-color: #000000;
   --sidebar-btn-bg: #e5e7eb;
   --sidebar-selected-bg: rgba(99, 102, 241, 0.15);
 }
@@ -56,9 +56,11 @@
   transition: width 0.15s ease;
 }
 
-/* Shorten line when file item is hovered or selected (not folders) */
-.itemWrapper.noChevron:has(.item:hover .fileDot)::after,
-.itemWrapper.noChevron:has(.selected .fileDot)::after {
+/* Shorten line when item is hovered or selected (files and folders) */
+.itemWrapper.noChevron:has(.item:hover .fileIcon)::after,
+.itemWrapper.noChevron:has(.selected .fileIcon)::after,
+.itemWrapper.noChevron:has(.item:hover .folderIcon)::after,
+.itemWrapper.noChevron:has(.selected .folderIcon)::after {
   width: 15px;
 }
 
@@ -95,16 +97,6 @@
 
 .selected {
   background-color: var(--sidebar-selected-bg);
-}
-
-
-/* Folders don't get hover or selected styles */
-.item:has(.icon svg):hover {
-  background-color: transparent;
-}
-
-.item:has(.icon svg).selected {
-  background-color: transparent;
 }
 
 .itemContent {
@@ -144,13 +136,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--sidebar-icon-color);
   flex-shrink: 0;
 }
 
-/* Folder icons are yellow */
-.item:not(.rootItem) .icon {
+.folderIcon {
   color: #f59e0b;
+}
+
+.fileIcon {
+  color: #3b82f6;
 }
 
 /* Root folder icon is red */
@@ -215,25 +209,26 @@
 }
 
 .actionBtn {
-  background: var(--sidebar-btn-bg);
-  border: none;
+  background: transparent;
+  border: 1px solid #e5e7eb;
   border-radius: 4px;
   width: 20px;
   height: 20px;
   cursor: pointer;
   font-size: 16px;
   line-height: 1;
-  color: #4b5563;
+  color: #000000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: background-color 0.15s, color 0.15s;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
 }
 
 .actionBtn:hover {
-  background-color: #d1d5db;
-  color: #000;
+  background-color: #f3f4f6;
+  color: #000000;
+  border-color: #d1d5db;
 }
 
 /* ============================================
