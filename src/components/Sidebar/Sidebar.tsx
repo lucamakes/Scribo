@@ -96,6 +96,20 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [showTrash, setShowTrash] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set([ROOT_ID])); // Track expanded folders
+
+  // Toggle folder expansion
+  const toggleExpanded = useCallback((id: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
 
   // Load items from database
   useEffect(() => {
@@ -311,9 +325,11 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
         actions={actions}
         isRoot={isRoot}
         selectedItemId={selectedItemId}
+        isExpanded={expandedIds.has(item.id)}
+        onToggleExpand={toggleExpanded}
       />
     );
-  }, [items, handleDrop, actions, ROOT_ID, selectedItemId]);
+  }, [items, handleDrop, actions, ROOT_ID, selectedItemId, expandedIds, toggleExpanded]);
 
   const rootItem: SidebarItemData = useMemo(() => ({
     id: ROOT_ID,
@@ -329,9 +345,35 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
   // Root children have parentId === ROOT_ID in UI
   const rootChildren = items.filter(i => i.parentId === ROOT_ID).sort((a, b) => a.order - b.order);
 
+  // Calculate max VISIBLE depth based on expanded folders
+  const maxDepth = useMemo(() => {
+    const getVisibleMaxDepth = (itemId: string, currentDepth: number): number => {
+      // If this folder is not expanded, don't count its children
+      if (!expandedIds.has(itemId)) return currentDepth;
+      
+      const children = items.filter(i => i.parentId === itemId);
+      if (children.length === 0) return currentDepth;
+      
+      return Math.max(...children.map(child => {
+        if (child.type === 'folder') {
+          return getVisibleMaxDepth(child.id, currentDepth + 1);
+        }
+        return currentDepth + 1;
+      }));
+    };
+    return getVisibleMaxDepth(ROOT_ID, 0);
+  }, [items, ROOT_ID, expandedIds]);
+
+  // Calculate dynamic width: base width + additional width per nesting level
+  const sidebarWidth = useMemo(() => {
+    const baseWidth = 220;
+    const widthPerLevel = 24; // matches the margin-left in .children
+    return Math.min(baseWidth + (maxDepth * widthPerLevel), 500); // cap at 500px
+  }, [maxDepth]);
+
   if (loading) {
     return (
-      <aside className={styles.sidebar}>
+      <aside className={styles.sidebar} style={{ width: `${sidebarWidth}px` }}>
         <header className={styles.header}>
           <span className={styles.title}>{project.name}</span>
         </header>
@@ -341,7 +383,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
   }
 
   return (
-    <aside className={styles.sidebar} role="tree" aria-label="File explorer">
+    <aside className={styles.sidebar} style={{ width: `${sidebarWidth}px` }} role="tree" aria-label="File explorer">
       <header className={styles.header}>
         <span className={styles.title}>{project.name}</span>
         {onBackToProjects && (
@@ -379,6 +421,8 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
           actions={actions}
           isRoot={true}
           selectedItemId={selectedItemId}
+          isExpanded={expandedIds.has(ROOT_ID)}
+          onToggleExpand={toggleExpanded}
         />
       </nav>
 

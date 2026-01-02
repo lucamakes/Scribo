@@ -246,7 +246,11 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             {!isFocusMode && (
                 <div className={styles.fileHeader}>
                     <div className={styles.fileHeaderLeft}>
-                        <h2 className={styles.fileName}>{selectedItem.name}</h2>
+                        <h2 className={styles.fileName}>
+                            {selectedItem.name.length > 25 
+                                ? selectedItem.name.slice(0, 25) + '...' 
+                                : selectedItem.name}
+                        </h2>
                     </div>
                     <div className={styles.fileHeaderRight}>
                         <button

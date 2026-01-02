@@ -14,6 +14,8 @@ interface SidebarItemProps {
   actions: ItemActions;
   isRoot?: boolean;
   selectedItemId?: string | null;
+  isExpanded?: boolean;
+  onToggleExpand?: (id: string) => void;
 }
 
 // Icons
@@ -32,9 +34,9 @@ export function SidebarItem({
   actions,
   isRoot = false,
   selectedItemId,
+  isExpanded = false,
+  onToggleExpand,
 }: SidebarItemProps) {
-  // Default to expanded for root; others can be toggled
-  const [isExpanded, setIsExpanded] = useState(isRoot ? true : false);
   const [dropPosition, setDropPosition] = useState<DropPosition | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
@@ -105,13 +107,15 @@ export function SidebarItem({
     if ((e.target as HTMLElement).closest(`.${styles.actions}`)) return;
 
     // Toggle expand for folders - ONLY if they have children
-    if (isFolder && hasChildren) setIsExpanded(prev => !prev);
+    if (isFolder && hasChildren && onToggleExpand) {
+      onToggleExpand(item.id);
+    }
 
     // Select the item (unless it's root)
     if (!isRoot) {
       actions.onSelect(item);
     }
-  }, [isFolder, isRoot, actions, item, hasChildren]);
+  }, [isFolder, isRoot, actions, item, hasChildren, onToggleExpand]);
 
   const handleEdit = useCallback((e: MouseEvent) => {
     e.stopPropagation();
@@ -184,7 +188,7 @@ export function SidebarItem({
           </span>
 
           <span className={`${styles.name} ${isRoot ? styles.rootName : ''}`}>
-            {item.name}
+            {item.name.length > 15 ? item.name.slice(0, 15) + '...' : item.name}
           </span>
         </div>
 

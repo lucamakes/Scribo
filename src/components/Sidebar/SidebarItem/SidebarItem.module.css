@@ -18,12 +18,12 @@
 .itemWrapper {
   position: relative;
   line-height: 28px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 /* Ensure first child also gets top margin */
 .itemWrapper:first-child {
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 /* Vertical line running down the left side */
