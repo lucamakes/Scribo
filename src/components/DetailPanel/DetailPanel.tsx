@@ -376,6 +376,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                     isAtLimit={isAtLimit}
                     isPro={isPro}
                     onLimitBlocked={handleLimitBlocked}
+                    focusMode={isFocusMode}
                 />
             </div>
 

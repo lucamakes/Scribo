@@ -13,6 +13,7 @@ export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
   useEffect(() => {
     setMounted(true);
@@ -67,6 +68,9 @@ export default function Home() {
               Start writing free
               <ArrowRight size={18} strokeWidth={1.5} />
             </button>
+            <button onClick={() => router.push('/demo')} className={styles.secondaryButton}>
+              Try it first
+            </button>
             <p className={styles.heroNote}>15,000 words free. No credit card required.</p>
           </div>
         </div>
@@ -113,6 +117,22 @@ export default function Home() {
           <h2 className={styles.pricingTitle}>Simple, honest pricing</h2>
           <p className={styles.pricingSubtitle}>Start free. Upgrade when you need more.</p>
 
+          <div className={styles.billingToggle}>
+            <button 
+              className={`${styles.billingOption} ${billingPeriod === 'monthly' ? styles.billingOptionActive : ''}`}
+              onClick={() => setBillingPeriod('monthly')}
+            >
+              Monthly
+            </button>
+            <button 
+              className={`${styles.billingOption} ${billingPeriod === 'yearly' ? styles.billingOptionActive : ''}`}
+              onClick={() => setBillingPeriod('yearly')}
+            >
+              Yearly
+              <span className={styles.saveBadge}>Save 33%</span>
+            </button>
+          </div>
+
           <div className={styles.plans}>
             <div className={styles.plan}>
               <h3 className={styles.planName}>Free</h3>
@@ -135,9 +155,12 @@ export default function Home() {
               <div className={styles.planBadge}>Most popular</div>
               <h3 className={styles.planName}>Pro</h3>
               <div className={styles.planPrice}>
-                <span className={styles.planAmount}>$5</span>
-                <span className={styles.planPeriod}>/month</span>
+                <span className={styles.planAmount}>{billingPeriod === 'monthly' ? '$5' : '$40'}</span>
+                <span className={styles.planPeriod}>{billingPeriod === 'monthly' ? '/month' : '/year'}</span>
               </div>
+              {billingPeriod === 'yearly' && (
+                <p className={styles.planSavings}>$3.33/month — save $20/year</p>
+              )}
               <ul className={styles.planFeatures}>
                 <li><Check size={16} strokeWidth={2} /> Unlimited words</li>
                 <li><Check size={16} strokeWidth={2} /> Unlimited projects</li>
@@ -147,7 +170,6 @@ export default function Home() {
               <button onClick={() => router.push('/auth/signup')} className={styles.planButtonPrimary}>
                 Start free trial
               </button>
-              <p className={styles.planNote}>or $40/year (save 33%)</p>
             </div>
           </div>
         </div>

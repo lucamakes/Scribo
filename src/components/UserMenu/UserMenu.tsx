@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useSubscription } from '@/lib/hooks/useSubscription';
-import { User, Settings, X, Sparkles, CreditCard } from 'lucide-react';
+import { User, Settings, X, Sparkles, CreditCard, MessageSquare } from 'lucide-react';
 import styles from './UserMenu.module.css';
 
 /**
@@ -159,6 +159,10 @@ export function UserMenu() {
                         <button onClick={handleOpenSettings} className={styles.menuButton}>
                             <Settings size={16} strokeWidth={1.5} />
                             Settings
+                        </button>
+                        <button onClick={() => { setIsOpen(false); router.push('/feedback'); }} className={styles.menuButton}>
+                            <MessageSquare size={16} strokeWidth={1.5} />
+                            Feedback
                         </button>
                         <button onClick={handleLogout} className={styles.logoutButton}>
                             Log out

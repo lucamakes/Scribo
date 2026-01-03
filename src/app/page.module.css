@@ -123,8 +123,10 @@
 
 .heroCta {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 12px;
 }
 
@@ -147,6 +149,28 @@
 .primaryButton:hover {
   background: #4f46e5;
   border-color: #4f46e5;
+}
+
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #666;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.secondaryButton:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #1a1a1a;
 }
 
 .heroNote {
@@ -223,7 +247,50 @@
 .pricingSubtitle {
   font-size: 18px;
   color: #666;
-  margin: 0 0 48px 0;
+  margin: 0 0 32px 0;
+}
+
+.billingToggle {
+  display: inline-flex;
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 40px;
+}
+
+.billingOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.billingOption:hover {
+  color: #1a1a1a;
+}
+
+.billingOptionActive {
+  background: #ffffff;
+  color: #1a1a1a;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.saveBadge {
+  font-size: 11px;
+  font-weight: 600;
+  background: #10b981;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
 .plans {
@@ -285,6 +352,13 @@
 .planPeriod {
   font-size: 16px;
   color: #666;
+}
+
+.planSavings {
+  font-size: 13px;
+  color: #10b981;
+  margin: -12px 0 16px 0;
+  font-weight: 500;
 }
 
 .planFeatures {
