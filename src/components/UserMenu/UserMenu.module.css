@@ -225,3 +225,237 @@
     color: #1a1a1a;
     font-weight: 500;
 }
+
+
+/* Plan badge */
+.planBadge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    color: #666;
+    margin-left: auto;
+}
+
+.planBadgePro {
+    border-color: #1a1a1a;
+    color: #1a1a1a;
+}
+
+/* Word count section */
+.wordCountSection {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.wordCountBar {
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.wordCountFill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.wordCountText {
+    font-size: 11px;
+    color: #666;
+}
+
+/* Upgrade button */
+.upgradeButton {
+    width: 100%;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border: none;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+    font-family: var(--font-hanken-grotesk), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.upgradeButton:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+}
+
+.upgradeButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.dropdownHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+/* Pricing Modal */
+.pricingModal {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    padding: 32px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    animation: slideUp 0.15s ease-out;
+    position: relative;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    font-family: var(--font-hanken-grotesk), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.pricingCloseButton {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    color: #000000;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pricingCloseButton:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.pricingHeader {
+    margin-bottom: 24px;
+}
+
+.pricingIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    background: #6366f126;
+    border-radius: 12px;
+    color: #6366f1;
+    margin-bottom: 16px;
+}
+
+.pricingTitle {
+    font-size: 22px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.01em;
+}
+
+.pricingSubtitle {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+}
+
+.pricingPlans {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.pricingPlan {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    position: relative;
+}
+
+.pricingPlan:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.pricingPlan:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.pricingPlanPrimary {
+    background: #6366f126;
+    border-color: #6366f1;
+}
+
+.pricingPlanPrimary:hover {
+    background: #6366f126;
+}
+
+.planBadge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #6366f1;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 10px;
+}
+
+.planName {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #1a1a1a;
+}
+
+.planPrice {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    color: #1a1a1a;
+}
+
+.planPeriod {
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+}
+
+.planSaving {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6366f1;
+    margin-top: 6px;
+}
+
+.pricingFooter {
+    font-size: 12px;
+    color: #999;
+    margin: 0;
+}

@@ -1,0 +1,273 @@
+/* Warning Modal (80% usage) */
+.warningModal {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 32px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  animation: slideUp 0.2s ease;
+  position: relative;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  font-family: var(--font-hanken-grotesk), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.warningClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.warningClose:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.warningIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: #6366f126;
+  border-radius: 12px;
+  color: #6366f1;
+  margin-bottom: 16px;
+}
+
+.warningTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.01em;
+}
+
+.warningSubtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 24px 0;
+}
+
+.warningActions {
+  display: flex;
+  gap: 12px;
+}
+
+.warningDismiss {
+  flex: 1;
+  padding: 12px 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.warningDismiss:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.warningUpgrade {
+  flex: 1;
+  padding: 12px 16px;
+  background: #6366f1;
+  border: 1px solid #6366f1;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.warningUpgrade:hover {
+  background: #4f46e5;
+  border-color: #4f46e5;
+}
+
+.warningUpgrade:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Modal style - blocking overlay */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  animation: slideUp 0.25s ease;
+  position: relative;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modalHeader {
+  margin-bottom: 24px;
+}
+
+.modalIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 12px;
+  color: #f59e0b;
+  margin-bottom: 16px;
+}
+
+.modalTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.modalSubtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.plans {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.planButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.planButton:hover {
+  background: #f5f5f5;
+  border-color: #d5d5d5;
+}
+
+.planButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.planButtonPrimary {
+  background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+  border-color: #1a1a1a;
+  color: white;
+}
+
+.planButtonPrimary:hover {
+  background: linear-gradient(135deg, #333 0%, #444 100%);
+  border-color: #333;
+}
+
+.planName {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.planPrice {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.planSave {
+  font-size: 11px;
+  font-weight: 600;
+  background: #22c55e;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.modalFooter {
+  font-size: 12px;
+  color: #999;
+  margin: 0;
+}
+
+
+.modalClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.modalClose:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}

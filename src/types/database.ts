@@ -9,6 +9,25 @@
 export type ItemType = 'file' | 'folder';
 
 /**
+ * Subscription status enum
+ */
+export type SubscriptionStatus = 'free' | 'pro' | 'cancelled';
+
+/**
+ * User row from database
+ */
+export interface UserRow {
+  id: string;
+  email: string | null;
+  subscription_status: SubscriptionStatus;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  subscription_end_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
  * Project row from database
  */
 export interface ProjectRow {
@@ -106,6 +125,12 @@ export interface Database {
         Row: ItemRow;
         Insert: ItemInsert;
         Update: ItemUpdate;
+        Relationships: [];
+      };
+      users: {
+        Row: UserRow;
+        Insert: Partial<UserRow> & { id: string };
+        Update: Partial<UserRow>;
         Relationships: [];
       };
     };

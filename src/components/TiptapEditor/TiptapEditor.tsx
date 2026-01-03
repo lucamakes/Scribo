@@ -31,6 +31,12 @@ interface TiptapEditorProps {
     onContentChange: (html: string) => void;
     /** Placeholder text */
     placeholder?: string;
+    /** Whether the user is at their word limit */
+    isAtLimit?: boolean;
+    /** Whether the user is a Pro subscriber */
+    isPro?: boolean;
+    /** Called when typing is blocked due to word limit */
+    onLimitBlocked?: () => void;
 }
 
 /**
@@ -40,9 +46,13 @@ interface TiptapEditorProps {
 export function TiptapEditor({
     content,
     onContentChange,
-    placeholder = 'Start writing...'
+    placeholder = 'Start writing...',
+    isAtLimit = false,
+    isPro = false,
+    onLimitBlocked
 }: TiptapEditorProps) {
     const isInitialMount = useRef(true);
+    const previousContent = useRef(content);
 
     const editor = useEditor({
         extensions: [
@@ -68,10 +78,64 @@ export function TiptapEditor({
             attributes: {
                 class: styles.editorContent,
             },
+            // Block paste when at limit
+            handlePaste: () => {
+                if (isAtLimit && !isPro) {
+                    onLimitBlocked?.();
+                    return true; // Returning true prevents default paste behavior
+                }
+                return false;
+            },
+            // Block typing when at limit
+            handleKeyDown: (view, event) => {
+                if (isAtLimit && !isPro) {
+                    // Allow navigation, selection, deletion keys
+                    const allowedKeys = [
+                        'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 
+                        'ArrowUp', 'ArrowDown', 'Home', 'End', 'Tab',
+                        'Escape', 'Enter' // Enter for navigation, not adding content
+                    ];
+                    const isModifierOnly = event.ctrlKey || event.metaKey || event.altKey;
+                    const isAllowedKey = allowedKeys.includes(event.key);
+                    const isSelectAll = (event.ctrlKey || event.metaKey) && event.key === 'a';
+                    const isCopy = (event.ctrlKey || event.metaKey) && event.key === 'c';
+                    const isCut = (event.ctrlKey || event.metaKey) && event.key === 'x';
+                    const isUndo = (event.ctrlKey || event.metaKey) && event.key === 'z';
+                    const isSave = (event.ctrlKey || event.metaKey) && event.key === 's';
+                    
+                    // Allow these actions
+                    if (isAllowedKey || isSelectAll || isCopy || isCut || isUndo || isSave) {
+                        return false;
+                    }
+                    
+                    // Block character input and show modal
+                    if (event.key.length === 1 && !isModifierOnly) {
+                        onLimitBlocked?.();
+                        return true; // Block the keystroke
+                    }
+                }
+                return false;
+            },
         },
         immediatelyRender: false,
         onUpdate: ({ editor }) => {
-            onContentChange(editor.getHTML());
+            const newContent = editor.getHTML();
+            
+            // If at limit and not Pro, check if content increased
+            if (isAtLimit && !isPro) {
+                const prevWordCount = countWordsInHtml(previousContent.current);
+                const newWordCount = countWordsInHtml(newContent);
+                
+                // Block if trying to add words
+                if (newWordCount > prevWordCount) {
+                    // Revert to previous content
+                    editor.commands.setContent(previousContent.current, { emitUpdate: false });
+                    return;
+                }
+            }
+            
+            previousContent.current = newContent;
+            onContentChange(newContent);
         },
     });
 
@@ -81,6 +145,7 @@ export function TiptapEditor({
             const currentContent = editor.getHTML();
             if (currentContent !== content) {
                 editor.commands.setContent(content, { emitUpdate: false });
+                previousContent.current = content;
             }
         }
         isInitialMount.current = false;
@@ -229,4 +294,19 @@ export function TiptapEditor({
             </div>
         </div>
     );
+}
+
+/**
+ * Count words in HTML content
+ */
+function countWordsInHtml(html: string): number {
+    if (!html) return 0;
+    const text = html.replace(/<[^>]*>/g, ' ');
+    const words = text
+        .replace(/&nbsp;/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .split(' ')
+        .filter((word) => word.length > 0);
+    return words.length;
 }

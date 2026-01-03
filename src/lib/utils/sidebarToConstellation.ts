@@ -2,13 +2,22 @@ import type { ItemRow } from '@/types/database';
 import type { ChildData } from '@/example-files/types';
 
 /**
+ * Strips HTML tags from content string.
+ */
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/**
  * Counts words in content string.
- * Returns minimum of 50 to ensure every item has some visual presence.
+ * Returns 0 for empty content.
  */
 function countWords(content: string): number {
-  if (!content || !content.trim()) return 50;
-  const words = content.trim().split(/\s+/).filter(Boolean);
-  return Math.max(words.length, 50);
+  if (!content || !content.trim()) return 0;
+  const plainText = stripHtml(content);
+  if (!plainText) return 0;
+  const words = plainText.split(/\s+/).filter(Boolean);
+  return words.length;
 }
 
 /**
@@ -39,7 +48,7 @@ export function itemsToChildData(items: readonly ItemRow[]): readonly ChildData[
     // - For folders: sum of all children's words
     const words = item.type === 'file'
       ? countWords(item.content)
-      : childItems.reduce((sum, child) => sum + child.words, 0) || 50;
+      : childItems.reduce((sum, child) => sum + child.words, 0);
 
     return {
       id: item.id,

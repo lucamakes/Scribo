@@ -61,7 +61,9 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
         if (itemsResult.success) {
           totalWords = itemsResult.data.reduce((sum, item) => {
             if (item.type === 'file' && item.content) {
-              const words = item.content.trim() ? item.content.trim().split(/\s+/).length : 0;
+              // Strip HTML tags before counting words
+              const plainText = item.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+              const words = plainText ? plainText.split(/\s+/).filter(Boolean).length : 0;
               return sum + words;
             }
             return sum;

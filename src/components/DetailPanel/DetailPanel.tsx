@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
 import { itemService } from '@/lib/services/itemService';
 import { TiptapEditor } from '@/components/TiptapEditor/TiptapEditor';
+import { UpgradePrompt } from '@/components/UpgradePrompt/UpgradePrompt';
+import { useSubscription } from '@/lib/hooks/useSubscription';
 import {
     Folder,
     FileText,
@@ -45,9 +48,45 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
     const [error, setError] = useState<string | null>(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isFocusMode, setIsFocusMode] = useState(false);
+    const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
+    const [showLimitModal, setShowLimitModal] = useState(false);
     const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const lastSavedContent = useRef('');
     const selectedItemIdRef = useRef<string | null>(null);
+    
+    const { isPro, percentage, isAtLimit, refresh: refreshSubscription } = useSubscription();
+
+    // Track if component is mounted (for portal)
+    const [isMounted, setIsMounted] = useState(false);
+    
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    // Check if we should show the 80% warning (once per day)
+    useEffect(() => {
+        if (isPro || percentage < 80 || percentage >= 100) {
+            setShowUpgradeBanner(false);
+            return;
+        }
+
+        const lastShown = localStorage.getItem('upgradeWarningLastShown');
+        const now = new Date().getTime();
+        const oneDay = 24 * 60 * 60 * 1000;
+
+        if (!lastShown || now - parseInt(lastShown) > oneDay) {
+            setShowUpgradeBanner(true);
+        }
+    }, [isPro, percentage]);
+
+    const handleDismissUpgradeBanner = useCallback(() => {
+        setShowUpgradeBanner(false);
+        localStorage.setItem('upgradeWarningLastShown', new Date().getTime().toString());
+    }, []);
+
+    const handleLimitBlocked = useCallback(() => {
+        setShowLimitModal(true);
+    }, []);
 
     // Load content when a file is selected
     useEffect(() => {
@@ -115,6 +154,8 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             lastSavedContent.current = newContent;
             setSaveStatus('saved');
             onContentSaved?.(selectedItem.id, newContent);
+            // Refresh subscription word count after save
+            refreshSubscription();
 
             // Reset to idle after 2 seconds
             setTimeout(() => {
@@ -261,8 +302,10 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
     }
 
     // File view - rich text editor
-    // Calculate statistics
-    const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+    // Calculate statistics - strip HTML tags before counting words
+    const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    const plainText = stripHtml(content);
+    const wordCount = plainText ? plainText.split(/\s+/).filter(Boolean).length : 0;
     const readingTime = Math.ceil(wordCount / 225); // 225 words per minute average
     const pageCount = (wordCount / 250).toFixed(1); // ~250 words per page
     
@@ -330,8 +373,30 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                     content={content}
                     onContentChange={handleContentChange}
                     placeholder="Start writing your story..."
+                    isAtLimit={isAtLimit}
+                    isPro={isPro}
+                    onLimitBlocked={handleLimitBlocked}
                 />
             </div>
+
+            {/* Show upgrade warning at 80%+ usage - rendered via portal */}
+            {isMounted && !isPro && percentage >= 80 && percentage < 100 && showUpgradeBanner && createPortal(
+                <UpgradePrompt 
+                    type="banner" 
+                    percentage={Math.round(percentage)} 
+                    onClose={handleDismissUpgradeBanner}
+                />,
+                document.body
+            )}
+
+            {/* Show limit modal when user tries to type at 100% - rendered via portal */}
+            {isMounted && showLimitModal && createPortal(
+                <UpgradePrompt 
+                    type="modal" 
+                    onClose={() => setShowLimitModal(false)}
+                />,
+                document.body
+            )}
 
             {isFullscreen && (
                 <button
