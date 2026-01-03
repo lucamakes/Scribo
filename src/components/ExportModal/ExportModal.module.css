@@ -227,6 +227,16 @@
   line-height: 1.5;
 }
 
+.error {
+  padding: 12px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 14px;
+  margin-top: 16px;
+}
+
 .footer {
   display: flex;
   align-items: center;

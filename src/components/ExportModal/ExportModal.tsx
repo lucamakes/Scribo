@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Download, FileText, File } from 'lucide-react';
+import { X, Download, FileText } from 'lucide-react';
 import styles from './ExportModal.module.css';
+import { itemService } from '@/lib/services/itemService';
+import { exportProject, type ExportFormat } from '@/lib/services/exportService';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -11,18 +13,18 @@ interface ExportModalProps {
   projectId: string;
 }
 
-type ExportFormat = 'docx' | 'pdf' | 'txt' | 'md' | 'html';
-
 export function ExportModal({ isOpen, onClose, projectName, projectId }: ExportModalProps) {
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('docx');
   const [includeStructure, setIncludeStructure] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const formats: { value: ExportFormat; label: string; description: string }[] = [
     { value: 'docx', label: 'Word Document (.docx)', description: 'Compatible with Microsoft Word' },
     { value: 'pdf', label: 'PDF Document (.pdf)', description: 'Universal format for sharing' },
+    { value: 'epub', label: 'EPUB (.epub)', description: 'E-book format for readers' },
     { value: 'txt', label: 'Plain Text (.txt)', description: 'Simple text file' },
     { value: 'md', label: 'Markdown (.md)', description: 'Formatted text with markdown syntax' },
     { value: 'html', label: 'HTML (.html)', description: 'Web page format' },
@@ -30,29 +32,31 @@ export function ExportModal({ isOpen, onClose, projectName, projectId }: ExportM
 
   const handleExport = async () => {
     setExporting(true);
+    setError(null);
     
     try {
-      // TODO: Implement actual export logic
-      // This would call an API endpoint that:
-      // 1. Fetches all items in the project
-      // 2. Combines them based on includeStructure setting
-      // 3. Converts to the selected format
-      // 4. Returns a downloadable file
+      // Fetch all items in the project
+      const result = await itemService.getByProject(projectId);
       
-      console.log('Exporting project:', {
+      if (!result.success) {
+        throw new Error('error' in result ? result.error : 'Failed to fetch project items');
+      }
+
+      const items = result.data;
+
+      // Export the project
+      await exportProject({
         projectId,
         projectName,
+        items,
         format: selectedFormat,
         includeStructure,
       });
-
-      // Simulate export delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // For now, just close the modal
       onClose();
-    } catch (error) {
-      console.error('Export failed:', error);
+    } catch (err) {
+      console.error('Export failed:', err);
+      setError(err instanceof Error ? err.message : 'Export failed. Please try again.');
     } finally {
       setExporting(false);
     }
@@ -118,6 +122,12 @@ export function ExportModal({ isOpen, onClose, projectName, projectId }: ExportM
               When enabled, folder names will be added as section headings in the exported document
             </p>
           </div>
+
+          {error && (
+            <div className={styles.error}>
+              {error}
+            </div>
+          )}
         </div>
 
         <footer className={styles.footer}>

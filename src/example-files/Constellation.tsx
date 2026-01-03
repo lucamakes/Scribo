@@ -176,10 +176,19 @@ export default function Constellation({
           <ul className={styles.infoList}>
             <li><strong>Navigate:</strong> Click folders to explore deeper levels</li>
             <li><strong>Open files:</strong> Click file orbs to open them in the editor</li>
-            <li><strong>Zoom:</strong> Use mouse wheel or zoom buttons</li>
-            <li><strong>Pan:</strong> Click and drag to move around</li>
             <li><strong>Go back:</strong> Click the center orb or use breadcrumbs</li>
           </ul>
+          <h4 className={styles.infoSubtitle}>Controls</h4>
+          <ul className={styles.infoList}>
+            <li><span className={styles.infoIcon}><CircleDot size={14} strokeWidth={1.5} /></span> <strong>Simplify view:</strong> Show only 2 orbits for cleaner look</li>
+            <li><span className={styles.infoIcon}><Orbit size={14} strokeWidth={1.5} /></span> <strong>Show all orbits:</strong> Display all orbital rings</li>
+            <li><span className={styles.infoIcon}><ZoomIn size={14} strokeWidth={1.5} /></span> <strong>Zoom in:</strong> Get a closer look (or use mouse wheel)</li>
+            <li><span className={styles.infoIcon}><ZoomOut size={14} strokeWidth={1.5} /></span> <strong>Zoom out:</strong> See more of the view</li>
+            <li><span className={styles.infoIcon}><RotateCcw size={14} strokeWidth={1.5} /></span> <strong>Reset view:</strong> Return to default zoom and position</li>
+          </ul>
+          <p className={styles.infoText}>
+            <strong>Tip:</strong> Click and drag anywhere to pan around the constellation.
+          </p>
         </div>
       )}
 
