@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
 import { Sparkles, FileText, Telescope, Download, ArrowRight, Check } from 'lucide-react';
+import FeedbackSection from '@/components/FeedbackSection/FeedbackSection';
+import FAQSection from '@/components/FAQSection/FAQSection';
 import styles from './page.module.css';
 
 /**
@@ -174,6 +176,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Feedback */}
+      <FeedbackSection />
+
+      {/* FAQ */}
+      <FAQSection />
 
       {/* Footer */}
       <footer className={styles.footer}>

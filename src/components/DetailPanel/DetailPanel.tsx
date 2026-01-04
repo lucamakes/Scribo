@@ -7,6 +7,7 @@ import { itemService } from '@/lib/services/itemService';
 import { TiptapEditor } from '@/components/TiptapEditor/TiptapEditor';
 import { UpgradePrompt } from '@/components/UpgradePrompt/UpgradePrompt';
 import { useSubscription } from '@/lib/hooks/useSubscription';
+import { usePreferences } from '@/lib/hooks/usePreferences';
 import {
     Folder,
     FileText,
@@ -55,6 +56,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
     const selectedItemIdRef = useRef<string | null>(null);
     
     const { isPro, percentage, isAtLimit, refresh: refreshSubscription } = useSubscription();
+    const { fontSize, lineHeight, textColor } = usePreferences();
 
     // Track if component is mounted (for portal)
     const [isMounted, setIsMounted] = useState(false);
@@ -377,6 +379,9 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                     isPro={isPro}
                     onLimitBlocked={handleLimitBlocked}
                     focusMode={isFocusMode}
+                    fontSize={fontSize}
+                    lineHeight={lineHeight}
+                    textColor={textColor}
                 />
             </div>
 

@@ -23,8 +23,18 @@ export interface UserRow {
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
   subscription_end_date: string | null;
+  preferences: UserPreferences | null;
   created_at: string;
   updated_at: string;
+}
+
+/**
+ * User preferences stored as JSONB
+ */
+export interface UserPreferences {
+  fontSize?: number;
+  lineHeight?: number;
+  textColor?: string;
 }
 
 /**

@@ -39,6 +39,12 @@ interface TiptapEditorProps {
     onLimitBlocked?: () => void;
     /** Whether focus mode is active (hides toolbar) */
     focusMode?: boolean;
+    /** Font size in pixels */
+    fontSize?: number;
+    /** Line height multiplier */
+    lineHeight?: number;
+    /** Text color */
+    textColor?: string;
 }
 
 /**
@@ -52,7 +58,10 @@ export function TiptapEditor({
     isAtLimit = false,
     isPro = false,
     onLimitBlocked,
-    focusMode = false
+    focusMode = false,
+    fontSize = 18,
+    lineHeight = 2.0,
+    textColor = '#4a4a4a'
 }: TiptapEditorProps) {
     const isInitialMount = useRef(true);
     const previousContent = useRef(content);
@@ -292,7 +301,10 @@ export function TiptapEditor({
             </div>
 
             {/* Editor Content */}
-            <div className={`${styles.editorWrapper} ${focusMode ? styles.editorWrapperFocusMode : ''}`}>
+            <div 
+                className={`${styles.editorWrapper} ${focusMode ? styles.editorWrapperFocusMode : ''}`}
+                style={{ fontSize: `${fontSize}px`, lineHeight, color: textColor }}
+            >
                 <EditorContent editor={editor} />
             </div>
         </div>

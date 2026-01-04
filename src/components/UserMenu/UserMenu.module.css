@@ -212,6 +212,20 @@
     background: #fafafa;
     border: 1px solid #e5e5e5;
     border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.settingItem:last-of-type {
+    margin-bottom: 0;
+}
+
+.previewText {
+    margin-top: 16px;
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    font-family: var(--font-hanken-grotesk), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .settingLabel {

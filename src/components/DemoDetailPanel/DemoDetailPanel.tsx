@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
 import { TiptapEditor } from '@/components/TiptapEditor/TiptapEditor';
+import { usePreferences } from '@/lib/hooks/usePreferences';
 import {
   Lightbulb,
   Check,
@@ -36,6 +37,8 @@ export function DemoDetailPanel({
   const lastSavedContent = useRef('');
   const selectedItemIdRef = useRef<string | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const { fontSize, lineHeight, textColor } = usePreferences();
 
   // Load content when file is selected
   useEffect(() => {
@@ -230,6 +233,9 @@ export function DemoDetailPanel({
           isPro={true}
           onLimitBlocked={() => {}}
           focusMode={isFocusMode}
+          fontSize={fontSize}
+          lineHeight={lineHeight}
+          textColor={textColor}
         />
       </div>
 

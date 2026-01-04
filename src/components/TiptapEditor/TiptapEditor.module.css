@@ -121,9 +121,6 @@
 
 .editorContent {
     outline: none;
-    color: #1a1a1a;
-    font-size: 15px;
-    line-height: 1.7;
     min-height: 100%;
     text-align: left;
 }
@@ -173,7 +170,6 @@
 .editor :global(.tiptap h1) {
     font-size: 2em;
     font-weight: 700;
-    color: #1a1a1a;
     margin: 1em 0 0.5em 0;
     letter-spacing: -0.02em;
     text-align: left;
@@ -182,7 +178,6 @@
 .editor :global(.tiptap h2) {
     font-size: 1.5em;
     font-weight: 600;
-    color: #1a1a1a;
     margin: 1em 0 0.5em 0;
     letter-spacing: -0.01em;
     text-align: left;
@@ -191,14 +186,12 @@
 .editor :global(.tiptap h3) {
     font-size: 1.25em;
     font-weight: 600;
-    color: #1a1a1a;
     margin: 1em 0 0.5em 0;
     text-align: left;
 }
 
 .editor :global(.tiptap strong) {
     font-weight: 600;
-    color: #1a1a1a;
 }
 
 .editor :global(.tiptap em) {

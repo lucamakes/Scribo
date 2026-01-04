@@ -1,0 +1,194 @@
+.section {
+  padding: 80px 20px;
+  background: #fafafa;
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 8px 0;
+  color: #111;
+}
+
+.subtitle {
+  font-size: 16px;
+  text-align: center;
+  color: #666;
+  margin: 0 0 40px 0;
+}
+
+.loading {
+  text-align: center;
+  color: #666;
+  padding: 40px;
+}
+
+.feedbackList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.emptyState svg {
+  margin: 0 auto 16px;
+  opacity: 0.3;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.feedbackItem {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.feedbackItem:hover {
+  border-color: #d4d4d4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.voteButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: #f5f5f5;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 50px;
+  height: fit-content;
+}
+
+.voteButton:hover {
+  background: #ebebeb;
+  border-color: #d4d4d4;
+}
+
+.voteButton.voted {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: white;
+}
+
+.voteButton svg {
+  flex-shrink: 0;
+}
+
+.voteButton span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.feedbackContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.feedbackHeader {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.typeBadge,
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.typeBadge svg,
+.statusBadge svg {
+  flex-shrink: 0;
+}
+
+.feedbackTitle {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0;
+  color: #111;
+  line-height: 1.4;
+}
+
+.viewAllButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 24px;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.viewAllButton:hover {
+  background: #fafafa;
+  border-color: #d4d4d4;
+}
+
+.viewAllButton svg {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 60px 20px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+  }
+
+  .feedbackItem {
+    padding: 16px;
+  }
+
+  .voteButton {
+    padding: 6px 10px;
+    min-width: 45px;
+  }
+
+  .feedbackTitle {
+    font-size: 14px;
+  }
+}

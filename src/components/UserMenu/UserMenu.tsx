@@ -4,6 +4,10 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useSubscription } from '@/lib/hooks/useSubscription';
+import { usePreferences } from '@/lib/hooks/usePreferences';
+import { FontSizeControl } from '@/components/FontSizeControl/FontSizeControl';
+import { LineHeightControl } from '@/components/LineHeightControl/LineHeightControl';
+import { TextColorControl } from '@/components/TextColorControl/TextColorControl';
 import { User, Settings, X, Sparkles, CreditCard, MessageSquare } from 'lucide-react';
 import styles from './UserMenu.module.css';
 
@@ -13,6 +17,7 @@ import styles from './UserMenu.module.css';
 export function UserMenu() {
     const { user, signOut } = useAuth();
     const { isPro, wordCount, wordLimit, percentage, isLoading: subLoading } = useSubscription();
+    const { fontSize, setFontSize, lineHeight, setLineHeight, textColor, setTextColor } = usePreferences();
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
@@ -185,6 +190,41 @@ export function UserMenu() {
                             </button>
                         </div>
                         <div className={styles.modalContent}>
+                            <div className={styles.settingSection}>
+                                <h3 className={styles.sectionTitle}>Editor</h3>
+                                <div className={styles.settingItem}>
+                                    <span className={styles.settingLabel}>Font Size</span>
+                                    <FontSizeControl 
+                                        fontSize={fontSize}
+                                        onFontSizeChange={setFontSize}
+                                    />
+                                </div>
+                                <div className={styles.settingItem}>
+                                    <span className={styles.settingLabel}>Line Height</span>
+                                    <LineHeightControl 
+                                        lineHeight={lineHeight}
+                                        onLineHeightChange={setLineHeight}
+                                    />
+                                </div>
+                                <div className={styles.settingItem}>
+                                    <span className={styles.settingLabel}>Text Color</span>
+                                    <TextColorControl 
+                                        textColor={textColor}
+                                        onTextColorChange={setTextColor}
+                                    />
+                                </div>
+                                <div 
+                                    className={styles.previewText}
+                                    style={{ 
+                                        fontSize: `${fontSize}px`, 
+                                        lineHeight, 
+                                        color: textColor 
+                                    }}
+                                >
+                                    The quick brown fox jumps over the lazy dog. This is how your text will appear in the editor.
+                                </div>
+                            </div>
+
                             <div className={styles.settingSection}>
                                 <h3 className={styles.sectionTitle}>Account</h3>
                                 <div className={styles.settingItem}>
