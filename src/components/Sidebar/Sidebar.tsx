@@ -8,7 +8,7 @@ import { SidebarItem } from './SidebarItem/SidebarItem';
 import { TrashPanel } from '@/components/TrashPanel/TrashPanel';
 import { ExportModal } from '@/components/ExportModal/ExportModal';
 import styles from './Sidebar.module.css';
-import { Telescope, Trash2, ArrowLeft, Download, Search, X, Folder, File } from 'lucide-react';
+import { Telescope, Trash2, ArrowLeft, Download, Search, X, Folder, File, Layout } from 'lucide-react';
 
 
 
@@ -43,7 +43,7 @@ function getChildren(items: SidebarItemData[], parentId: string | null): Sidebar
  * Maps null parent_id to ROOT_ID for UI consistency.
  */
 function dbItemToSidebarItem(
-  dbItem: { id: string; name: string; type: 'file' | 'folder'; parent_id: string | null; content: string; sort_order: number; created_at: string; updated_at: string },
+  dbItem: { id: string; name: string; type: 'file' | 'folder' | 'canvas'; parent_id: string | null; content: string; sort_order: number; created_at: string; updated_at: string },
   rootId: string
 ): SidebarItemData {
   const baseItem = {
@@ -57,11 +57,17 @@ function dbItemToSidebarItem(
     updatedAt: dbItem.updated_at,
   };
 
-  // Use discriminated union: files require content, folders have optional content
+  // Use discriminated union: files and canvas require content, folders have optional content
   if (dbItem.type === 'file') {
     return {
       ...baseItem,
       type: 'file',
+      content: dbItem.content ?? '',
+    };
+  } else if (dbItem.type === 'canvas') {
+    return {
+      ...baseItem,
+      type: 'canvas',
       content: dbItem.content ?? '',
     };
   } else {
@@ -138,7 +144,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
       .filter(item => item.id !== ROOT_ID)
       .map(item => {
         const nameMatch = item.name.toLowerCase().includes(query);
-        const content = item.type === 'file' && 'content' in item ? (item.content || '') : '';
+        const content = (item.type === 'file' || item.type === 'canvas') && 'content' in item ? (item.content || '') : '';
         const contentMatch = content.toLowerCase().includes(query);
         
         // Get content snippet around the match
@@ -314,10 +320,12 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
     // Convert ROOT_ID to null for database
     const dbParentId = uiParentIdToDb(parentId, ROOT_ID);
 
+    const defaultName = type === 'folder' ? 'New Folder' : type === 'canvas' ? 'New Canvas' : 'New File';
+
     const result = await itemService.create(
       project.id,
       dbParentId,
-      type === 'folder' ? 'New Folder' : 'New File',
+      defaultName,
       type
     );
 
@@ -341,8 +349,8 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
 
 
   const handleSelect = useCallback(async (item: SidebarItemData) => {
-    // For files, fetch fresh content from database to ensure we have latest saved content
-    if (item.type === 'file') {
+    // For files and canvas, fetch fresh content from database to ensure we have latest saved content
+    if (item.type === 'file' || item.type === 'canvas') {
       const result = await itemService.getById(item.id);
       if (result.success) {
         const freshItem = dbItemToSidebarItem(result.data as any, ROOT_ID);
@@ -607,16 +615,18 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
                           key={item.id}
                           className={styles.searchResultItem}
                           onClick={() => {
-                            if (item.type === 'file') {
+                            if (item.type === 'file' || item.type === 'canvas') {
                               actions.onSelect(item);
                               setShowSearch(false);
                               setSearchQuery('');
                             }
                           }}
                         >
-                          <div className={`${styles.resultIcon} ${item.type === 'folder' ? styles.resultFolderIcon : styles.resultFileIcon}`}>
+                          <div className={`${styles.resultIcon} ${item.type === 'folder' ? styles.resultFolderIcon : item.type === 'canvas' ? styles.resultCanvasIcon : styles.resultFileIcon}`}>
                             {item.type === 'folder' ? (
                               <Folder size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
+                            ) : item.type === 'canvas' ? (
+                              <Layout size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
                             ) : (
                               <File size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
                             )}

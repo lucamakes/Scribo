@@ -6,7 +6,7 @@
 /**
  * Item type enum matching database enum
  */
-export type ItemType = 'file' | 'folder';
+export type ItemType = 'file' | 'folder' | 'canvas';
 
 /**
  * Subscription status enum

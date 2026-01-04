@@ -147,6 +147,10 @@
   color: #3b82f6;
 }
 
+.canvasIcon {
+  color: #8b5cf6;
+}
+
 /* Root folder icon is red */
 .rootItem .icon {
   color: #ef4444;

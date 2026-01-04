@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useDemo } from '@/lib/context/DemoContext';
 import type { SidebarItem as SidebarItemData, SidebarItemType, ItemActions, DropPosition } from '@/types/sidebar';
 import { SidebarItem } from '@/components/Sidebar/SidebarItem/SidebarItem';
-import { Telescope, LogIn, Search, X, Folder, File } from 'lucide-react';
+import { Telescope, LogIn, Search, X, Folder, File, Layout } from 'lucide-react';
 import styles from '@/components/Sidebar/Sidebar.module.css';
 
 interface DemoSidebarProps {
@@ -43,16 +43,24 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
 
   // Convert items to SidebarItem format
   const items: SidebarItemData[] = useMemo(() => {
-    return rawItems.map(item => ({
-      id: item.id,
-      name: item.name,
-      type: item.type,
-      parentId: item.parent_id === null ? ROOT_ID : item.parent_id,
-      content: item.content,
-      order: item.sort_order,
-      createdAt: item.created_at,
-      updatedAt: item.updated_at,
-    }));
+    return rawItems.map(item => {
+      const baseItem = {
+        id: item.id,
+        name: item.name,
+        parentId: item.parent_id === null ? ROOT_ID : item.parent_id,
+        order: item.sort_order,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+      };
+      
+      if (item.type === 'file') {
+        return { ...baseItem, type: 'file' as const, content: item.content };
+      } else if (item.type === 'canvas') {
+        return { ...baseItem, type: 'canvas' as const, content: item.content };
+      } else {
+        return { ...baseItem, type: 'folder' as const, content: item.content };
+      }
+    });
   }, [rawItems]);
 
   const toggleExpanded = useCallback((id: string) => {
@@ -75,7 +83,7 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
       .filter(item => item.id !== ROOT_ID)
       .map(item => {
         const nameMatch = item.name.toLowerCase().includes(query);
-        const content = item.type === 'file' ? (item.content || '') : '';
+        const content = (item.type === 'file' || item.type === 'canvas') ? (item.content || '') : '';
         const contentMatch = content.toLowerCase().includes(query);
         let snippet = '';
         if (contentMatch && content) {
@@ -136,7 +144,8 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
 
   const handleAdd = useCallback((parentId: string, type: SidebarItemType) => {
     const dbParentId = parentId === ROOT_ID ? null : parentId;
-    const newItem = createItem(dbParentId, type === 'folder' ? 'New Folder' : 'New File', type);
+    const defaultName = type === 'folder' ? 'New Folder' : type === 'canvas' ? 'New Canvas' : 'New File';
+    const newItem = createItem(dbParentId, defaultName, type);
     
     if (!expandedIds.has(parentId)) {
       setExpandedIds(prev => new Set([...prev, parentId]));
@@ -308,16 +317,18 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
                           key={item.id}
                           className={styles.searchResultItem}
                           onClick={() => {
-                            if (item.type === 'file') {
+                            if (item.type === 'file' || item.type === 'canvas') {
                               actions.onSelect(item);
                               setShowSearch(false);
                               setSearchQuery('');
                             }
                           }}
                         >
-                          <div className={`${styles.resultIcon} ${item.type === 'folder' ? styles.resultFolderIcon : styles.resultFileIcon}`}>
+                          <div className={`${styles.resultIcon} ${item.type === 'folder' ? styles.resultFolderIcon : item.type === 'canvas' ? styles.resultCanvasIcon : styles.resultFileIcon}`}>
                             {item.type === 'folder' ? (
                               <Folder size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
+                            ) : item.type === 'canvas' ? (
+                              <Layout size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
                             ) : (
                               <File size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
                             )}

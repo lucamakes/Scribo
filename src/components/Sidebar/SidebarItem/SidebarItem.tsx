@@ -24,7 +24,7 @@ interface SidebarItemProps {
 }
 
 // Icons
-import { Folder, File, ChevronRight, Pencil, X, Plus } from 'lucide-react';
+import { Folder, File, ChevronRight, Pencil, X, Plus, Layout } from 'lucide-react';
 
 /**
  * Sidebar item with updated styling matches.
@@ -154,6 +154,12 @@ export function SidebarItem({
     setShowAddMenu(false);
   }, [actions, item.id]);
 
+  const handleAddCanvas = useCallback((e: MouseEvent) => {
+    e.stopPropagation();
+    actions.onAdd(item.id, 'canvas');
+    setShowAddMenu(false);
+  }, [actions, item.id]);
+
   const getDropClass = () => {
     if (!dropPosition) return '';
     if (isRoot && dropPosition !== 'inside') return '';
@@ -190,9 +196,11 @@ export function SidebarItem({
             )}
           </span>
 
-          <span className={`${styles.icon} ${item.type === 'folder' ? styles.folderIcon : styles.fileIcon}`}>
+          <span className={`${styles.icon} ${item.type === 'folder' ? styles.folderIcon : item.type === 'canvas' ? styles.canvasIcon : styles.fileIcon}`}>
             {item.type === 'folder'
               ? <Folder size={14} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
+              : item.type === 'canvas'
+              ? <Layout size={14} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
               : <File size={14} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
             }
           </span>
@@ -238,6 +246,9 @@ export function SidebarItem({
                 <div className={styles.addMenu}>
                   <button onClick={handleAddFile} className={styles.menuItem}>
                     <File size={14} strokeWidth={1.5} /> New File
+                  </button>
+                  <button onClick={handleAddCanvas} className={styles.menuItem}>
+                    <Layout size={14} strokeWidth={1.5} /> New Canvas
                   </button>
                   <button onClick={handleAddFolder} className={styles.menuItem}>
                     <Folder size={14} strokeWidth={1.5} /> New Folder

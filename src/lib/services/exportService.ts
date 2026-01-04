@@ -110,6 +110,7 @@ function htmlToMarkdown(html: string): string {
 
 /**
  * Flatten tree to ordered content array
+ * Note: Canvas items are skipped as their JSON content is not suitable for text export
  */
 function flattenTreeToContent(
   items: (ItemRow & { children?: ItemRow[] })[],
@@ -126,9 +127,11 @@ function flattenTreeToContent(
       if (item.children && item.children.length > 0) {
         result.push(...flattenTreeToContent(item.children, includeStructure, depth + 1));
       }
-    } else {
+    } else if (item.type === 'file') {
+      // Only include file items, skip canvas items
       result.push({ name: item.name, content: item.content || '', type: 'file', depth });
     }
+    // Canvas items are intentionally skipped as their JSON content is not suitable for text export
   });
 
   return result;

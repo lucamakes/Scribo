@@ -1,8 +1,8 @@
 /**
- * Represents a file or folder item in the sidebar.
+ * Represents a file, folder, or canvas item in the sidebar.
  * Structure mirrors typical database schema with foreign key relationships.
  */
-export type SidebarItemType = 'file' | 'folder';
+export type SidebarItemType = 'file' | 'folder' | 'canvas';
 
 /**
  * Base properties shared by both files and folders
@@ -41,9 +41,18 @@ interface FolderSidebarItem extends BaseSidebarItem {
 }
 
 /**
+ * Canvas item with JSON content for fabric.js
+ */
+interface CanvasSidebarItem extends BaseSidebarItem {
+  type: 'canvas';
+  /** Canvas content (fabric.js JSON) */
+  content: string;
+}
+
+/**
  * Discriminated union for sidebar items
  */
-export type SidebarItem = FileSidebarItem | FolderSidebarItem;
+export type SidebarItem = FileSidebarItem | FolderSidebarItem | CanvasSidebarItem;
 
 /**
  * Drop position relative to target element

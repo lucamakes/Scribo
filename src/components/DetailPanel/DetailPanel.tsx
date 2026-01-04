@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
 import { itemService } from '@/lib/services/itemService';
 import { TiptapEditor } from '@/components/TiptapEditor/TiptapEditor';
+import { CanvasEditor } from '@/components/CanvasEditor';
 import { UpgradePrompt } from '@/components/UpgradePrompt/UpgradePrompt';
 import { useSubscription } from '@/lib/hooks/useSubscription';
 import { usePreferences } from '@/lib/hooks/usePreferences';
@@ -90,10 +91,10 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
         setShowLimitModal(true);
     }, []);
 
-    // Load content when a file is selected
+    // Load content when a file or canvas is selected
     useEffect(() => {
-        if (selectedItem?.type === 'file') {
-            // Only reset content if we're switching to a different file
+        if (selectedItem?.type === 'file' || selectedItem?.type === 'canvas') {
+            // Only reset content if we're switching to a different item
             if (selectedItemIdRef.current !== selectedItem.id) {
                 setContent(selectedItem.content || '');
                 lastSavedContent.current = selectedItem.content || '';
@@ -111,7 +112,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
 
     // Handle fullscreen request when opening from Constellation
     useEffect(() => {
-        if (openInFullscreen && selectedItem?.type === 'file') {
+        if (openInFullscreen && (selectedItem?.type === 'file' || selectedItem?.type === 'canvas')) {
             setIsFullscreen(true);
             // Notify parent that fullscreen has been opened so it can reset the flag
             onFullscreenOpened?.();
@@ -144,7 +145,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
 
     // Auto-save with debounce
     const saveContent = useCallback(async (newContent: string) => {
-        if (!selectedItem || selectedItem.type !== 'file') return;
+        if (!selectedItem || (selectedItem.type !== 'file' && selectedItem.type !== 'canvas')) return;
         if (newContent === lastSavedContent.current) return;
 
         setSaveStatus('saving');
@@ -298,6 +299,85 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                             Hover over items in the sidebar to reveal buttons for renaming, deleting, or adding subfolders.
                         </p>
                     </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Canvas view
+    if (selectedItem.type === 'canvas') {
+        const canvasContent = (
+            <>
+                <div className={styles.canvasHeader}>
+                    <h2 className={styles.fileName}>
+                        {selectedItem.name.length > 25 
+                            ? selectedItem.name.slice(0, 25) + '...' 
+                            : selectedItem.name}
+                    </h2>
+                    <div className={styles.canvasHeaderRight}>
+                        <button
+                            onClick={() => saveContent(content)}
+                            className={`${styles.saveButton} ${content === lastSavedContent.current ? styles.saved : styles.unsaved}`}
+                            disabled={saveStatus === 'saving' || content === lastSavedContent.current}
+                            title={content === lastSavedContent.current ? 'All changes saved' : 'Save now'}
+                        >
+                            {content === lastSavedContent.current ? (
+                                <Check size={16} strokeWidth={2} />
+                            ) : (
+                                <div className={styles.unsavedDot} />
+                            )}
+                        </button>
+                        <button
+                            onClick={onBackToMaster}
+                            className={styles.mobileCloseButton}
+                            title="Back to files"
+                        >
+                            <X size={18} strokeWidth={1.5} />
+                        </button>
+                        <button
+                            onClick={toggleFullscreen}
+                            className={styles.fullscreenButton}
+                            title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
+                        >
+                            {isFullscreen ? <Minimize2 size={18} strokeWidth={1} /> : <Maximize2 size={18} strokeWidth={1} />}
+                        </button>
+                    </div>
+                </div>
+                {error && (
+                    <div className={styles.errorBanner}>
+                        <span><AlertTriangle size={16} strokeWidth={1} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> {error}</span>
+                    </div>
+                )}
+                <div className={styles.canvasContainer}>
+                    <CanvasEditor
+                        content={content}
+                        onContentChange={handleContentChange}
+                    />
+                </div>
+            </>
+        );
+
+        if (isFullscreen) {
+            return (
+                <div className={styles.fullscreenOverlay}>
+                    <div className={styles.fullscreenCanvas}>
+                        {canvasContent}
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className={styles.panel}>
+                <button
+                    onClick={onBackToMaster}
+                    className={styles.mobileBackButton}
+                    aria-label="Back to files"
+                >
+                    <X size={20} strokeWidth={1.5} />
+                </button>
+                <div className={styles.canvasView}>
+                    {canvasContent}
                 </div>
             </div>
         );
