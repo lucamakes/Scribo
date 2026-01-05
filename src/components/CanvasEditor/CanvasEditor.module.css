@@ -2,7 +2,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--bg-primary, #fafafa);
+  background: #fff;
+  position: relative;
 }
 
 .toolbar {
@@ -10,8 +11,9 @@
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--border-color, #e5e5e5);
-  background: var(--bg-secondary, #fff);
+  border-bottom: 1px solid #e5e5e5;
+  background: #fff;
+  z-index: 10;
 }
 
 .toolButton {
@@ -19,71 +21,146 @@
   align-items: center;
   gap: 4px;
   padding: 6px 12px;
-  border: 1px solid var(--border-color, #e5e5e5);
+  border: 1px solid #e5e5e5;
   border-radius: 6px;
-  background: var(--bg-primary, #fff);
-  color: var(--text-primary, #333);
+  background: #fff;
+  color: #333;
   font-size: 13px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.toolButton:hover {
-  background: var(--bg-hover, #f0f0f0);
+.toolButton:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+.toolButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .toolButton.active {
-  background: var(--accent-color, #6366f1);
+  background: #6366f1;
   color: white;
-  border-color: var(--accent-color, #6366f1);
+  border-color: #6366f1;
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background: #e5e5e5;
+  margin: 0 4px;
+}
+
+.spacer {
+  flex: 1;
 }
 
 .hint {
   font-size: 12px;
-  color: var(--text-secondary, #666);
+  color: #666;
   margin-left: 8px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.zoomLabel {
+  font-size: 12px;
+  color: #666;
+  min-width: 40px;
+  text-align: center;
+}
+
+.colorPicker {
+  position: absolute;
+  top: 56px;
+  left: 16px;
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 20;
+}
+
+.colorOption {
+  width: 24px;
+  height: 24px;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.colorOption:hover {
+  transform: scale(1.1);
+  border-color: #333;
 }
 
 .canvas {
   flex: 1;
   position: relative;
   overflow: hidden;
-  cursor: default;
+  background: #fff;
 }
 
-.connections {
+.canvasContent {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
+  transition: transform 0.1s ease-out;
+}
+
+.canvasContent > * {
+  pointer-events: auto;
+}
+
+.connections {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10000px;
+  height: 10000px;
+  pointer-events: none;
+  overflow: visible;
 }
 
 .connectionLine {
-  stroke: var(--border-color, #ccc);
+  stroke: #888;
   stroke-width: 2;
+  stroke-linecap: round;
 }
 
 .node {
   position: absolute;
   min-width: 120px;
+  max-width: 200px;
   padding: 10px 16px;
-  background: var(--bg-secondary, #fff);
-  border: 2px solid var(--border-color, #e5e5e5);
+  background: #fff;
+  border: 2px solid transparent;
   border-radius: 8px;
   cursor: grab;
   user-select: none;
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .node:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .node.selected {
-  border-color: var(--accent-color, #6366f1);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2), 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .node.connecting {
@@ -97,7 +174,8 @@
 
 .nodeText {
   font-size: 14px;
-  color: var(--text-primary, #333);
+  color: #333;
+  word-break: break-word;
 }
 
 .nodeInput {
@@ -105,8 +183,13 @@
   border: none;
   background: transparent;
   font-size: 14px;
-  color: var(--text-primary, #333);
+  color: #333;
   outline: none;
+  font-family: inherit;
+}
+
+.nodeInput::placeholder {
+  color: #999;
 }
 
 .emptyState {
@@ -115,6 +198,47 @@
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  color: var(--text-secondary, #888);
+  color: #888;
   font-size: 14px;
+  pointer-events: none;
+}
+
+.emptyHint {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 8px;
+}
+
+.shortcuts {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #666;
+}
+
+.shortcuts span {
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .toolbar {
+    padding: 8px 12px;
+    flex-wrap: wrap;
+  }
+  
+  .shortcuts {
+    display: none;
+  }
+  
+  .node {
+    min-width: 100px;
+  }
 }

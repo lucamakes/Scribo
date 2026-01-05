@@ -322,49 +322,70 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             }, 1500);
         };
 
-        return (
-            <div className={styles.panel}>
-                <div className={styles.canvasView}>
-                    <div className={styles.canvasHeader}>
-                        <h2 className={styles.fileName}>
-                            {selectedItem.name.length > 25 
-                                ? selectedItem.name.slice(0, 25) + '...' 
-                                : selectedItem.name}
-                        </h2>
-                        <div className={styles.canvasHeaderRight}>
-                            <button
-                                onClick={() => saveContent(content)}
-                                className={`${styles.saveButton} ${content === lastSavedContent.current ? styles.saved : styles.unsaved}`}
-                                disabled={saveStatus === 'saving' || content === lastSavedContent.current}
-                                title={content === lastSavedContent.current ? 'All changes saved' : 'Save now'}
-                            >
-                                {content === lastSavedContent.current ? (
-                                    <Check size={16} strokeWidth={2} />
-                                ) : (
-                                    <div className={styles.unsavedDot} />
-                                )}
-                            </button>
-                            <button
-                                onClick={onBackToMaster}
-                                className={styles.mobileCloseButton}
-                                title="Back to files"
-                            >
-                                <X size={18} strokeWidth={1.5} />
-                            </button>
-                        </div>
-                    </div>
-                    {error && (
-                        <div className={styles.errorBanner}>
-                            <span><AlertTriangle size={16} strokeWidth={1} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> {error}</span>
-                        </div>
-                    )}
-                    <div className={styles.canvasContainer}>
-                        <CanvasEditor
-                            content={content}
-                            onContentChange={handleCanvasChange}
-                        />
+        const canvasContent = (
+            <div className={styles.canvasView}>
+                <div className={styles.canvasHeader}>
+                    <h2 className={styles.fileName}>
+                        {selectedItem.name.length > 25 
+                            ? selectedItem.name.slice(0, 25) + '...' 
+                            : selectedItem.name}
+                    </h2>
+                    <div className={styles.canvasHeaderRight}>
+                        <button
+                            onClick={() => saveContent(content)}
+                            className={`${styles.saveButton} ${content === lastSavedContent.current ? styles.saved : styles.unsaved}`}
+                            disabled={saveStatus === 'saving' || content === lastSavedContent.current}
+                            title={content === lastSavedContent.current ? 'All changes saved' : 'Save now'}
+                        >
+                            {content === lastSavedContent.current ? (
+                                <Check size={16} strokeWidth={2} />
+                            ) : (
+                                <div className={styles.unsavedDot} />
+                            )}
+                        </button>
+                        <button
+                            onClick={onBackToMaster}
+                            className={styles.mobileCloseButton}
+                            title="Back to files"
+                        >
+                            <X size={18} strokeWidth={1.5} />
+                        </button>
+                        <button
+                            onClick={toggleFullscreen}
+                            className={styles.fullscreenButton}
+                            title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
+                        >
+                            {isFullscreen ? <Minimize2 size={18} strokeWidth={1} /> : <Maximize2 size={18} strokeWidth={1} />}
+                        </button>
                     </div>
                 </div>
+                {error && (
+                    <div className={styles.errorBanner}>
+                        <span><AlertTriangle size={16} strokeWidth={1} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> {error}</span>
+                    </div>
+                )}
+                <div className={styles.canvasContainer}>
+                    <CanvasEditor
+                        content={content}
+                        onContentChange={handleCanvasChange}
+                    />
+                </div>
+            </div>
+        );
+
+        if (isFullscreen) {
+            return (
+                <div className={styles.fullscreenOverlay}>
+                    <div className={styles.fullscreenEditor}>
+                        {canvasContent}
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className={styles.panel}>
+                {canvasContent}
             </div>
         );
     }
