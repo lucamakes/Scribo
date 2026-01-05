@@ -56,7 +56,7 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
       if (item.type === 'file') {
         return { ...baseItem, type: 'file' as const, content: item.content };
       } else if (item.type === 'canvas') {
-        return { ...baseItem, type: 'canvas' as const, content: item.content };
+        return { ...baseItem, type: 'canvas' as const, content: item.content || '{"nodes":[],"connections":[]}' };
       } else {
         return { ...baseItem, type: 'folder' as const, content: item.content };
       }
@@ -83,7 +83,7 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
       .filter(item => item.id !== ROOT_ID)
       .map(item => {
         const nameMatch = item.name.toLowerCase().includes(query);
-        const content = (item.type === 'file' || item.type === 'canvas') ? (item.content || '') : '';
+        const content = (item.type === 'file') ? (item.content || '') : '';
         const contentMatch = content.toLowerCase().includes(query);
         let snippet = '';
         if (contentMatch && content) {
@@ -324,7 +324,7 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
                             }
                           }}
                         >
-                          <div className={`${styles.resultIcon} ${item.type === 'folder' ? styles.resultFolderIcon : item.type === 'canvas' ? styles.resultCanvasIcon : styles.resultFileIcon}`}>
+                          <div className={`${styles.resultIcon} ${item.type === 'folder' ? styles.resultFolderIcon : styles.resultFileIcon}`}>
                             {item.type === 'folder' ? (
                               <Folder size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
                             ) : item.type === 'canvas' ? (

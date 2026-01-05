@@ -1,29 +1,25 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { ZoomIn, ZoomOut, Trash2, Link2, Unlink } from 'lucide-react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { Plus, Trash2 } from 'lucide-react';
 import styles from './CanvasEditor.module.css';
 
-interface Note {
+export interface CanvasNode {
   id: string;
   x: number;
   y: number;
   text: string;
-  width: number;
-  color: string;
 }
 
-interface Connection {
+export interface CanvasConnection {
   id: string;
   from: string;
   to: string;
 }
 
-interface CanvasData {
-  notes: Note[];
-  connections: Connection[];
-  viewOffset: { x: number; y: number };
-  zoom: number;
+export interface CanvasData {
+  nodes: CanvasNode[];
+  connections: CanvasConnection[];
 }
 
 interface CanvasEditorProps {
@@ -31,402 +27,212 @@ interface CanvasEditorProps {
   onContentChange: (content: string) => void;
 }
 
-const COLORS = ['#fef3c7', '#dbeafe', '#dcfce7', '#fce7f3', '#f3e8ff', '#e0e7ff', '#ffffff'];
-
 function generateId(): string {
-  return `note-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+function parseCanvasData(content: string): CanvasData {
+  try {
+    const data = JSON.parse(content);
+    return {
+      nodes: data.nodes || [],
+      connections: data.connections || [],
+    };
+  } catch {
+    return { nodes: [], connections: [] };
+  }
 }
 
 export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [connections, setConnections] = useState<Connection[]>([]);
-  const [viewOffset, setViewOffset] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
-  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
-  const [isPanning, setIsPanning] = useState(false);
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-  const [draggedNote, setDraggedNote] = useState<string | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
-  const lastLoadedContentRef = useRef<string>('');
-  const isUserEditingRef = useRef(false);
+  const [data, setData] = useState<CanvasData>(() => parseCanvasData(content));
+  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  const [draggingNode, setDraggingNode] = useState<string | null>(null);
+  const [connecting, setConnecting] = useState<string | null>(null);
+  const [editingNode, setEditingNode] = useState<string | null>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const dragOffset = useRef({ x: 0, y: 0 });
 
-  // Load content when prop changes (from database)
+  // Sync content changes
   useEffect(() => {
-    // Skip if this is the same content we already loaded or if user is actively editing
-    if (content === lastLoadedContentRef.current || isUserEditingRef.current) return;
-    
-    lastLoadedContentRef.current = content;
-
-    if (content) {
-      try {
-        const data: CanvasData = JSON.parse(content);
-        setNotes(data.notes || []);
-        setConnections(data.connections || []);
-        setViewOffset(data.viewOffset || { x: 0, y: 0 });
-        setZoom(data.zoom || 1);
-      } catch {
-        // Invalid JSON, start fresh
-        setNotes([]);
-        setConnections([]);
-        setViewOffset({ x: 0, y: 0 });
-        setZoom(1);
-      }
-    } else {
-      // Empty content, start fresh
-      setNotes([]);
-      setConnections([]);
-      setViewOffset({ x: 0, y: 0 });
-      setZoom(1);
-    }
+    const newData = parseCanvasData(content);
+    setData(newData);
   }, [content]);
 
-  // Save content when data changes
-  const saveContent = useCallback(() => {
-    const data: CanvasData = { notes, connections, viewOffset, zoom };
-    const json = JSON.stringify(data);
-    lastLoadedContentRef.current = json; // Track what we're saving to avoid reload loop
-    onContentChange(json);
-  }, [notes, connections, viewOffset, zoom, onContentChange]);
+  const saveData = useCallback((newData: CanvasData) => {
+    setData(newData);
+    onContentChange(JSON.stringify(newData));
+  }, [onContentChange]);
 
-  // Mark user as editing when notes/connections change, then save
-  useEffect(() => {
-    // Only save if we have actually loaded content before (not on initial mount)
-    if (lastLoadedContentRef.current || notes.length > 0 || connections.length > 0) {
-      isUserEditingRef.current = true;
-      saveContent();
-      // Reset editing flag after a short delay
-      const timeout = setTimeout(() => {
-        isUserEditingRef.current = false;
-      }, 100);
-      return () => clearTimeout(timeout);
-    }
-  }, [notes, connections, saveContent]);
-
-  // Convert screen coords to canvas coords
-  const screenToCanvas = useCallback((screenX: number, screenY: number) => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return { x: 0, y: 0 };
-    return {
-      x: (screenX - rect.left - viewOffset.x) / zoom,
-      y: (screenY - rect.top - viewOffset.y) / zoom,
-    };
-  }, [viewOffset, zoom]);
-
-  // Double-click to create note
-  const handleDoubleClick = useCallback((e: React.MouseEvent) => {
-    if (e.target !== containerRef.current) return;
-    
-    const pos = screenToCanvas(e.clientX, e.clientY);
-    const newNote: Note = {
+  const addNode = useCallback(() => {
+    const newNode: CanvasNode = {
       id: generateId(),
-      x: pos.x - 75,
-      y: pos.y - 20,
-      text: '',
-      width: 150,
-      color: COLORS[0],
+      x: 150 + Math.random() * 200,
+      y: 150 + Math.random() * 200,
+      text: 'New idea',
     };
-    
-    setNotes(prev => [...prev, newNote]);
-    setEditingNoteId(newNote.id);
-    setSelectedNoteId(newNote.id);
-  }, [screenToCanvas]);
+    saveData({ ...data, nodes: [...data.nodes, newNode] });
+    setEditingNode(newNode.id);
+  }, [data, saveData]);
 
-  // Pan canvas
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.target === containerRef.current && e.button === 0) {
-      setIsPanning(true);
-      setPanStart({ x: e.clientX - viewOffset.x, y: e.clientY - viewOffset.y });
+  const deleteNode = useCallback((nodeId: string) => {
+    const newNodes = data.nodes.filter(n => n.id !== nodeId);
+    const newConnections = data.connections.filter(c => c.from !== nodeId && c.to !== nodeId);
+    saveData({ nodes: newNodes, connections: newConnections });
+    setSelectedNode(null);
+  }, [data, saveData]);
+
+  const updateNodeText = useCallback((nodeId: string, text: string) => {
+    const newNodes = data.nodes.map(n => n.id === nodeId ? { ...n, text } : n);
+    saveData({ ...data, nodes: newNodes });
+  }, [data, saveData]);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent, nodeId: string) => {
+    if (e.button !== 0) return;
+    e.stopPropagation();
+    
+    if (connecting) {
+      if (connecting !== nodeId) {
+        const connectionExists = data.connections.some(
+          c => (c.from === connecting && c.to === nodeId) || (c.from === nodeId && c.to === connecting)
+        );
+        if (!connectionExists) {
+          const newConnection: CanvasConnection = {
+            id: generateId(),
+            from: connecting,
+            to: nodeId,
+          };
+          saveData({ ...data, connections: [...data.connections, newConnection] });
+        }
+      }
+      setConnecting(null);
+      return;
     }
-  }, [viewOffset]);
+
+    const node = data.nodes.find(n => n.id === nodeId);
+    if (!node) return;
+
+    setSelectedNode(nodeId);
+    setDraggingNode(nodeId);
+    dragOffset.current = { x: e.clientX - node.x, y: e.clientY - node.y };
+  }, [connecting, data, saveData]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (isPanning) {
-      setViewOffset({
-        x: e.clientX - panStart.x,
-        y: e.clientY - panStart.y,
-      });
-    } else if (draggedNote) {
-      const pos = screenToCanvas(e.clientX, e.clientY);
-      setNotes(prev => prev.map(note =>
-        note.id === draggedNote
-          ? { ...note, x: pos.x - dragOffset.x, y: pos.y - dragOffset.y }
-          : note
-      ));
-    }
-  }, [isPanning, panStart, draggedNote, dragOffset, screenToCanvas]);
+    if (!draggingNode) return;
+    
+    const newX = e.clientX - dragOffset.current.x;
+    const newY = e.clientY - dragOffset.current.y;
+    
+    const newNodes = data.nodes.map(n => 
+      n.id === draggingNode ? { ...n, x: Math.max(0, newX), y: Math.max(0, newY) } : n
+    );
+    setData({ ...data, nodes: newNodes });
+  }, [draggingNode, data]);
 
   const handleMouseUp = useCallback(() => {
-    setIsPanning(false);
-    setDraggedNote(null);
-  }, []);
-
-  // Zoom with wheel
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    setZoom(prev => Math.min(Math.max(prev * delta, 0.25), 3));
-  }, []);
-
-  // Note drag start
-  const handleNoteDragStart = useCallback((e: React.MouseEvent, noteId: string) => {
-    e.stopPropagation();
-    const note = notes.find(n => n.id === noteId);
-    if (!note) return;
-    
-    const pos = screenToCanvas(e.clientX, e.clientY);
-    setDragOffset({ x: pos.x - note.x, y: pos.y - note.y });
-    setDraggedNote(noteId);
-    setSelectedNoteId(noteId);
-  }, [notes, screenToCanvas]);
-
-  // Update note text
-  const handleNoteTextChange = useCallback((noteId: string, text: string) => {
-    setNotes(prev => prev.map(note =>
-      note.id === noteId ? { ...note, text } : note
-    ));
-  }, []);
-
-  // Delete selected note
-  const deleteSelectedNote = useCallback(() => {
-    if (!selectedNoteId) return;
-    setNotes(prev => prev.filter(n => n.id !== selectedNoteId));
-    setConnections(prev => prev.filter(c => c.from !== selectedNoteId && c.to !== selectedNoteId));
-    setSelectedNoteId(null);
-  }, [selectedNoteId]);
-
-  // Change note color
-  const changeNoteColor = useCallback((color: string) => {
-    if (!selectedNoteId) return;
-    setNotes(prev => prev.map(note =>
-      note.id === selectedNoteId ? { ...note, color } : note
-    ));
-  }, [selectedNoteId]);
-
-  // Start connecting notes
-  const startConnecting = useCallback(() => {
-    if (selectedNoteId) {
-      setConnectingFrom(selectedNoteId);
+    if (draggingNode) {
+      onContentChange(JSON.stringify(data));
     }
-  }, [selectedNoteId]);
+    setDraggingNode(null);
+  }, [draggingNode, data, onContentChange]);
 
-  // Complete connection
-  const handleNoteClick = useCallback((e: React.MouseEvent, noteId: string) => {
-    e.stopPropagation();
-    
-    if (connectingFrom && connectingFrom !== noteId) {
-      // Check if connection already exists
-      const exists = connections.some(
-        c => (c.from === connectingFrom && c.to === noteId) ||
-             (c.from === noteId && c.to === connectingFrom)
-      );
-      
-      if (!exists) {
-        setConnections(prev => [...prev, {
-          id: generateId(),
-          from: connectingFrom,
-          to: noteId,
-        }]);
-      }
-      setConnectingFrom(null);
-    } else {
-      setSelectedNoteId(noteId);
-    }
-  }, [connectingFrom, connections]);
-
-  // Remove connections from selected note
-  const removeConnections = useCallback(() => {
-    if (!selectedNoteId) return;
-    setConnections(prev => prev.filter(c => c.from !== selectedNoteId && c.to !== selectedNoteId));
-  }, [selectedNoteId]);
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (editingNoteId) return;
-      
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        deleteSelectedNote();
-      } else if (e.key === 'Escape') {
-        setSelectedNoteId(null);
-        setConnectingFrom(null);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [editingNoteId, deleteSelectedNote]);
-
-  // Click outside to deselect
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === containerRef.current) {
-      setSelectedNoteId(null);
-      setConnectingFrom(null);
+    if (e.target === canvasRef.current) {
+      setSelectedNode(null);
+      setConnecting(null);
+      setEditingNode(null);
     }
   }, []);
 
-  // Get note center for connection lines
-  const getNoteCenter = (note: Note) => ({
-    x: note.x + note.width / 2,
-    y: note.y + 20,
-  });
+  const handleDoubleClick = useCallback((nodeId: string) => {
+    setEditingNode(nodeId);
+  }, []);
 
-  const selectedNote = notes.find(n => n.id === selectedNoteId);
+  const startConnecting = useCallback((nodeId: string) => {
+    setConnecting(nodeId);
+  }, []);
 
   return (
     <div className={styles.container}>
       <div className={styles.toolbar}>
-        <div className={styles.hint}>
-          Double-click to add a note • Drag notes to move • Select and press Delete to remove
-        </div>
-        <div className={styles.toolGroup}>
-          {selectedNote && (
-            <>
-              <div className={styles.colorPicker}>
-                {COLORS.map(color => (
-                  <button
-                    key={color}
-                    className={`${styles.colorSwatch} ${selectedNote.color === color ? styles.activeColor : ''}`}
-                    style={{ backgroundColor: color }}
-                    onClick={() => changeNoteColor(color)}
-                    title="Change color"
-                  />
-                ))}
-              </div>
-              <div className={styles.divider} />
-              <button
-                className={`${styles.toolButton} ${connectingFrom ? styles.active : ''}`}
-                onClick={startConnecting}
-                title="Connect to another note"
-              >
-                <Link2 size={18} />
-              </button>
-              <button
-                className={styles.toolButton}
-                onClick={removeConnections}
-                title="Remove connections"
-              >
-                <Unlink size={18} />
-              </button>
-              <button
-                className={styles.toolButton}
-                onClick={deleteSelectedNote}
-                title="Delete note"
-              >
-                <Trash2 size={18} />
-              </button>
-              <div className={styles.divider} />
-            </>
-          )}
-          <button
-            className={styles.toolButton}
-            onClick={() => setZoom(prev => Math.min(prev * 1.2, 3))}
-            title="Zoom in"
-          >
-            <ZoomIn size={18} />
-          </button>
-          <span className={styles.zoomLevel}>{Math.round(zoom * 100)}%</span>
-          <button
-            className={styles.toolButton}
-            onClick={() => setZoom(prev => Math.max(prev / 1.2, 0.25))}
-            title="Zoom out"
-          >
-            <ZoomOut size={18} />
-          </button>
-        </div>
+        <button onClick={addNode} className={styles.toolButton} title="Add node">
+          <Plus size={18} />
+        </button>
+        {selectedNode && (
+          <>
+            <button 
+              onClick={() => startConnecting(selectedNode)} 
+              className={`${styles.toolButton} ${connecting ? styles.active : ''}`}
+              title="Connect to another node"
+            >
+              Connect
+            </button>
+            <button 
+              onClick={() => deleteNode(selectedNode)} 
+              className={styles.toolButton}
+              title="Delete node"
+            >
+              <Trash2 size={18} />
+            </button>
+          </>
+        )}
+        {connecting && <span className={styles.hint}>Click another node to connect</span>}
       </div>
 
-      <div
-        ref={containerRef}
+      <div 
+        ref={canvasRef}
         className={styles.canvas}
-        onDoubleClick={handleDoubleClick}
-        onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        onWheel={handleWheel}
         onClick={handleCanvasClick}
       >
-        {connectingFrom && (
-          <div className={styles.connectingHint}>
-            Click another note to connect, or press Escape to cancel
-          </div>
-        )}
-
-        <svg
-          className={styles.connectionsSvg}
-          style={{
-            transform: `translate(${viewOffset.x}px, ${viewOffset.y}px) scale(${zoom})`,
-          }}
-        >
-          {connections.map(conn => {
-            const fromNote = notes.find(n => n.id === conn.from);
-            const toNote = notes.find(n => n.id === conn.to);
-            if (!fromNote || !toNote) return null;
-
-            const from = getNoteCenter(fromNote);
-            const to = getNoteCenter(toNote);
-
+        <svg className={styles.connections}>
+          {data.connections.map(conn => {
+            const fromNode = data.nodes.find(n => n.id === conn.from);
+            const toNode = data.nodes.find(n => n.id === conn.to);
+            if (!fromNode || !toNode) return null;
             return (
               <line
                 key={conn.id}
-                x1={from.x}
-                y1={from.y}
-                x2={to.x}
-                y2={to.y}
+                x1={fromNode.x + 60}
+                y1={fromNode.y + 20}
+                x2={toNode.x + 60}
+                y2={toNode.y + 20}
                 className={styles.connectionLine}
               />
             );
           })}
         </svg>
 
-        <div
-          className={styles.notesContainer}
-          style={{
-            transform: `translate(${viewOffset.x}px, ${viewOffset.y}px) scale(${zoom})`,
-          }}
-        >
-          {notes.map(note => (
-            <div
-              key={note.id}
-              className={`${styles.note} ${selectedNoteId === note.id ? styles.selected : ''} ${connectingFrom === note.id ? styles.connecting : ''}`}
-              style={{
-                left: note.x,
-                top: note.y,
-                width: note.width,
-                backgroundColor: note.color,
-              }}
-              onMouseDown={(e) => handleNoteDragStart(e, note.id)}
-              onClick={(e) => handleNoteClick(e, note.id)}
-              onDoubleClick={(e) => {
-                e.stopPropagation();
-                setEditingNoteId(note.id);
-              }}
-            >
-              {editingNoteId === note.id ? (
-                <textarea
-                  className={styles.noteTextarea}
-                  value={note.text}
-                  onChange={(e) => handleNoteTextChange(note.id, e.target.value)}
-                  onBlur={() => setEditingNoteId(null)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Escape') {
-                      setEditingNoteId(null);
-                    }
-                  }}
-                  autoFocus
-                  placeholder="Type your note..."
-                />
-              ) : (
-                <div className={styles.noteText}>
-                  {note.text || <span className={styles.placeholder}>Double-click to edit</span>}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+        {data.nodes.map(node => (
+          <div
+            key={node.id}
+            className={`${styles.node} ${selectedNode === node.id ? styles.selected : ''} ${connecting === node.id ? styles.connecting : ''}`}
+            style={{ left: node.x, top: node.y }}
+            onMouseDown={(e) => handleMouseDown(e, node.id)}
+            onDoubleClick={() => handleDoubleClick(node.id)}
+          >
+            {editingNode === node.id ? (
+              <input
+                type="text"
+                value={node.text}
+                onChange={(e) => updateNodeText(node.id, e.target.value)}
+                onBlur={() => setEditingNode(null)}
+                onKeyDown={(e) => e.key === 'Enter' && setEditingNode(null)}
+                className={styles.nodeInput}
+                autoFocus
+              />
+            ) : (
+              <span className={styles.nodeText}>{node.text}</span>
+            )}
+          </div>
+        ))}
+
+        {data.nodes.length === 0 && (
+          <div className={styles.emptyState}>
+            <p>Click the + button to add your first idea</p>
+          </div>
+        )}
       </div>
     </div>
   );

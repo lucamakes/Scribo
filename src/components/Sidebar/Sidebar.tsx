@@ -68,7 +68,7 @@ function dbItemToSidebarItem(
     return {
       ...baseItem,
       type: 'canvas',
-      content: dbItem.content ?? '',
+      content: dbItem.content ?? '{"nodes":[],"connections":[]}',
     };
   } else {
     return {
@@ -144,7 +144,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
       .filter(item => item.id !== ROOT_ID)
       .map(item => {
         const nameMatch = item.name.toLowerCase().includes(query);
-        const content = (item.type === 'file' || item.type === 'canvas') && 'content' in item ? (item.content || '') : '';
+        const content = (item.type === 'file') && 'content' in item ? (item.content || '') : '';
         const contentMatch = content.toLowerCase().includes(query);
         
         // Get content snippet around the match
@@ -320,7 +320,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
     // Convert ROOT_ID to null for database
     const dbParentId = uiParentIdToDb(parentId, ROOT_ID);
 
-    const defaultName = type === 'folder' ? 'New Folder' : type === 'canvas' ? 'New Canvas' : 'New File';
+    const defaultName = type === 'folder' ? 'New Folder' : 'New File';
 
     const result = await itemService.create(
       project.id,
@@ -622,7 +622,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
                             }
                           }}
                         >
-                          <div className={`${styles.resultIcon} ${item.type === 'folder' ? styles.resultFolderIcon : item.type === 'canvas' ? styles.resultCanvasIcon : styles.resultFileIcon}`}>
+                          <div className={`${styles.resultIcon} ${item.type === 'folder' ? styles.resultFolderIcon : styles.resultFileIcon}`}>
                             {item.type === 'folder' ? (
                               <Folder size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
                             ) : item.type === 'canvas' ? (

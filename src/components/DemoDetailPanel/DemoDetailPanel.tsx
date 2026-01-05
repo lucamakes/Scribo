@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
 import { TiptapEditor } from '@/components/TiptapEditor/TiptapEditor';
-import { CanvasEditor } from '@/components/CanvasEditor';
+import { CanvasEditor } from '@/components/CanvasEditor/CanvasEditor';
 import { usePreferences } from '@/lib/hooks/usePreferences';
 import {
   Lightbulb,
@@ -55,7 +55,7 @@ export function DemoDetailPanel({
 
   // Handle fullscreen request
   useEffect(() => {
-    if (openInFullscreen && (selectedItem?.type === 'file' || selectedItem?.type === 'canvas')) {
+    if (openInFullscreen && (selectedItem?.type === 'file')) {
       setIsFullscreen(true);
       onFullscreenOpened?.();
     }
@@ -178,63 +178,51 @@ export function DemoDetailPanel({
 
   // Canvas view
   if (selectedItem.type === 'canvas') {
-    const canvasContent = (
-      <>
-        <div className={styles.canvasHeader}>
-          <h2 className={styles.fileName}>
-            {selectedItem.name.length > 25 ? selectedItem.name.slice(0, 25) + '...' : selectedItem.name}
-          </h2>
-          <div className={styles.canvasHeaderRight}>
-            <button
-              onClick={() => saveContent(content)}
-              className={`${styles.saveButton} ${content === lastSavedContent.current ? styles.saved : styles.unsaved}`}
-              disabled={content === lastSavedContent.current}
-              title={content === lastSavedContent.current ? 'All changes saved' : 'Save now'}
-            >
-              {content === lastSavedContent.current ? (
-                <Check size={16} strokeWidth={2} />
-              ) : (
-                <div className={styles.unsavedDot} />
-              )}
-            </button>
-            <button onClick={onBackToMaster} className={styles.mobileCloseButton} title="Back to files">
-              <X size={18} strokeWidth={1.5} />
-            </button>
-            <button
-              onClick={toggleFullscreen}
-              className={styles.fullscreenButton}
-              title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
-            >
-              {isFullscreen ? <Minimize2 size={18} strokeWidth={1} /> : <Maximize2 size={18} strokeWidth={1} />}
-            </button>
-          </div>
-        </div>
-        <div className={styles.canvasContainer}>
-          <CanvasEditor
-            content={content}
-            onContentChange={handleContentChange}
-          />
-        </div>
-      </>
-    );
+    const handleCanvasChange = (newContent: string) => {
+      setContent(newContent);
+      
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
 
-    if (isFullscreen) {
-      return (
-        <div className={styles.fullscreenOverlay}>
-          <div className={styles.fullscreenCanvas}>
-            {canvasContent}
-          </div>
-        </div>
-      );
-    }
+      saveTimeoutRef.current = setTimeout(() => {
+        saveContent(newContent);
+      }, 1000);
+    };
 
     return (
       <div className={styles.panel}>
-        <button onClick={onBackToMaster} className={styles.mobileBackButton} aria-label="Back to files">
-          <X size={20} strokeWidth={1.5} />
-        </button>
         <div className={styles.canvasView}>
-          {canvasContent}
+          <div className={styles.canvasHeader}>
+            <h2 className={styles.fileName}>
+              {selectedItem.name.length > 25 
+                ? selectedItem.name.slice(0, 25) + '...' 
+                : selectedItem.name}
+            </h2>
+            <div className={styles.canvasHeaderRight}>
+              <button
+                onClick={() => saveContent(content)}
+                className={`${styles.saveButton} ${content === lastSavedContent.current ? styles.saved : styles.unsaved}`}
+                disabled={content === lastSavedContent.current}
+                title={content === lastSavedContent.current ? 'All changes saved' : 'Save now'}
+              >
+                {content === lastSavedContent.current ? (
+                  <Check size={16} strokeWidth={2} />
+                ) : (
+                  <div className={styles.unsavedDot} />
+                )}
+              </button>
+              <button onClick={onBackToMaster} className={styles.mobileCloseButton} title="Back to files">
+                <X size={18} strokeWidth={1.5} />
+              </button>
+            </div>
+          </div>
+          <div className={styles.canvasContainer}>
+            <CanvasEditor
+              content={content}
+              onContentChange={handleCanvasChange}
+            />
+          </div>
         </div>
       </div>
     );

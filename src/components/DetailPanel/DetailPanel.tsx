@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
 import { itemService } from '@/lib/services/itemService';
 import { TiptapEditor } from '@/components/TiptapEditor/TiptapEditor';
-import { CanvasEditor } from '@/components/CanvasEditor';
+import { CanvasEditor } from '@/components/CanvasEditor/CanvasEditor';
 import { UpgradePrompt } from '@/components/UpgradePrompt/UpgradePrompt';
 import { useSubscription } from '@/lib/hooks/useSubscription';
 import { usePreferences } from '@/lib/hooks/usePreferences';
@@ -112,7 +112,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
 
     // Handle fullscreen request when opening from Constellation
     useEffect(() => {
-        if (openInFullscreen && (selectedItem?.type === 'file' || selectedItem?.type === 'canvas')) {
+        if (openInFullscreen && (selectedItem?.type === 'file')) {
             setIsFullscreen(true);
             // Notify parent that fullscreen has been opened so it can reset the flag
             onFullscreenOpened?.();
@@ -157,8 +157,10 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             lastSavedContent.current = newContent;
             setSaveStatus('saved');
             onContentSaved?.(selectedItem.id, newContent);
-            // Refresh subscription word count after save
-            refreshSubscription();
+            // Refresh subscription word count after save (only for files)
+            if (selectedItem.type === 'file') {
+                refreshSubscription();
+            }
 
             // Reset to idle after 2 seconds
             setTimeout(() => {
@@ -168,7 +170,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             setError((result as { success: false; error: string }).error);
             setSaveStatus('error');
         }
-    }, [selectedItem, onContentSaved]);
+    }, [selectedItem, onContentSaved, refreshSubscription]);
 
     // Debounced content change handler for Tiptap
     const handleContentChange = useCallback((newContent: string) => {
@@ -304,80 +306,64 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
         );
     }
 
-    // Canvas view
+    // Canvas view - mindmap editor
     if (selectedItem.type === 'canvas') {
-        const canvasContent = (
-            <>
-                <div className={styles.canvasHeader}>
-                    <h2 className={styles.fileName}>
-                        {selectedItem.name.length > 25 
-                            ? selectedItem.name.slice(0, 25) + '...' 
-                            : selectedItem.name}
-                    </h2>
-                    <div className={styles.canvasHeaderRight}>
-                        <button
-                            onClick={() => saveContent(content)}
-                            className={`${styles.saveButton} ${content === lastSavedContent.current ? styles.saved : styles.unsaved}`}
-                            disabled={saveStatus === 'saving' || content === lastSavedContent.current}
-                            title={content === lastSavedContent.current ? 'All changes saved' : 'Save now'}
-                        >
-                            {content === lastSavedContent.current ? (
-                                <Check size={16} strokeWidth={2} />
-                            ) : (
-                                <div className={styles.unsavedDot} />
-                            )}
-                        </button>
-                        <button
-                            onClick={onBackToMaster}
-                            className={styles.mobileCloseButton}
-                            title="Back to files"
-                        >
-                            <X size={18} strokeWidth={1.5} />
-                        </button>
-                        <button
-                            onClick={toggleFullscreen}
-                            className={styles.fullscreenButton}
-                            title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
-                        >
-                            {isFullscreen ? <Minimize2 size={18} strokeWidth={1} /> : <Maximize2 size={18} strokeWidth={1} />}
-                        </button>
-                    </div>
-                </div>
-                {error && (
-                    <div className={styles.errorBanner}>
-                        <span><AlertTriangle size={16} strokeWidth={1} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> {error}</span>
-                    </div>
-                )}
-                <div className={styles.canvasContainer}>
-                    <CanvasEditor
-                        content={content}
-                        onContentChange={handleContentChange}
-                    />
-                </div>
-            </>
-        );
+        const handleCanvasChange = (newContent: string) => {
+            setContent(newContent);
+            
+            // Clear existing timeout
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current);
+            }
 
-        if (isFullscreen) {
-            return (
-                <div className={styles.fullscreenOverlay}>
-                    <div className={styles.fullscreenCanvas}>
-                        {canvasContent}
-                    </div>
-                </div>
-            );
-        }
+            // Set new timeout for auto-save
+            saveTimeoutRef.current = setTimeout(() => {
+                saveContent(newContent);
+            }, 1500);
+        };
 
         return (
             <div className={styles.panel}>
-                <button
-                    onClick={onBackToMaster}
-                    className={styles.mobileBackButton}
-                    aria-label="Back to files"
-                >
-                    <X size={20} strokeWidth={1.5} />
-                </button>
                 <div className={styles.canvasView}>
-                    {canvasContent}
+                    <div className={styles.canvasHeader}>
+                        <h2 className={styles.fileName}>
+                            {selectedItem.name.length > 25 
+                                ? selectedItem.name.slice(0, 25) + '...' 
+                                : selectedItem.name}
+                        </h2>
+                        <div className={styles.canvasHeaderRight}>
+                            <button
+                                onClick={() => saveContent(content)}
+                                className={`${styles.saveButton} ${content === lastSavedContent.current ? styles.saved : styles.unsaved}`}
+                                disabled={saveStatus === 'saving' || content === lastSavedContent.current}
+                                title={content === lastSavedContent.current ? 'All changes saved' : 'Save now'}
+                            >
+                                {content === lastSavedContent.current ? (
+                                    <Check size={16} strokeWidth={2} />
+                                ) : (
+                                    <div className={styles.unsavedDot} />
+                                )}
+                            </button>
+                            <button
+                                onClick={onBackToMaster}
+                                className={styles.mobileCloseButton}
+                                title="Back to files"
+                            >
+                                <X size={18} strokeWidth={1.5} />
+                            </button>
+                        </div>
+                    </div>
+                    {error && (
+                        <div className={styles.errorBanner}>
+                            <span><AlertTriangle size={16} strokeWidth={1} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> {error}</span>
+                        </div>
+                    )}
+                    <div className={styles.canvasContainer}>
+                        <CanvasEditor
+                            content={content}
+                            onContentChange={handleCanvasChange}
+                        />
+                    </div>
                 </div>
             </div>
         );

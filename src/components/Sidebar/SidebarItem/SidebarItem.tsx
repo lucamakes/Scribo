@@ -160,6 +160,8 @@ export function SidebarItem({
     setShowAddMenu(false);
   }, [actions, item.id]);
 
+
+
   const getDropClass = () => {
     if (!dropPosition) return '';
     if (isRoot && dropPosition !== 'inside') return '';

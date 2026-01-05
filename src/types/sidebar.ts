@@ -41,11 +41,11 @@ interface FolderSidebarItem extends BaseSidebarItem {
 }
 
 /**
- * Canvas item with JSON content for fabric.js
+ * Canvas item for mindmap/visual planning
  */
 interface CanvasSidebarItem extends BaseSidebarItem {
   type: 'canvas';
-  /** Canvas content (fabric.js JSON) */
+  /** Canvas data stored as JSON string */
   content: string;
 }
 
