@@ -18,7 +18,7 @@
   width: 32px;
   height: 32px;
   border: 2px solid #e5e7eb;
-  border-top-color: #6366f1;
+  border-top-color: #1a78c2;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -135,8 +135,8 @@
   align-items: center;
   gap: 8px;
   padding: 14px 28px;
-  background: #6366f1;
-  border: 1px solid #6366f1;
+  background: #1a78c2;
+  border: 1px solid #1a78c2;
   border-radius: 8px;
   color: #ffffff;
   font-size: 16px;
@@ -147,8 +147,8 @@
 }
 
 .primaryButton:hover {
-  background: #4f46e5;
-  border-color: #4f46e5;
+  background: #1565a8;
+  border-color: #1565a8;
 }
 
 .secondaryButton {
@@ -205,9 +205,9 @@
   justify-content: center;
   width: 56px;
   height: 56px;
-  background: #6366f126;
+  background: #1a78c226;
   border-radius: 12px;
-  color: #6366f1;
+  color: #1a78c2;
   margin-bottom: 16px;
 }
 
@@ -311,8 +311,8 @@
 }
 
 .planPrimary {
-  background: #6366f126;
-  border-color: #6366f1;
+  background: #1a78c226;
+  border-color: #1a78c2;
   border-width: 2px;
 }
 
@@ -323,7 +323,7 @@
   transform: translateX(-50%);
   font-size: 11px;
   font-weight: 600;
-  background: #6366f1;
+  background: #1a78c2;
   color: white;
   padding: 4px 12px;
   border-radius: 12px;
@@ -377,7 +377,7 @@
 }
 
 .planFeatures li svg {
-  color: #6366f1;
+  color: #1a78c2;
   flex-shrink: 0;
 }
 
@@ -403,8 +403,8 @@
 .planButtonPrimary {
   width: 100%;
   padding: 12px 16px;
-  background: #6366f1;
-  border: 1px solid #6366f1;
+  background: #1a78c2;
+  border: 1px solid #1a78c2;
   border-radius: 6px;
   color: #ffffff;
   font-size: 14px;
@@ -415,8 +415,8 @@
 }
 
 .planButtonPrimary:hover {
-  background: #4f46e5;
-  border-color: #4f46e5;
+  background: #1565a8;
+  border-color: #1565a8;
 }
 
 .planNote {

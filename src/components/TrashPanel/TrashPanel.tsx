@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { ItemRow } from '@/types/database';
 import { itemService } from '@/lib/services/itemService';
 import styles from './TrashPanel.module.css';
-import { Trash2, X, Folder, File, Undo } from 'lucide-react';
+import { Trash2, X, Folder, File, Undo, Layout } from 'lucide-react';
 
 interface TrashPanelProps {
     projectId: string;
@@ -123,6 +123,8 @@ export function TrashPanel({ projectId, isOpen, onClose }: TrashPanelProps) {
                                         <span className={styles.itemIcon}>
                                             {item.type === 'folder'
                                                 ? <Folder size={16} strokeWidth={1} data-type="folder" />
+                                                : item.type === 'canvas'
+                                                ? <Layout size={16} strokeWidth={1} data-type="canvas" />
                                                 : <File size={16} strokeWidth={1} data-type="file" />
                                             }
                                         </span>
