@@ -59,6 +59,8 @@
 /* Shorten line when item is hovered or selected (files and folders) */
 .itemWrapper.noChevron:has(.item:hover .fileIcon)::after,
 .itemWrapper.noChevron:has(.selected .fileIcon)::after,
+.itemWrapper.noChevron:has(.item:hover .canvasIcon)::after,
+.itemWrapper.noChevron:has(.selected .canvasIcon)::after,
 .itemWrapper.noChevron:has(.item:hover .folderIcon)::after,
 .itemWrapper.noChevron:has(.selected .folderIcon)::after {
   width: 15px;

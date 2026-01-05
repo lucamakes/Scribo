@@ -137,13 +137,26 @@ export function useConstellation(
     });
   }, [canvasRef, centerX, centerY, zoom, initializedNodes]);
 
-  // Zoom Handler
+  // Zoom Handler - smooth zoom towards cursor position
   const handleWheel = useCallback((e: React.WheelEvent) => {
-    setZoom((prevZoom) => {
-      const newZoom = prevZoom - e.deltaY * ZOOM_SENSITIVITY;
-      return Math.min(Math.max(newZoom, MIN_ZOOM), MAX_ZOOM);
-    });
-  }, []);
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    // Smoother zoom with smaller steps
+    const zoomFactor = e.deltaY > 0 ? 0.95 : 1.05;
+    const newZoom = Math.min(Math.max(zoom * zoomFactor, MIN_ZOOM), MAX_ZOOM);
+    
+    // Adjust offset to zoom towards mouse position
+    const zoomRatio = newZoom / zoom;
+    const newOffsetX = mouseX - (mouseX - offset.x - dimensions.width / 2) * zoomRatio - dimensions.width / 2;
+    const newOffsetY = mouseY - (mouseY - offset.y - dimensions.height / 2) * zoomRatio - dimensions.height / 2;
+    
+    setZoom(newZoom);
+    setOffset({ x: newOffsetX, y: newOffsetY });
+  }, [zoom, offset, dimensions, canvasRef]);
 
   // Hover Handlers
   const handleNodeMouseEnter = useCallback((index: number) => {
@@ -201,11 +214,11 @@ export function useConstellation(
   }, []);
 
   const zoomIn = useCallback(() => {
-    setZoom((prev) => Math.min(prev + 0.2, MAX_ZOOM));
+    setZoom((prev) => Math.min(prev * 1.2, MAX_ZOOM));
   }, []);
 
   const zoomOut = useCallback(() => {
-    setZoom((prev) => Math.max(prev - 0.2, MIN_ZOOM));
+    setZoom((prev) => Math.max(prev * 0.8, MIN_ZOOM));
   }, []);
 
   const resetView = useCallback(() => {
