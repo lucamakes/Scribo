@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Plus, Trash2, Undo2, Circle } from 'lucide-react';
+import { Plus, Trash2, Undo2, Circle, ZoomIn, ZoomOut, RotateCcw, Info } from 'lucide-react';
 import styles from './CanvasEditor.module.css';
 
 export interface CanvasNode {
@@ -58,6 +58,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
   const [viewport, setViewport] = useState({ x: 0, y: 0, zoom: 1 });
   const [history, setHistory] = useState<CanvasData[]>([]);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   
   const canvasRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -348,10 +349,27 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
           </>
         )}
         {connecting && <span className={styles.hint}>Click another node to connect</span>}
-        <div className={styles.spacer} />
-        <span className={styles.zoomLabel}>{Math.round(viewport.zoom * 100)}%</span>
-        <button onClick={resetView} className={styles.toolButton} title="Reset view">
-          Reset
+      </div>
+
+      {/* Zoom controls - bottom right */}
+      <div className={styles.zoomControls}>
+        <button 
+          onClick={() => setViewport(v => ({ ...v, zoom: Math.min(v.zoom * 1.2, 3) }))} 
+          className={styles.zoomButton} 
+          title="Zoom In"
+        >
+          <ZoomIn size={16} strokeWidth={1} />
+        </button>
+        <span className={styles.zoomLevel}>{Math.round(viewport.zoom * 100)}%</span>
+        <button 
+          onClick={() => setViewport(v => ({ ...v, zoom: Math.max(v.zoom * 0.8, 0.25) }))} 
+          className={styles.zoomButton} 
+          title="Zoom Out"
+        >
+          <ZoomOut size={16} strokeWidth={1} />
+        </button>
+        <button onClick={resetView} className={styles.zoomButton} title="Reset View">
+          <RotateCcw size={16} strokeWidth={1} />
         </button>
       </div>
 
@@ -444,11 +462,36 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
         )}
       </div>
 
-      <div className={styles.shortcuts}>
-        <span>Tab: new</span>
-        <span>Enter: edit</span>
-        <span>C: connect</span>
+      {/* Info button - bottom left */}
+      <div className={styles.infoButton}>
+        <button
+          onClick={() => setShowInfo(!showInfo)}
+          className={styles.zoomButton}
+          title="Keyboard shortcuts"
+        >
+          <Info size={16} strokeWidth={1} />
+        </button>
       </div>
+
+      {showInfo && (
+        <div className={styles.infoPanel}>
+          <h3 className={styles.infoTitle}>Keyboard Shortcuts</h3>
+          <ul className={styles.infoList}>
+            <li><strong>Tab</strong> — Create new node</li>
+            <li><strong>Enter</strong> — Edit selected node</li>
+            <li><strong>C</strong> — Connect mode</li>
+            <li><strong>Delete</strong> — Delete selected</li>
+            <li><strong>Ctrl+Z</strong> — Undo</li>
+            <li><strong>Escape</strong> — Deselect</li>
+          </ul>
+          <h4 className={styles.infoSubtitle}>Navigation</h4>
+          <ul className={styles.infoList}>
+            <li><strong>Scroll</strong> — Zoom in/out</li>
+            <li><strong>Drag</strong> — Pan canvas</li>
+            <li><strong>Double-click</strong> — Create node at cursor</li>
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
