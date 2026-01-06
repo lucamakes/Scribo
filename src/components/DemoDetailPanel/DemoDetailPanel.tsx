@@ -24,12 +24,12 @@ interface DemoDetailPanelProps {
   onBackToMaster?: () => void;
 }
 
-export function DemoDetailPanel({ 
-  selectedItem, 
-  onContentSaved, 
-  openInFullscreen, 
-  onFullscreenOpened, 
-  onBackToMaster 
+export function DemoDetailPanel({
+  selectedItem,
+  onContentSaved,
+  openInFullscreen,
+  onFullscreenOpened,
+  onBackToMaster
 }: DemoDetailPanelProps) {
   const [content, setContent] = useState('');
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -37,7 +37,7 @@ export function DemoDetailPanel({
   const lastSavedContent = useRef('');
   const selectedItemIdRef = useRef<string | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   const { fontSize, lineHeight, textColor } = usePreferences();
 
   // Load content when file or canvas is selected
@@ -138,7 +138,7 @@ export function DemoDetailPanel({
       <div className={styles.panel}>
         <div className={styles.emptyStateWrapper}>
           <div className={styles.emptyState}>
-            <h3 className={styles.emptyTitle}>Welcome to Scribe</h3>
+            <h3 className={styles.emptyTitle}>Welcome to Scripta</h3>
             <p className={styles.emptyDescription}>
               Select a file from the sidebar to start writing, or create a new one.
             </p>
@@ -180,7 +180,7 @@ export function DemoDetailPanel({
   if (selectedItem.type === 'canvas') {
     const handleCanvasChange = (newContent: string) => {
       setContent(newContent);
-      
+
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
@@ -194,8 +194,8 @@ export function DemoDetailPanel({
       <div className={styles.canvasView}>
         <div className={styles.canvasHeader}>
           <h2 className={styles.fileName}>
-            {selectedItem.name.length > 25 
-              ? selectedItem.name.slice(0, 25) + '...' 
+            {selectedItem.name.length > 25
+              ? selectedItem.name.slice(0, 25) + '...'
               : selectedItem.name}
           </h2>
           <div className={styles.canvasHeaderRight}>
@@ -304,7 +304,7 @@ export function DemoDetailPanel({
           placeholder="Start writing your story..."
           isAtLimit={false}
           isPro={true}
-          onLimitBlocked={() => {}}
+          onLimitBlocked={() => { }}
           focusMode={isFocusMode}
           fontSize={fontSize}
           lineHeight={lineHeight}

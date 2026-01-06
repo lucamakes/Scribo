@@ -1,6 +1,7 @@
 .section {
   padding: 80px 20px;
   background: white;
+  border-top: 1px solid rgb(209, 213, 219);
 }
 
 .content {
@@ -27,13 +28,13 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #999999;
   border-radius: 8px;
   overflow: hidden;
 }
 
 .faqItem {
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid #999999;
 }
 
 .faqItem:last-child {
@@ -54,11 +55,6 @@
   font-weight: 500;
   color: #111;
   cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.faqQuestion:hover {
-  background: #fafafa;
 }
 
 .faqQuestion span {

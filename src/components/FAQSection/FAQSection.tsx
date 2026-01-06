@@ -12,7 +12,7 @@ interface FAQItem {
 const faqs: FAQItem[] = [
   {
     question: 'How does the free plan work?',
-    answer: 'The free plan gives you 15,000 words to write with—perfect for short stories, essays, or trying out Scribe. You get unlimited projects and all core features. No credit card required.',
+    answer: 'The free plan gives you 15,000 words to write with—perfect for short stories, essays, or trying out Scripta. You get unlimited projects and all core features. No credit card required.',
   },
   {
     question: 'What happens when I reach the word limit?',
@@ -32,15 +32,15 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'Do you offer refunds?',
-    answer: 'We offer a 30-day money-back guarantee. If Scribe isn\'t right for you, just contact us within 30 days of your purchase for a full refund.',
+    answer: 'We offer a 30-day money-back guarantee. If Scripta isn\'t right for you, just contact us within 30 days of your purchase for a full refund.',
   },
   {
     question: 'Can I collaborate with other writers?',
-    answer: 'Collaboration features are on our roadmap! For now, Scribe is designed for individual writers. You can vote for collaboration features on our feedback board.',
+    answer: 'Collaboration features are on our roadmap! For now, Scripta is designed for individual writers. You can vote for collaboration features on our feedback board.',
   },
   {
-    question: 'Does Scribe work offline?',
-    answer: 'Scribe requires an internet connection to sync your work across devices. We\'re exploring offline capabilities for future updates.',
+    question: 'Does Scripta work offline?',
+    answer: 'Scripta requires an internet connection to sync your work across devices. We\'re exploring offline capabilities for future updates.',
   },
 ];
 
@@ -55,7 +55,7 @@ export default function FAQSection() {
     <section className={styles.section}>
       <div className={styles.content}>
         <h2 className={styles.title}>Frequently asked questions</h2>
-        <p className={styles.subtitle}>Everything you need to know about Scribe</p>
+        <p className={styles.subtitle}>Everything you need to know about Scripta</p>
 
         <div className={styles.faqList}>
           {faqs.map((faq, index) => (
