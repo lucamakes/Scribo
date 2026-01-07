@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
-import { FileText, ArrowRight, Check, FolderTree, Eye, Download, Clock, Users, Play, Menu, X } from 'lucide-react';
+import { ArrowRight, Check, Clock, Users, Menu, X } from 'lucide-react';
 import FeedbackBoard from '@/components/FeedbackBoard/FeedbackBoard';
 import FAQSection from '@/components/FAQSection/FAQSection';
+import BentoFeatures from '@/components/BentoFeatures/BentoFeatures';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -13,7 +14,6 @@ export default function Home() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -43,8 +43,7 @@ export default function Home() {
       <header className={`${styles.header} ${scrolled ? styles.headerScrolled : ''}`}>
         <div className={styles.headerContent}>
           <div className={styles.logo}>
-            <FileText size={24} strokeWidth={1.5} />
-            <span>Scripta</span>
+            <span className={styles.logoText}>Scribo</span>
           </div>
 
           {/* Desktop Nav */}
@@ -118,7 +117,7 @@ export default function Home() {
           {/* Social Proof Stat */}
           <div className={styles.heroStat}>
             <Users size={18} strokeWidth={1.5} />
-            <span>Join <strong>2,400+</strong> writers who&apos;ve written <strong>12M+ words</strong> with Scripta</span>
+            <span>Join <strong>2,400+</strong> writers who&apos;ve written <strong>12M+ words</strong> with Scribo</span>
           </div>
 
           {/* CTA with Risk Reversal */}
@@ -139,104 +138,24 @@ export default function Home() {
             15,000 words free
           </p>
         </div>
-      </section>
 
-      {/* Product Showcase */}
-      <section className={styles.showcase}>
-        <div className={styles.showcaseContent}>
-          <div className={styles.showcaseImage} onClick={() => setShowVideo(true)}>
-            {showVideo ? (
-              <iframe
-                src="https://www.youtube.com/embed/6xJWQRVl9nw?autoplay=1"
-                title="Scripta Demo Video"
-                className={styles.videoIframe}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
+        {/* Product Showcase */}
+        <div className={styles.showcase}>
+          <div className={styles.showcaseContent}>
+            <div className={styles.showcaseImage} onClick={() => router.push('/demo')}>
+              <img
+                src="/app.png"
+                alt="Scribo app interface"
+                className={styles.appScreenshot}
               />
-            ) : (
-              <>
-                <img
-                  src="/app.png"
-                  alt="Scripta app interface"
-                  className={styles.appScreenshot}
-                />
-                <div className={styles.playButtonMobile}>
-                  <Play size={24} strokeWidth={2} fill="white" />
-                </div>
-              </>
-            )}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Features Grid */}
-      <section id="features" className={styles.features}>
-        <div className={styles.featuresHeader}>
-          <h2 className={styles.sectionTitle}>Everything you need to finish your manuscript</h2>
-          <p className={styles.sectionSubtitle}>No bloat. No learning curve. Just write.</p>
-        </div>
-        <div className={styles.featuresContent}>
-          <div className={styles.feature}>
-            <div className={styles.featureIcon}>
-              <FolderTree size={24} strokeWidth={1.5} />
-            </div>
-            <h3 className={styles.featureTitle}>Nested folders & files</h3>
-            <p className={styles.featureDescription}>
-              Organize chapters, scenes, and notes exactly how you want. Unlimited depth.
-            </p>
-          </div>
-
-          <div className={styles.feature}>
-            <div className={styles.featureIcon}>
-              <Eye size={24} strokeWidth={1.5} />
-            </div>
-            <h3 className={styles.featureTitle}>Visual progress tracking</h3>
-            <p className={styles.featureDescription}>
-              Watch your constellation grow as you write. Each star represents a chapter.
-            </p>
-          </div>
-
-          <div className={styles.feature}>
-            <div className={styles.featureIcon}>
-              <Download size={24} strokeWidth={1.5} />
-            </div>
-            <h3 className={styles.featureTitle}>Export anywhere</h3>
-            <p className={styles.featureDescription}>
-              One click to Markdown, Word, or plain text. Your words, your format.
-            </p>
-          </div>
-
-          <div className={styles.feature}>
-            <div className={styles.featureIcon}>
-              <FileText size={24} strokeWidth={1.5} />
-            </div>
-            <h3 className={styles.featureTitle}>Rich text formatting</h3>
-            <p className={styles.featureDescription}>
-              Bold, italic, headings, lists. All the formatting you need, nothing you don&apos;t.
-            </p>
-          </div>
-
-          <div className={styles.feature}>
-            <div className={styles.featureIcon}>
-              <Clock size={24} strokeWidth={1.5} />
-            </div>
-            <h3 className={styles.featureTitle}>Auto-save everything</h3>
-            <p className={styles.featureDescription}>
-              Never lose a word. Every keystroke is saved automatically to the cloud.
-            </p>
-          </div>
-
-          <div className={styles.feature}>
-            <div className={styles.featureIcon}>
-              <Users size={24} strokeWidth={1.5} />
-            </div>
-            <h3 className={styles.featureTitle}>Multiple projects</h3>
-            <p className={styles.featureDescription}>
-              Work on your novel, short stories, and blog posts. All in one place.
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* Features Grid */}
+      <BentoFeatures />
 
       {/* Pricing */}
       <section id="pricing" className={styles.pricing}>
@@ -330,8 +249,7 @@ export default function Home() {
           <div className={styles.footerGrid}>
             <div className={styles.footerBrand}>
               <div className={styles.footerLogo}>
-                <FileText size={24} strokeWidth={1.5} />
-                <span>Scripta</span>
+                <span className={styles.logoText}>Scribo</span>
               </div>
               <p className={styles.footerTagline}>
                 Distraction-free writing for authors who want to finish their book.
@@ -362,7 +280,7 @@ export default function Home() {
           </div>
 
           <div className={styles.footerBottom}>
-            <p className={styles.footerText}>© 2025 Scripta. Built for writers.</p>
+            <p className={styles.footerText}>© 2025 Scribo. Built for writers.</p>
           </div>
         </div>
       </footer>

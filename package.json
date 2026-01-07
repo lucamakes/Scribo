@@ -1,5 +1,5 @@
 {
-  "name": "scripta",
+  "name": "Scribo",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -23,7 +23,9 @@
     "docx": "^9.5.1",
     "epub-gen-memory": "^1.1.2",
     "file-saver": "^2.0.5",
+    "framer-motion": "^12.24.10",
     "jspdf": "^3.0.4",
+    "lenis": "^1.3.17",
     "lucide-react": "^0.562.0",
     "next": "16.1.1",
     "posthog-js": "^1.313.0",

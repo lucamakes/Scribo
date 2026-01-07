@@ -7,7 +7,7 @@ import { itemService } from '@/lib/services/itemService';
 import { ProjectSetup } from '@/components/ProjectSetup/ProjectSetup';
 import { ProjectImportModal } from '@/components/ProjectImportModal';
 import { UserMenu } from '@/components/UserMenu/UserMenu';
-import { Pencil, X, Plus, ChevronRight, Upload } from 'lucide-react';
+import { Pencil, X, Plus, ChevronRight, Upload, BookOpen } from 'lucide-react';
 import styles from './ProjectList.module.css';
 
 interface ProjectListProps {
@@ -184,8 +184,9 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
         <div className={styles.projects}>
           {projects.length === 0 ? (
             <div className={styles.empty}>
+              <BookOpen size={48} strokeWidth={1} style={{ color: '#ccc', marginBottom: '16px' }} />
               <p className={styles.emptyText}>No projects yet</p>
-              <p className={styles.emptySubtext}>Create your first project to get started</p>
+              <p className={styles.emptySubtext}>Create your first project to start writing</p>
             </div>
           ) : (
             <ul className={styles.list}>
@@ -225,13 +226,10 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
                       </span>
                     </div>
 
+                    <ChevronRight size={18} strokeWidth={1} className={styles.arrow} />
+
                     <div className={styles.actions}>
-                      {editingId === project.id ? (
-                        // If editing, we rely on Enter/Blur/Escape usually, or we could add a save button icon.
-                        // For simplicity with the input taking full width potentially or focus, we'll stick to keyboard + blur for now
-                        // or we can add a small checkmark button.
-                        null
-                      ) : (
+                      {editingId === project.id ? null : (
                         <>
                           <button
                             onClick={(e) => handleStartEdit(e, project)}
@@ -249,7 +247,6 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
                           </button>
                         </>
                       )}
-                      <ChevronRight size={18} strokeWidth={1} className={styles.arrow} />
                     </div>
                   </div>
                 </li>

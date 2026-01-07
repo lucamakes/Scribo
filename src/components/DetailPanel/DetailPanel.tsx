@@ -36,6 +36,8 @@ interface DetailPanelProps {
     onFullscreenOpened?: () => void;
     /** Callback to return to master list on mobile */
     onBackToMaster?: () => void;
+    /** If true, skip subscription checks and use local save callback */
+    isDemo?: boolean;
 }
 
 /**
@@ -44,7 +46,7 @@ interface DetailPanelProps {
  * - Rich text editor when a file is selected
  * - Empty state when nothing is selected
  */
-export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, onFullscreenOpened, onBackToMaster }: DetailPanelProps) {
+export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, onFullscreenOpened, onBackToMaster, isDemo = false }: DetailPanelProps) {
     const [content, setContent] = useState('');
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [error, setError] = useState<string | null>(null);
@@ -151,6 +153,17 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
         setSaveStatus('saving');
         setError(null);
 
+        // In demo mode, just use the callback directly
+        if (isDemo) {
+            lastSavedContent.current = newContent;
+            setSaveStatus('saved');
+            onContentSaved?.(selectedItem.id, newContent);
+            setTimeout(() => {
+                setSaveStatus('idle');
+            }, 2000);
+            return;
+        }
+
         const result = await itemService.updateContent(selectedItem.id, newContent);
 
         if (result.success) {
@@ -170,7 +183,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             setError((result as { success: false; error: string }).error);
             setSaveStatus('error');
         }
-    }, [selectedItem, onContentSaved, refreshSubscription]);
+    }, [selectedItem, onContentSaved, refreshSubscription, isDemo]);
 
     // Debounced content change handler for Tiptap
     const handleContentChange = useCallback((newContent: string) => {
@@ -462,8 +475,8 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                     content={content}
                     onContentChange={handleContentChange}
                     placeholder="Start writing your story..."
-                    isAtLimit={isAtLimit}
-                    isPro={isPro}
+                    isAtLimit={isDemo ? false : isAtLimit}
+                    isPro={isDemo ? true : isPro}
                     onLimitBlocked={handleLimitBlocked}
                     focusMode={isFocusMode}
                     fontSize={fontSize}
@@ -473,7 +486,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             </div>
 
             {/* Show upgrade warning at 80%+ usage - rendered via portal */}
-            {isMounted && !isPro && percentage >= 80 && percentage < 100 && showUpgradeBanner && createPortal(
+            {isMounted && !isDemo && !isPro && percentage >= 80 && percentage < 100 && showUpgradeBanner && createPortal(
                 <UpgradePrompt 
                     type="banner" 
                     percentage={Math.round(percentage)} 
@@ -483,7 +496,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             )}
 
             {/* Show limit modal when user tries to type at 100% - rendered via portal */}
-            {isMounted && showLimitModal && createPortal(
+            {isMounted && !isDemo && showLimitModal && createPortal(
                 <UpgradePrompt 
                     type="modal" 
                     onClose={() => setShowLimitModal(false)}

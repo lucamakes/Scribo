@@ -138,15 +138,15 @@ export function DemoDetailPanel({
       <div className={styles.panel}>
         <div className={styles.emptyStateWrapper}>
           <div className={styles.emptyState}>
-            <h3 className={styles.emptyTitle}>Welcome to Scripta</h3>
+            <h3 className={styles.emptyTitle}>No item selected</h3>
             <p className={styles.emptyDescription}>
-              Select a file from the sidebar to start writing, or create a new one.
+              Select a file or folder from the sidebar to view its details
             </p>
           </div>
           <div className={styles.tipCard}>
             <Lightbulb size={24} strokeWidth={1} className={styles.tipIcon} />
             <p className={styles.tipText}>
-              This is a demo. Your work is saved locally in your browser. Sign up to save to the cloud!
+              Hover over items in the sidebar to reveal buttons for renaming, deleting, or adding subfolders.
             </p>
           </div>
         </div>
@@ -156,6 +156,22 @@ export function DemoDetailPanel({
 
   // Folder view
   if (selectedItem.type === 'folder') {
+    const createdDate = new Date(selectedItem.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    const updatedDate = new Date(selectedItem.updatedAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
     return (
       <div className={styles.panel}>
         <button onClick={onBackToMaster} className={styles.mobileBackButton} aria-label="Back to files">
@@ -165,10 +181,33 @@ export function DemoDetailPanel({
           <div className={styles.folderHeader}>
             <h2 className={styles.folderName}>{selectedItem.name}</h2>
           </div>
+
+          <div className={styles.infoCard}>
+            <h3 className={styles.infoCardTitle}>Folder Information</h3>
+            <div className={styles.infoGrid}>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>Type</span>
+                <span className={styles.infoValue}>Folder</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>Created</span>
+                <span className={styles.infoValue}>{createdDate}</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>Modified</span>
+                <span className={styles.infoValue}>{updatedDate}</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>ID</span>
+                <span className={styles.infoValueMono}>{selectedItem.id}</span>
+              </div>
+            </div>
+          </div>
+
           <div className={styles.tipCard}>
             <Lightbulb size={24} strokeWidth={1} className={styles.tipIcon} />
             <p className={styles.tipText}>
-              Hover over items in the sidebar to add files or subfolders.
+              Hover over items in the sidebar to reveal buttons for renaming, deleting, or adding subfolders.
             </p>
           </div>
         </div>

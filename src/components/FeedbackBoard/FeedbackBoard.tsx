@@ -153,7 +153,7 @@ export default function FeedbackBoard({ showBackButton = false }: FeedbackBoardP
         <div className={styles.feedbackHeaderLeft}>
           <div>
             <h2 className={styles.sectionTitle}>Feedback Board</h2>
-            <p className={styles.sectionSubtitle}>Help shape the future of Scripta — your ideas matter</p>
+            <p className={styles.sectionSubtitle}>Help shape the future of Scribo — your ideas matter</p>
           </div>
         </div>
         <div className={styles.feedbackActions}>

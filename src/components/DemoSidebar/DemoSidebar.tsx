@@ -4,8 +4,9 @@ import { useState, useCallback, useMemo } from 'react';
 import { useDemo } from '@/lib/context/DemoContext';
 import type { SidebarItem as SidebarItemData, SidebarItemType, ItemActions, DropPosition } from '@/types/sidebar';
 import { SidebarItem } from '@/components/Sidebar/SidebarItem/SidebarItem';
-import { Telescope, LogIn, Search, X, Folder, File, Layout } from 'lucide-react';
+import { Telescope, Trash2, Search, X, Folder, File, Layout, Download, Undo, MoreHorizontal } from 'lucide-react';
 import styles from '@/components/Sidebar/Sidebar.module.css';
+import trashStyles from '@/components/TrashPanel/TrashPanel.module.css';
 
 interface DemoSidebarProps {
   selectedItemId: string | null;
@@ -33,13 +34,15 @@ function wouldCreateCycle(items: SidebarItemData[], draggedId: string, targetId:
   return false;
 }
 
-export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellation, onSignUp }: DemoSidebarProps) {
-  const { project, items: rawItems, createItem, updateItem, deleteItem } = useDemo();
+export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellation }: DemoSidebarProps) {
+  const { project, items: rawItems, createItem, updateItem, deleteItem, restoreItem, permanentDeleteItem, getTrashItems, emptyTrash } = useDemo();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set([ROOT_ID]));
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [showTrash, setShowTrash] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   // Convert items to SidebarItem format
   const items: SidebarItemData[] = useMemo(() => {
@@ -62,6 +65,20 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
       }
     });
   }, [rawItems]);
+
+  // Expand all folders for search modal sidebar
+  const searchExpandedIds = useMemo(() => {
+    const allFolderIds = new Set([ROOT_ID]);
+    items.forEach(item => {
+      if (item.type === 'folder') {
+        allFolderIds.add(item.id);
+      }
+    });
+    return allFolderIds;
+  }, [items]);
+
+  // No-op toggle for search modal (always expanded)
+  const toggleSearchExpanded = useCallback(() => {}, []);
 
   const toggleExpanded = useCallback((id: string) => {
     setExpandedIds(prev => {
@@ -166,6 +183,18 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
     onSelect: handleSelect,
   }), [handleEdit, handleDelete, handleAdd, handleSelect]);
 
+  // Actions for search modal sidebar - closes modal on select
+  const searchActions: ItemActions = useMemo(() => ({
+    onEdit: handleEdit,
+    onDelete: handleDelete,
+    onAdd: handleAdd,
+    onSelect: (item: SidebarItemData) => {
+      handleSelect(item);
+      setShowSearch(false);
+      setSearchQuery('');
+    },
+  }), [handleEdit, handleDelete, handleAdd, handleSelect]);
+
   const renderItem = useCallback((item: SidebarItemData, depth: number) => {
     const children = items.filter(i => i.parentId === item.id).sort((a, b) => a.order - b.order);
     const isRoot = item.id === ROOT_ID;
@@ -191,6 +220,33 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
       />
     );
   }, [items, handleDrop, actions, selectedItemId, expandedIds, toggleExpanded, editingId, editName, handleSaveEdit]);
+
+  // Render item for search modal sidebar
+  const renderSearchItem = useCallback((item: SidebarItemData, depth: number) => {
+    const children = items.filter(i => i.parentId === item.id).sort((a, b) => a.order - b.order);
+    const isRoot = item.id === ROOT_ID;
+    return (
+      <SidebarItem
+        key={item.id}
+        item={item}
+        children={children}
+        allItems={items}
+        depth={depth}
+        onDrop={handleDrop}
+        renderItem={renderSearchItem}
+        actions={searchActions}
+        isRoot={isRoot}
+        selectedItemId={selectedItemId}
+        isExpanded={searchExpandedIds.has(item.id)}
+        onToggleExpand={toggleSearchExpanded}
+        editingId={editingId}
+        editName={editName}
+        onEditNameChange={setEditName}
+        onSaveEdit={handleSaveEdit}
+        onCancelEdit={() => setEditingId(null)}
+      />
+    );
+  }, [items, handleDrop, searchActions, selectedItemId, searchExpandedIds, toggleSearchExpanded, editingId, editName, handleSaveEdit]);
 
   const rootItem: SidebarItemData = useMemo(() => ({
     id: ROOT_ID,
@@ -227,6 +283,23 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
     return Math.min(baseWidth + (maxDepth * widthPerLevel), 500);
   }, [maxDepth]);
 
+  // Trash items
+  const trashItems = getTrashItems();
+
+  const handleRestore = useCallback((id: string) => {
+    restoreItem(id);
+  }, [restoreItem]);
+
+  const handlePermanentDelete = useCallback((id: string) => {
+    permanentDeleteItem(id);
+  }, [permanentDeleteItem]);
+
+  const handleEmptyTrash = useCallback(() => {
+    if (confirm('Are you sure you want to permanently delete all items in trash?')) {
+      emptyTrash();
+    }
+  }, [emptyTrash]);
+
   return (
     <aside className={styles.sidebar} style={{ width: `${sidebarWidth}px` }} role="tree" aria-label="File explorer">
       <header className={styles.header}>
@@ -237,21 +310,51 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
               onClick={onToggleConstellation}
               className={styles.blankIconButton}
               type="button"
-              aria-label="Show constellation view"
+              aria-label="Constellation View"
               title="Constellation View"
             >
               <Telescope size={18} strokeWidth={1} />
             </button>
           )}
-          <div className={styles.divider}></div>
           <button 
             className={styles.blankIconButton} 
-            title="Search" 
-            aria-label="Search"
-            onClick={() => setShowSearch(prev => !prev)}
+            title="Menu" 
+            aria-label="Menu"
+            onClick={() => setShowMenu(prev => !prev)}
           >
-            <Search size={16} strokeWidth={1} />
+            <MoreHorizontal size={18} strokeWidth={1} />
           </button>
+          
+          {showMenu && (
+            <div className={styles.menuDropdown}>
+              <div className={styles.menuBackdrop} onClick={() => setShowMenu(false)} />
+              <div className={styles.menuContent}>
+                <button
+                  onClick={() => { setShowSearch(true); setShowMenu(false); }}
+                  className={styles.menuItem}
+                >
+                  <Search size={16} strokeWidth={1} />
+                  <span>Search</span>
+                </button>
+                <button
+                  className={styles.menuItem}
+                  style={{ opacity: 0.4, cursor: 'not-allowed' }}
+                  disabled
+                  title="Sign up to export"
+                >
+                  <Download size={16} strokeWidth={1} />
+                  <span>Export</span>
+                </button>
+                <button
+                  onClick={() => { setShowTrash(true); setShowMenu(false); }}
+                  className={styles.menuItem}
+                >
+                  <Trash2 size={16} strokeWidth={1} />
+                  <span>Trash</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
@@ -271,13 +374,79 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
         />
       </nav>
 
-      {/* Demo banner */}
-      <div className={styles.trashButton}>
-        <button onClick={onSignUp} className={styles.trashBtn} title="Sign up to save your work">
-          <LogIn size={18} strokeWidth={1} />
-        </button>
-      </div>
+      {/* Trash Panel */}
+      {showTrash && (
+        <div className={trashStyles.overlay} onClick={() => setShowTrash(false)}>
+          <div className={trashStyles.panel} onClick={e => e.stopPropagation()}>
+            <header className={trashStyles.header}>
+              <div className={trashStyles.headerLeft}>
+                <Trash2 size={20} strokeWidth={1} className={trashStyles.icon} />
+                <h2 className={trashStyles.title}>Trash</h2>
+              </div>
+              <button onClick={() => setShowTrash(false)} className={trashStyles.closeButton}>
+                <X size={20} strokeWidth={1} />
+              </button>
+            </header>
 
+            <p className={trashStyles.subtitle}>
+              Items in trash will be permanently deleted when you clear browser data
+            </p>
+
+            <div className={trashStyles.content}>
+              {trashItems.length === 0 ? (
+                <div className={trashStyles.empty}>
+                  <Trash2 size={48} strokeWidth={1} className={trashStyles.emptyIcon} />
+                  <p>Trash is empty</p>
+                </div>
+              ) : (
+                <ul className={trashStyles.list}>
+                  {trashItems.map(item => (
+                    <li key={item.id} className={trashStyles.item}>
+                      <div className={trashStyles.itemInfo}>
+                        <span className={trashStyles.itemIcon}>
+                          {item.type === 'folder'
+                            ? <Folder size={16} strokeWidth={1} data-type="folder" />
+                            : item.type === 'canvas'
+                            ? <Layout size={16} strokeWidth={1} data-type="canvas" />
+                            : <File size={16} strokeWidth={1} data-type="file" />
+                          }
+                        </span>
+                        <span className={trashStyles.itemName}>{item.name}</span>
+                      </div>
+                      <div className={trashStyles.itemActions}>
+                        <button
+                          onClick={() => handleRestore(item.id)}
+                          className={trashStyles.restoreButton}
+                          title="Restore"
+                        >
+                          <Undo size={16} strokeWidth={1} />
+                        </button>
+                        <button
+                          onClick={() => handlePermanentDelete(item.id)}
+                          className={trashStyles.deleteButton}
+                          title="Delete permanently"
+                        >
+                          <X size={16} strokeWidth={1} />
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {trashItems.length > 0 && (
+              <footer className={trashStyles.footer}>
+                <button onClick={handleEmptyTrash} className={trashStyles.emptyButton}>
+                  Empty Trash
+                </button>
+              </footer>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Search Modal */}
       {showSearch && (
         <div className={styles.searchModal} onClick={() => { setShowSearch(false); setSearchQuery(''); }}>
           <div className={styles.searchModalContent} onClick={(e) => e.stopPropagation()}>
@@ -318,9 +487,7 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
                           className={styles.searchResultItem}
                           onClick={() => {
                             if (item.type === 'file' || item.type === 'canvas') {
-                              actions.onSelect(item);
-                              setShowSearch(false);
-                              setSearchQuery('');
+                              searchActions.onSelect(item);
                             }
                           }}
                         >
@@ -349,8 +516,27 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
                 <div className={styles.searchPlaceholder}>
                   <Search size={48} strokeWidth={1} className={styles.placeholderIcon} />
                   <div className={styles.placeholderText}>Start typing to search</div>
+                  <div className={styles.placeholderSubtext}>Search through all your files and folders</div>
                 </div>
               )}
+              
+              <div className={styles.miniSidebar}>
+                <nav className={styles.miniSidebarContent}>
+                  <SidebarItem
+                    item={rootItem}
+                    children={rootChildren}
+                    allItems={items}
+                    depth={0}
+                    onDrop={handleDrop}
+                    renderItem={renderSearchItem}
+                    actions={searchActions}
+                    isRoot={true}
+                    selectedItemId={selectedItemId}
+                    isExpanded={searchExpandedIds.has(ROOT_ID)}
+                    onToggleExpand={toggleSearchExpanded}
+                  />
+                </nav>
+              </div>
             </div>
           </div>
         </div>

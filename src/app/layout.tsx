@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Scripta",
+  title: "Scribo",
   description: "Organize your creative projects",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
 };

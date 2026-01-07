@@ -8,7 +8,7 @@ import { SidebarItem } from './SidebarItem/SidebarItem';
 import { TrashPanel } from '@/components/TrashPanel/TrashPanel';
 import { ExportModal } from '@/components/ExportModal/ExportModal';
 import styles from './Sidebar.module.css';
-import { Telescope, Trash2, ArrowLeft, Download, Search, X, Folder, File, Layout } from 'lucide-react';
+import { Telescope, Trash2, ArrowLeft, Download, Search, X, Folder, File, Layout, MoreHorizontal } from 'lucide-react';
 
 
 
@@ -19,6 +19,7 @@ interface SidebarProps {
   onSelectItem: (item: SidebarItemData | null) => void;
   onToggleBlankView?: () => void;
   onBackToProjects?: () => void;
+  isDemo?: boolean;
 }
 
 function wouldCreateCycle(items: SidebarItemData[], draggedId: string, targetId: string): boolean {
@@ -94,7 +95,7 @@ function uiParentIdToDb(parentId: string, rootId: string): string | null {
  * Database uses NULL for root-level items.
  * UI uses ROOT_ID (project.id) for root-level items.
  */
-export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankView, onBackToProjects }: SidebarProps) {
+export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankView, onBackToProjects, isDemo = false }: SidebarProps) {
   const ROOT_ID = project.id;
 
   const [items, setItems] = useState<SidebarItemData[]>([]);
@@ -104,6 +105,7 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
   const [editName, setEditName] = useState('');
   const [showTrash, setShowTrash] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set([ROOT_ID])); // Track expanded folders for main sidebar
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false); // Closed by default
@@ -491,45 +493,63 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
       <header className={styles.header}>
         <span className={styles.title}>{project.name}</span>
         <div className={styles.headerActions}>
-          {onBackToProjects && (
-            <button
-              onClick={onBackToProjects}
-              className={styles.blankIconButton}
-              type="button"
-              aria-label="Back to projects"
-              title="Back to Projects"
-            >
-              <ArrowLeft size={18} strokeWidth={1} />
-            </button>
-          )}
           {onToggleBlankView && (
             <button
               onClick={onToggleBlankView}
               className={styles.blankIconButton}
               type="button"
-              aria-label="Show constellation view"
+              aria-label="Constellation View"
               title="Constellation View"
             >
               <Telescope size={18} strokeWidth={1} />
             </button>
           )}
-          <div className={styles.divider}></div>
           <button 
             className={styles.blankIconButton} 
-            title="Export" 
-            aria-label="Export"
-            onClick={() => setShowExport(true)}
+            title="Menu" 
+            aria-label="Menu"
+            onClick={() => setShowMenu(prev => !prev)}
           >
-            <Download size={16} strokeWidth={1} />
+            <MoreHorizontal size={18} strokeWidth={1} />
           </button>
-          <button 
-            className={styles.blankIconButton} 
-            title="Search" 
-            aria-label="Search"
-            onClick={() => setShowSearch(prev => !prev)}
-          >
-            <Search size={16} strokeWidth={1} />
-          </button>
+          
+          {showMenu && (
+            <div className={styles.menuDropdown}>
+              <div className={styles.menuBackdrop} onClick={() => setShowMenu(false)} />
+              <div className={styles.menuContent}>
+                {onBackToProjects && !isDemo && (
+                  <button
+                    onClick={() => { onBackToProjects(); setShowMenu(false); }}
+                    className={styles.menuItem}
+                  >
+                    <ArrowLeft size={16} strokeWidth={1} />
+                    <span>Back to Projects</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => { setShowSearch(true); setShowMenu(false); }}
+                  className={styles.menuItem}
+                >
+                  <Search size={16} strokeWidth={1} />
+                  <span>Search</span>
+                </button>
+                <button
+                  onClick={() => { setShowExport(true); setShowMenu(false); }}
+                  className={styles.menuItem}
+                >
+                  <Download size={16} strokeWidth={1} />
+                  <span>Export</span>
+                </button>
+                <button
+                  onClick={() => { setShowTrash(true); setShowMenu(false); }}
+                  className={styles.menuItem}
+                >
+                  <Trash2 size={16} strokeWidth={1} />
+                  <span>Trash</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </header>
       {error && <div className={styles.error}>{error}</div>}
@@ -548,12 +568,6 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
           onToggleExpand={toggleExpanded}
         />
       </nav>
-
-      <div className={styles.trashButton}>
-        <button onClick={() => setShowTrash(true)} className={styles.trashBtn} title="Trash">
-          <Trash2 size={18} strokeWidth={1} />
-        </button>
-      </div>
 
       <TrashPanel
         projectId={project.id}

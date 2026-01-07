@@ -2,8 +2,7 @@
 .feedbackBoard {
   position: relative;
   padding: 80px 24px;
-  background: #fdfefe;
-  border-top: 1px solid rgb(209, 213, 219);
+  background: #fafafa;
 }
 
 .feedbackHeader {

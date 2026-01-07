@@ -113,9 +113,12 @@ function DemoPageContent() {
     <main className={styles.main}>
       {showBanner && (
         <div className={styles.demoBanner}>
-          <span>Demo mode — saved locally. Don&apos;t clear browser data or you&apos;ll lose your work.</span>
+          <span>
+            <strong>Demo mode</strong> — Write up to 15,000 words free. Your work is saved in your browser. 
+            Create a free account to save permanently.
+          </span>
           <button onClick={handleSignUp} className={styles.bannerButton}>
-            Sign up to keep it safe
+            Create Free Account
           </button>
           <button onClick={() => setShowBanner(false)} className={styles.bannerClose} aria-label="Dismiss">
             <X size={16} strokeWidth={1.5} />
@@ -127,7 +130,6 @@ function DemoPageContent() {
           selectedItemId={selectedItem?.id ?? null}
           onSelectItem={handleSelectItem}
           onToggleConstellation={toggleConstellation}
-          onSignUp={handleSignUp}
         />
         <section className={`${styles.content} ${showDetailOnMobile ? styles.showDetail : ''}`}>
           <DemoDetailPanel
