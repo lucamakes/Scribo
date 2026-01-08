@@ -1,0 +1,83 @@
+/* ============================================
+   SCRIBO DESIGN SYSTEM
+   Central source of truth for all UI styles
+   Based on landing page patterns
+   ============================================ */
+
+:root {
+  /* ==========================================
+     COLORS
+     ========================================== */
+  
+  /* Ghost button */
+  --secondary-button-text-color: #666;
+  --secondary-button-text-color-hover: #1a1a1a;
+  --secondary-button-border-color: #666;
+  --secondary-button-background-color: #fff;
+  --secondary-button-radius: 6px;
+
+
+    /* CTA button */
+    --primary-button-text-color: #fff;
+        --primary-button-text-color-hover: #fff;
+
+    --primary-button-background-color: #1a78c2;
+    --primary-button-background-color: #1565a8;
+    --primary-button-radius: 6px;
+
+
+
+
+
+
+  
+
+
+
+
+  /* Brand / Accent */
+  --color-accent: #1a78c2;
+  --color-accent-hover: #1565a8;
+  --color-accent-light: #1a78c210;
+  --color-accent-medium: #1a78c226;
+  --color-accent-border: #1a78c230;
+  
+  /* Text */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #666;
+  --color-text-tertiary: #888;
+  --color-text-muted: #999;
+
+  --color-text-ghost-button: #666;
+  --color-text-ghost-button-hover: #1a1a1a
+
+  
+
+
+  
+  /* Backgrounds */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #fafafa;
+  --color-bg-tertiary: #f9fafb;
+  --color-bg-hover: #f3f4f6;
+  --color-bg-dark: #1a1a1a;
+  --color-bg-dark-hover: #333;
+  
+  /* Borders */
+  --color-border-light: #e5e7eb;
+  --color-border-medium: #d1d5db;
+  --color-border-dark: #999;
+  --color-border-darker: #c7c7c7;
+  --color-border-black: #000;
+  
+  /* Semantic */
+  --color-success: #10b981;
+  --color-info: #ccc;
+  
+  /* File type colors */
+  --color-file: #3b82f6;
+  --color-folder: #f59e0b;
+  --color-canvas: #8b5cf6;
+
+  --button-radius: 6px;
+}

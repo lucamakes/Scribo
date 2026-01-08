@@ -351,6 +351,29 @@
   cursor: not-allowed;
 }
 
+/* History Button */
+.historyButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  color: #666;
+}
+
+.historyButton:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #1a1a1a;
+}
+
 .unsavedDot {
   width: 8px;
   height: 8px;
@@ -804,7 +827,6 @@
   justify-content: space-between;
   gap: 16px;
   padding: 24px;
-  border-bottom: 1px solid #e5e5e5;
   width: 100%;
 }
 

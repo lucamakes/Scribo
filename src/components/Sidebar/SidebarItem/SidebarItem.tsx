@@ -247,13 +247,13 @@ export function SidebarItem({
               {showAddMenu && (
                 <div className={styles.addMenu}>
                   <button onClick={handleAddFile} className={styles.menuItem}>
-                    <File size={14} strokeWidth={1.5} /> New File
+                    <span className={styles.menuFileIcon}><File size={14} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} /></span> New File
                   </button>
                   <button onClick={handleAddCanvas} className={styles.menuItem}>
-                    <Layout size={14} strokeWidth={1.5} /> New Canvas
+                    <span className={styles.menuCanvasIcon}><Layout size={14} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} /></span> New Canvas
                   </button>
                   <button onClick={handleAddFolder} className={styles.menuItem}>
-                    <Folder size={14} strokeWidth={1.5} /> New Folder
+                    <span className={styles.menuFolderIcon}><Folder size={14} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} /></span> New Folder
                   </button>
                 </div>
               )}

@@ -128,7 +128,6 @@
   background-color: #fafafa;
   border-color: #d0d0d0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  transform: translateY(-2px);
 }
 
 .projectInfo {
@@ -286,6 +285,26 @@
   background-color: rgba(239, 68, 68, 0.1);
   border-color: #ef4444;
   color: #dc2626;
+}
+
+.actionButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #1a78c2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Edit Input */

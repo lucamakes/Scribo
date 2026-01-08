@@ -4,30 +4,32 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
 import { itemService } from '@/lib/services/itemService';
+import { goalService } from '@/lib/services/goalService';
+import { versionService } from '@/lib/services/versionService';
 import { TiptapEditor } from '@/components/TiptapEditor/TiptapEditor';
 import { CanvasEditor } from '@/components/CanvasEditor/CanvasEditor';
 import { UpgradePrompt } from '@/components/UpgradePrompt/UpgradePrompt';
+import { VersionHistory } from '@/components/VersionHistory/VersionHistory';
 import { useSubscription } from '@/lib/hooks/useSubscription';
 import { usePreferences } from '@/lib/hooks/usePreferences';
 import {
-    Folder,
-    FileText,
     Lightbulb,
     Check,
     X,
     Maximize2,
     Minimize2,
     AlertTriangle,
-    Save,
-    Pencil,
     Eye,
-    EyeClosed
+    EyeClosed,
+    History
 } from 'lucide-react';
 import styles from './DetailPanel.module.css';
 
 interface DetailPanelProps {
     /** Currently selected item, or null if nothing selected */
     selectedItem: SidebarItemData | null;
+    /** Project ID for tracking goals */
+    projectId?: string;
     /** Callback when file content is saved */
     onContentSaved?: (itemId: string, content: string) => void;
     /** If true, opens the file in fullscreen mode */
@@ -46,7 +48,7 @@ interface DetailPanelProps {
  * - Rich text editor when a file is selected
  * - Empty state when nothing is selected
  */
-export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, onFullscreenOpened, onBackToMaster, isDemo = false }: DetailPanelProps) {
+export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFullscreen, onFullscreenOpened, onBackToMaster, isDemo = false }: DetailPanelProps) {
     const [content, setContent] = useState('');
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [error, setError] = useState<string | null>(null);
@@ -54,6 +56,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
     const [isFocusMode, setIsFocusMode] = useState(false);
     const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
     const [showLimitModal, setShowLimitModal] = useState(false);
+    const [showVersionHistory, setShowVersionHistory] = useState(false);
     const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const lastSavedContent = useRef('');
     const selectedItemIdRef = useRef<string | null>(null);
@@ -153,6 +156,16 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
         setSaveStatus('saving');
         setError(null);
 
+        // Calculate words for goal tracking (only for files)
+        const countWords = (html: string) => {
+            const text = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+            return text ? text.split(/\s+/).filter(Boolean).length : 0;
+        };
+
+        const previousWordCount = countWords(lastSavedContent.current);
+        const newWordCount = countWords(newContent);
+        const wordsAdded = Math.max(0, newWordCount - previousWordCount);
+
         // In demo mode, just use the callback directly
         if (isDemo) {
             lastSavedContent.current = newContent;
@@ -170,6 +183,26 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             lastSavedContent.current = newContent;
             setSaveStatus('saved');
             onContentSaved?.(selectedItem.id, newContent);
+            
+            // Create a version snapshot (runs in background, doesn't block save)
+            versionService.createVersion(selectedItem.id, newContent).catch(err => {
+                console.error('Failed to create version:', err);
+            });
+            
+            // Track goal progress (only for files with positive word additions)
+            if (selectedItem.type === 'file' && projectId && wordsAdded > 0) {
+                goalService.addWords(projectId, wordsAdded)
+                    .then(() => {
+                        // Dispatch event with words added to update GoalProgress component
+                        window.dispatchEvent(new CustomEvent('goalProgressUpdated', { 
+                            detail: { wordsAdded } 
+                        }));
+                    })
+                    .catch(err => {
+                        console.error('Failed to track goal progress:', err);
+                    });
+            }
+            
             // Refresh subscription word count after save (only for files)
             if (selectedItem.type === 'file') {
                 refreshSubscription();
@@ -183,7 +216,7 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
             setError((result as { success: false; error: string }).error);
             setSaveStatus('error');
         }
-    }, [selectedItem, onContentSaved, refreshSubscription, isDemo]);
+    }, [selectedItem, projectId, onContentSaved, refreshSubscription, isDemo]);
 
     // Debounced content change handler for Tiptap
     const handleContentChange = useCallback((newContent: string) => {
@@ -357,6 +390,13 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                             )}
                         </button>
                         <button
+                            onClick={() => setShowVersionHistory(true)}
+                            className={styles.historyButton}
+                            title="Version history"
+                        >
+                            <History size={16} strokeWidth={1.5} />
+                        </button>
+                        <button
                             onClick={onBackToMaster}
                             className={styles.mobileCloseButton}
                             title="Back to files"
@@ -388,18 +428,50 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
 
         if (isFullscreen) {
             return (
-                <div className={styles.fullscreenOverlay}>
-                    <div className={styles.fullscreenEditor}>
-                        {canvasContent}
+                <>
+                    <div className={styles.fullscreenOverlay}>
+                        <div className={styles.fullscreenEditor}>
+                            {canvasContent}
+                        </div>
                     </div>
-                </div>
+                    {isMounted && showVersionHistory && createPortal(
+                        <VersionHistory
+                            itemId={selectedItem.id}
+                            itemName={selectedItem.name}
+                            currentContent={content}
+                            onRestore={(restoredContent) => {
+                                setContent(restoredContent);
+                                saveContent(restoredContent);
+                            }}
+                            onClose={() => setShowVersionHistory(false)}
+                            isDemo={isDemo}
+                        />,
+                        document.body
+                    )}
+                </>
             );
         }
 
         return (
-            <div className={styles.panel}>
-                {canvasContent}
-            </div>
+            <>
+                <div className={styles.panel}>
+                    {canvasContent}
+                </div>
+                {isMounted && showVersionHistory && createPortal(
+                    <VersionHistory
+                        itemId={selectedItem.id}
+                        itemName={selectedItem.name}
+                        currentContent={content}
+                        onRestore={(restoredContent) => {
+                            setContent(restoredContent);
+                            saveContent(restoredContent);
+                        }}
+                        onClose={() => setShowVersionHistory(false)}
+                        isDemo={isDemo}
+                    />,
+                    document.body
+                )}
+            </>
         );
     }
 
@@ -433,6 +505,13 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                             ) : (
                                 <div className={styles.unsavedDot} />
                             )}
+                        </button>
+                        <button
+                            onClick={() => setShowVersionHistory(true)}
+                            className={styles.historyButton}
+                            title="Version history"
+                        >
+                            <History size={16} strokeWidth={1.5} />
                         </button>
                         <div className={styles.statistics}>
                             <span className={styles.stat}>
@@ -516,6 +595,23 @@ export function DetailPanel({ selectedItem, onContentSaved, openInFullscreen, on
                         <Eye size={18} strokeWidth={1} />
                     )}
                 </button>
+            )}
+
+            {/* Version History Panel */}
+            {isMounted && showVersionHistory && createPortal(
+                <VersionHistory
+                    itemId={selectedItem.id}
+                    itemName={selectedItem.name}
+                    currentContent={content}
+                    onRestore={(restoredContent) => {
+                        setContent(restoredContent);
+                        // Trigger save of restored content
+                        saveContent(restoredContent);
+                    }}
+                    onClose={() => setShowVersionHistory(false)}
+                    isDemo={isDemo}
+                />,
+                document.body
             )}
         </>
     );

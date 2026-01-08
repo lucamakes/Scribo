@@ -7,7 +7,7 @@ import { itemService } from '@/lib/services/itemService';
 import { ProjectSetup } from '@/components/ProjectSetup/ProjectSetup';
 import { ProjectImportModal } from '@/components/ProjectImportModal';
 import { UserMenu } from '@/components/UserMenu/UserMenu';
-import { Pencil, X, Plus, ChevronRight, Upload, BookOpen } from 'lucide-react';
+import { Pencil, X, Plus, ChevronRight, Upload, BookOpen, Copy } from 'lucide-react';
 import styles from './ProjectList.module.css';
 
 interface ProjectListProps {
@@ -33,6 +33,7 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
 
   const calculateStats = (content: string) => {
     const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
@@ -149,6 +150,20 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
     }
   };
 
+  const handleDuplicate = async (e: React.MouseEvent, projectId: string) => {
+    e.stopPropagation();
+    setDuplicatingId(projectId);
+    
+    const result = await projectService.duplicate(projectId);
+    if (result.success) {
+      // Reload projects to show the new one
+      await loadProjects();
+    } else {
+      setError((result as { success: false; error: string }).error);
+    }
+    setDuplicatingId(null);
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -231,6 +246,18 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
                     <div className={styles.actions}>
                       {editingId === project.id ? null : (
                         <>
+                          <button
+                            onClick={(e) => handleDuplicate(e, project.id)}
+                            className={styles.actionButton}
+                            title="Duplicate"
+                            disabled={duplicatingId === project.id}
+                          >
+                            {duplicatingId === project.id ? (
+                              <span className={styles.spinner} />
+                            ) : (
+                              <Copy size={14} strokeWidth={1} />
+                            )}
+                          </button>
                           <button
                             onClick={(e) => handleStartEdit(e, project)}
                             className={styles.actionButton}

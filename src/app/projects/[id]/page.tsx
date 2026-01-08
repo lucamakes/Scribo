@@ -7,6 +7,7 @@ import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
 import type { ItemRow } from '@/types/database';
 import { Sidebar } from '@/components/Sidebar/Sidebar';
 import { DetailPanel } from '@/components/DetailPanel/DetailPanel';
+import { SettingsModal } from '@/components/SettingsModal/SettingsModal';
 import Constellation from '@/example-files/Constellation';
 import { projectService } from '@/lib/services/projectService';
 import { itemService } from '@/lib/services/itemService';
@@ -34,6 +35,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     const [error, setError] = useState<string | null>(null);
     const [openInFullscreen, setOpenInFullscreen] = useState(false);
     const [showDetailOnMobile, setShowDetailOnMobile] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
 
     // Load project data
     useEffect(() => {
@@ -196,16 +198,23 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                 onSelectItem={handleSelectItem}
                 onToggleBlankView={toggleBlankView}
                 onBackToProjects={handleBackToProjects}
+                onOpenSettings={() => setShowSettings(true)}
             />
             <section className={`${styles.content} ${showDetailOnMobile ? styles.showDetail : ''}`}>
                 <DetailPanel
                     selectedItem={selectedItem}
+                    projectId={project.id}
                     onContentSaved={handleContentSaved}
                     openInFullscreen={openInFullscreen}
                     onFullscreenOpened={() => setOpenInFullscreen(false)}
                     onBackToMaster={handleBackToMaster}
                 />
             </section>
+
+            <SettingsModal
+                isOpen={showSettings}
+                onClose={() => setShowSettings(false)}
+            />
         </main>
     );
 }

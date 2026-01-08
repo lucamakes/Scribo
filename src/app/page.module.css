@@ -143,7 +143,7 @@
 .navCtaSecondary {
   padding: 8px 16px;
   background: #ffffff;
-  border: 1px solid #999999;
+  border: 1px solid #555555;
   border-radius: 6px;
   color: #555555;
   font-size: 14px;
@@ -189,7 +189,7 @@
   display: none;
   flex-direction: column;
   padding: 16px 24px 24px;
-  border-top: 1px solid rgb(209, 213, 219);
+  border-top: 1px solid #555555;
   background: #ffffff;
 }
 
@@ -225,8 +225,8 @@
   padding: 14px 20px;
   margin-top: 8px;
   background: #ffffff;
-  border: 1px solid #999999;
-  border-radius: 8px;
+  border: 1px solid #555555;
+  border-radius: 6px;
   color: #555555;
   font-size: 16px;
   font-weight: 500;
@@ -248,7 +248,7 @@
   margin-top: 8px;
   background: #1a78c2;
   border: 1px solid #1a78c2;
-  border-radius: 8px;
+  border-radius: 6px;
   color: #ffffff;
   font-size: 16px;
   font-weight: 500;
@@ -373,7 +373,7 @@
   padding: 14px 28px;
   background: #1a78c2;
   border: 1px solid #1a78c2;
-  border-radius: 8px;
+  border-radius: 6px;
   color: #ffffff;
   font-size: 16px;
   font-weight: 500;
@@ -393,8 +393,8 @@
   gap: 8px;
   padding: 14px 28px;
   background: #ffffff;
-  border: 1px solid #999999;
-  border-radius: 8px;
+  border: 1px solid #555555;
+  border-radius: 6px;
   color: #555555;
   font-size: 16px;
   font-weight: 500;
@@ -405,8 +405,8 @@
 
 .secondaryButton:hover {
   background: #f9fafb;
-  border-color: #999999;
-  color: #1a1a1a;
+  border-color: #555555;
+  color: #555555;
 }
 
 .heroNote {
@@ -565,8 +565,8 @@
 
 .bentoCard {
   background: #ffffff;
-  border: 1px solid #000000;
-  border-radius: 12px;
+  border: 1px solid #555555;
+  border-radius: 8px;
   padding: 32px;
   transition: box-shadow 0.2s ease;
   overflow: hidden;
@@ -608,7 +608,7 @@
 
 .bentoVisual {
   margin: 0 -32px -32px -32px;
-  border-top: 1px solid #d1d5db;
+  border-top: 1px solid #555555;
   overflow: hidden;
 }
 
@@ -826,7 +826,7 @@
 .plan {
   background: #ffffff;
   border: 1px solid #999999;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 32px 24px;
   text-align: left;
   position: relative;
@@ -1153,7 +1153,7 @@
 .feedbackBoard {
   padding: 80px 24px;
   background: #ffffff;
-  border-top: 1px solid #d1d5db;
+  border-top: 1px solid #555555;
 }
 
 .feedbackHeader {
@@ -1176,7 +1176,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  background: transparent;
+  background: #ffffff;
   border: 1px solid #555555;
   border-radius: 6px;
   color: #555555;
@@ -1235,7 +1235,7 @@
 
 .filterGroup select {
   padding: 8px 12px;
-  border: 1px solid #000000;
+  border: 1px solid #555555;
   border-radius: 6px;
   background: #ffffff;
   color: #1a1a1a;
@@ -1298,7 +1298,7 @@
   gap: 16px;
   padding: 20px;
   background: #ffffff;
-  border: 1px solid #000000;
+  border: 1px solid #555555;
   border-radius: 8px;
   transition: box-shadow 0.2s ease;
 }
@@ -1314,7 +1314,7 @@
   gap: 4px;
   padding: 8px 12px;
   background: #fafafa;
-  border: 1px solid #000000;
+  border: 1px solid #555555;
   border-radius: 6px;
   color: #666;
   font-size: 14px;
@@ -1398,7 +1398,7 @@
 
 .modal {
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: 8px;
   max-width: 500px;
   width: 100%;
   max-height: 90vh;
@@ -1411,7 +1411,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 24px 24px 16px;
-  border-bottom: 1px solid #d1d5db;
+  border-bottom: 1px solid #555555;
 }
 
 .modalHeader h2 {
@@ -1476,7 +1476,7 @@
 .formGroup textarea {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #000000;
+  border: 1px solid #555555;
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
@@ -1508,7 +1508,7 @@
   gap: 6px;
   padding: 10px 12px;
   background: #ffffff;
-  border: 1px solid #000000;
+  border: 1px solid #555555;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;

@@ -38,12 +38,20 @@ export interface UserPreferences {
 }
 
 /**
+ * Goal period type
+ */
+export type GoalPeriod = 'daily' | 'weekly' | 'total';
+
+/**
  * Project row from database
  */
 export interface ProjectRow {
   id: string;
   user_id: string;
   name: string;
+  word_count_goal: number | null;
+  time_goal_minutes: number | null;
+  goal_period: GoalPeriod;
   created_at: string;
   updated_at: string;
 }
@@ -55,6 +63,9 @@ export interface ProjectInsert {
   id?: string;
   user_id: string;
   name: string;
+  word_count_goal?: number | null;
+  time_goal_minutes?: number | null;
+  goal_period?: GoalPeriod;
   created_at?: string;
   updated_at?: string;
 }
@@ -64,7 +75,23 @@ export interface ProjectInsert {
  */
 export interface ProjectUpdate {
   name?: string;
+  word_count_goal?: number | null;
+  time_goal_minutes?: number | null;
+  goal_period?: GoalPeriod;
   updated_at?: string;
+}
+
+/**
+ * Goal progress row from database
+ */
+export interface GoalProgressRow {
+  id: string;
+  project_id: string;
+  date: string;
+  words_written: number;
+  time_spent_minutes: number;
+  created_at: string;
+  updated_at: string;
 }
 
 /**
@@ -119,6 +146,8 @@ export interface ItemWithPath extends ItemRow {
   depth: number;
 }
 
+import type { VersionRow, VersionInsert } from '@/types/version';
+
 /**
  * Database schema type for Supabase client
  */
@@ -141,6 +170,12 @@ export interface Database {
         Row: UserRow;
         Insert: Partial<UserRow> & { id: string };
         Update: Partial<UserRow>;
+        Relationships: [];
+      };
+      item_versions: {
+        Row: VersionRow;
+        Insert: VersionInsert;
+        Update: Partial<VersionRow>;
         Relationships: [];
       };
     };
@@ -171,6 +206,18 @@ export interface Database {
       };
       cleanup_old_trash_items: {
         Args: Record<string, never>;
+        Returns: number;
+      };
+      create_item_version: {
+        Args: { p_item_id: string; p_content: string; p_word_count?: number };
+        Returns: string | null;
+      };
+      get_next_version_number: {
+        Args: { p_item_id: string };
+        Returns: number;
+      };
+      cleanup_old_versions: {
+        Args: { p_keep_count?: number };
         Returns: number;
       };
     };

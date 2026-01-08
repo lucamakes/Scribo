@@ -7,8 +7,9 @@ import { itemService } from '@/lib/services/itemService';
 import { SidebarItem } from './SidebarItem/SidebarItem';
 import { TrashPanel } from '@/components/TrashPanel/TrashPanel';
 import { ExportModal } from '@/components/ExportModal/ExportModal';
+import { GoalProgress } from '@/components/GoalProgress/GoalProgress';
 import styles from './Sidebar.module.css';
-import { Telescope, Trash2, ArrowLeft, Download, Search, X, Folder, File, Layout, MoreHorizontal } from 'lucide-react';
+import { Telescope, Trash2, ArrowLeft, Download, Search, X, Folder, File, Layout, MoreHorizontal, Settings } from 'lucide-react';
 
 
 
@@ -19,6 +20,7 @@ interface SidebarProps {
   onSelectItem: (item: SidebarItemData | null) => void;
   onToggleBlankView?: () => void;
   onBackToProjects?: () => void;
+  onOpenSettings?: () => void;
   isDemo?: boolean;
 }
 
@@ -95,7 +97,7 @@ function uiParentIdToDb(parentId: string, rootId: string): string | null {
  * Database uses NULL for root-level items.
  * UI uses ROOT_ID (project.id) for root-level items.
  */
-export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankView, onBackToProjects, isDemo = false }: SidebarProps) {
+export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankView, onBackToProjects, onOpenSettings, isDemo = false }: SidebarProps) {
   const ROOT_ID = project.id;
 
   const [items, setItems] = useState<SidebarItemData[]>([]);
@@ -164,26 +166,26 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
   }, [items, searchQuery, ROOT_ID]);
 
   // Load items from database
-  useEffect(() => {
-    const loadItems = async () => {
-      setLoading(true);
-      setError(null);
-      const result = await itemService.getByProject(project.id);
+  const loadItems = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    const result = await itemService.getByProject(project.id);
 
-      if (!result.success) {
-        setError((result as { success: false; error: string }).error);
-        setLoading(false);
-        return;
-      }
-
-      // Convert DB items to UI format (null -> ROOT_ID)
-      const sidebarItems = result.data.map(item => dbItemToSidebarItem(item, ROOT_ID));
-      setItems(sidebarItems);
+    if (!result.success) {
+      setError((result as { success: false; error: string }).error);
       setLoading(false);
-    };
+      return;
+    }
 
-    loadItems();
+    // Convert DB items to UI format (null -> ROOT_ID)
+    const sidebarItems = result.data.map(item => dbItemToSidebarItem(item, ROOT_ID));
+    setItems(sidebarItems);
+    setLoading(false);
   }, [project.id, ROOT_ID]);
+
+  useEffect(() => {
+    loadItems();
+  }, [loadItems]);
 
   const handleDrop = useCallback(async (draggedId: string, targetId: string, position: DropPosition) => {
     const draggedItem = items.find(i => i.id === draggedId);
@@ -547,6 +549,15 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
                   <Trash2 size={16} strokeWidth={1} />
                   <span>Trash</span>
                 </button>
+                {onOpenSettings && (
+                  <button
+                    onClick={() => { onOpenSettings(); setShowMenu(false); }}
+                    className={styles.menuItem}
+                  >
+                    <Settings size={16} strokeWidth={1} />
+                    <span>Settings</span>
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -569,10 +580,26 @@ export function Sidebar({ project, selectedItemId, onSelectItem, onToggleBlankVi
         />
       </nav>
 
+      {!isDemo && (
+        <div className={styles.goalSection}>
+          <GoalProgress 
+            projectId={project.id} 
+            currentWordCount={items.reduce((sum, item) => {
+              if (item.type === 'file' && item.content) {
+                const plainText = item.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+                return sum + (plainText ? plainText.split(/\s+/).filter(Boolean).length : 0);
+              }
+              return sum;
+            }, 0)}
+          />
+        </div>
+      )}
+
       <TrashPanel
         projectId={project.id}
         isOpen={showTrash}
         onClose={() => setShowTrash(false)}
+        onItemRestored={loadItems}
       />
 
       <ExportModal

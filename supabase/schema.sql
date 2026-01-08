@@ -23,6 +23,9 @@ CREATE TABLE projects (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
+    word_count_goal INTEGER DEFAULT NULL,
+    time_goal_minutes INTEGER DEFAULT NULL,
+    goal_period TEXT DEFAULT 'daily' CHECK (goal_period IN ('daily', 'weekly', 'total')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     

@@ -10,13 +10,14 @@ interface TrashPanelProps {
     projectId: string;
     isOpen: boolean;
     onClose: () => void;
+    onItemRestored?: () => void;
 }
 
 /**
  * Trash panel showing deleted items with restore/permanent delete options.
  * Items are automatically deleted after 14 days.
  */
-export function TrashPanel({ projectId, isOpen, onClose }: TrashPanelProps) {
+export function TrashPanel({ projectId, isOpen, onClose, onItemRestored }: TrashPanelProps) {
     const [items, setItems] = useState<ItemRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -47,6 +48,7 @@ export function TrashPanel({ projectId, isOpen, onClose }: TrashPanelProps) {
         const result = await itemService.restore(id);
         if (result.success) {
             setItems(prev => prev.filter(item => item.id !== id));
+            onItemRestored?.();
         } else {
             setError((result as { success: false; error: string }).error);
         }

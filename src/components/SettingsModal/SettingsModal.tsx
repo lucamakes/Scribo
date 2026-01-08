@@ -1,0 +1,172 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { X, Type, AlignLeft, Palette } from 'lucide-react';
+import { usePreferences } from '@/lib/hooks/usePreferences';
+import styles from './SettingsModal.module.css';
+
+interface SettingsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+/**
+ * Settings modal for user preferences.
+ * Includes font size, line height, and text color settings.
+ */
+export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+  const { fontSize, lineHeight, textColor, setFontSize, setLineHeight, setTextColor, isLoading } = usePreferences();
+  
+  const [localFontSize, setLocalFontSize] = useState(fontSize);
+  const [localLineHeight, setLocalLineHeight] = useState(lineHeight);
+  const [localTextColor, setLocalTextColor] = useState(textColor);
+  const [saving, setSaving] = useState(false);
+
+  // Sync local state when preferences load
+  useEffect(() => {
+    setLocalFontSize(fontSize);
+    setLocalLineHeight(lineHeight);
+    setLocalTextColor(textColor);
+  }, [fontSize, lineHeight, textColor]);
+
+  if (!isOpen) return null;
+
+  const handleSave = async () => {
+    setSaving(true);
+    await setFontSize(localFontSize);
+    await setLineHeight(localLineHeight);
+    await setTextColor(localTextColor);
+    setSaving(false);
+    onClose();
+  };
+
+  const handleReset = () => {
+    setLocalFontSize(18);
+    setLocalLineHeight(2.0);
+    setLocalTextColor('#4a4a4a');
+  };
+
+  const colorPresets = [
+    { color: '#1a1a1a', name: 'Dark' },
+    { color: '#4a4a4a', name: 'Default' },
+    { color: '#666666', name: 'Gray' },
+    { color: '#8b5cf6', name: 'Purple' },
+    { color: '#0ea5e9', name: 'Blue' },
+    { color: '#10b981', name: 'Green' },
+  ];
+
+  return (
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <div className={styles.header}>
+          <h2 className={styles.title}>Settings</h2>
+          <button onClick={onClose} className={styles.closeButton}>
+            <X size={20} strokeWidth={1.5} />
+          </button>
+        </div>
+
+        <div className={styles.content}>
+          {isLoading ? (
+            <div className={styles.loading}>Loading preferences...</div>
+          ) : (
+            <>
+              {/* Font Size */}
+              <div className={styles.setting}>
+                <div className={styles.settingHeader}>
+                  <Type size={18} strokeWidth={1.5} />
+                  <label className={styles.settingLabel}>Font Size</label>
+                </div>
+                <div className={styles.settingControl}>
+                  <input
+                    type="range"
+                    min="14"
+                    max="24"
+                    value={localFontSize}
+                    onChange={(e) => setLocalFontSize(Number(e.target.value))}
+                    className={styles.slider}
+                  />
+                  <span className={styles.value}>{localFontSize}px</span>
+                </div>
+              </div>
+
+              {/* Line Height */}
+              <div className={styles.setting}>
+                <div className={styles.settingHeader}>
+                  <AlignLeft size={18} strokeWidth={1.5} />
+                  <label className={styles.settingLabel}>Line Height</label>
+                </div>
+                <div className={styles.settingControl}>
+                  <input
+                    type="range"
+                    min="1.4"
+                    max="2.5"
+                    step="0.1"
+                    value={localLineHeight}
+                    onChange={(e) => setLocalLineHeight(Number(e.target.value))}
+                    className={styles.slider}
+                  />
+                  <span className={styles.value}>{localLineHeight.toFixed(1)}</span>
+                </div>
+              </div>
+
+              {/* Text Color */}
+              <div className={styles.setting}>
+                <div className={styles.settingHeader}>
+                  <Palette size={18} strokeWidth={1.5} />
+                  <label className={styles.settingLabel}>Text Color</label>
+                </div>
+                <div className={styles.colorPresets}>
+                  {colorPresets.map(preset => (
+                    <button
+                      key={preset.color}
+                      onClick={() => setLocalTextColor(preset.color)}
+                      className={`${styles.colorButton} ${localTextColor === preset.color ? styles.colorButtonActive : ''}`}
+                      style={{ backgroundColor: preset.color }}
+                      title={preset.name}
+                    />
+                  ))}
+                  <input
+                    type="color"
+                    value={localTextColor}
+                    onChange={(e) => setLocalTextColor(e.target.value)}
+                    className={styles.colorPicker}
+                    title="Custom color"
+                  />
+                </div>
+              </div>
+
+              {/* Preview */}
+              <div className={styles.preview}>
+                <div className={styles.previewLabel}>Preview</div>
+                <p
+                  className={styles.previewText}
+                  style={{
+                    fontSize: `${localFontSize}px`,
+                    lineHeight: localLineHeight,
+                    color: localTextColor,
+                  }}
+                >
+                  The quick brown fox jumps over the lazy dog. This is how your text will appear in the editor.
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className={styles.footer}>
+          <button onClick={handleReset} className={styles.resetButton}>
+            Reset to Defaults
+          </button>
+          <div className={styles.footerRight}>
+            <button onClick={onClose} className={styles.cancelButton}>
+              Cancel
+            </button>
+            <button onClick={handleSave} className={styles.saveButton} disabled={saving}>
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
