@@ -134,12 +134,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     padding: 0;
-    background: none;
-    border: 1px solid #e5e7eb;
-    color: #000000;
+    background: #ffffff;
+    border: 1px solid #999999;
+    color: #555555;
     cursor: pointer;
     border-radius: 6px;
     transition: all 0.15s ease;
@@ -147,11 +147,16 @@
     flex-shrink: 0;
 }
 
+.blankToggleButton svg {
+    color: inherit;
+}
+
 .blankToggleButton:hover {
-    background: #f3f4f6;
-    border-color: #d1d5db;
+    background: #f5f5f5;
+    border-color: #333333;
+    color: #555555;
 }
 
 .blankToggleButton:active {
-    background: #e5e7eb;
+    background: #f5f5f5;
 }

@@ -114,8 +114,7 @@ export function UserMenu() {
                     className={styles.accountButton}
                     aria-label="Account menu"
                 >
-                    <User size={16} strokeWidth={1.5} />
-                    Account
+                    <User size={18} strokeWidth={1.5} />
                 </button>
 
                 {isOpen && (

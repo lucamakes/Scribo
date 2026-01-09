@@ -108,18 +108,22 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  background: transparent;
-  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border: 1px solid #999999;
   border-radius: 6px;
-  color: #000000;
+  color: #555555;
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
 }
 
+.panel > .mobileBackButton svg {
+  color: inherit;
+}
+
 .panel > .mobileBackButton:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
+  background: #f5f5f5;
+  border-color: #333333;
 }
 
 @media (max-width: 768px) {
@@ -293,20 +297,20 @@
   gap: 8px;
   height: 32px;
   padding: 0 10px;
-  background: transparent;
-  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border: 1px solid #999999;
   border-radius: 6px;
 }
 
 .stat {
   font-size: 12px;
-  color: #000000;
+  color: #555555;
   font-weight: 500;
   white-space: nowrap;
 }
 
 .statDivider {
-  color: #d4d4d4;
+  color: #555555;
   font-size: 12px;
 }
 
@@ -318,18 +322,22 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  background: transparent;
-  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border: 1px solid #999999;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
-  color: #000000;
+  color: #555555;
+}
+
+.saveButton svg {
+  color: inherit;
 }
 
 .saveButton:hover:not(:disabled) {
-  background: #f3f4f6;
-  border-color: #d1d5db;
+  background: #f5f5f5;
+  border-color: #333333;
 }
 
 .saveButton.saved {
@@ -343,7 +351,7 @@
 }
 
 .saveButton.unsaved:hover:not(:disabled) {
-  background: rgba(245, 158, 11, 0.05);
+  background: #ffffff;
 }
 
 .saveButton:disabled {
@@ -359,19 +367,23 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  background: transparent;
-  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border: 1px solid #999999;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
-  color: #666;
+  color: #555555;
+}
+
+.historyButton svg {
+  color: inherit;
 }
 
 .historyButton:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
-  color: #1a1a1a;
+  background: #f5f5f5;
+  border-color: #333333;
+  color: #555555;
 }
 
 .unsavedDot {
@@ -538,18 +550,22 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  background: transparent;
-  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border: 1px solid #999999;
   border-radius: 6px;
-  color: #000000;
+  color: #555555;
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
 }
 
+.mobileCloseButton svg {
+  color: inherit;
+}
+
 .mobileCloseButton:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
+  background: #f5f5f5;
+  border-color: #333333;
 }
 
 @media (max-width: 768px) {
@@ -565,19 +581,23 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  background: transparent;
-  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border: 1px solid #999999;
   border-radius: 6px;
-  color: #000000;
+  color: #555555;
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
 }
 
+.fullscreenButton svg {
+  color: inherit;
+}
+
 .fullscreenButton:hover {
-  background: #f3f4f6;
-  color: #000000;
-  border-color: #d1d5db;
+  background: #f5f5f5;
+  color: #555555;
+  border-color: #333333;
 }
 
 /* Hide fullscreen button on mobile - we use mobileCloseButton instead */
@@ -594,32 +614,36 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  padding: 10px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #999999;
   border-radius: 6px;
-  color: #000000;
+  color: #555555;
   cursor: pointer;
   transition: all 0.15s ease;
   z-index: 100;
   flex-shrink: 0;
 }
 
+.focusButton svg {
+  color: inherit;
+}
+
 .focusButton:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
+  background: #f5f5f5;
+  border-color: #333333;
 }
 
 .focusButtonActive {
-  background: transparent;
+  background: #ffffff;
   opacity: 0.4;
 }
 
 .focusButtonActive:hover {
   opacity: 1;
-  background: #f3f4f6;
+  background: #f5f5f5;
 }
 
 .fullscreenOverlay {
