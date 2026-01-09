@@ -5,7 +5,6 @@ import { createPortal } from 'react-dom';
 import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
 import { itemService } from '@/lib/services/itemService';
 import { goalService } from '@/lib/services/goalService';
-import { versionService } from '@/lib/services/versionService';
 import { TiptapEditor } from '@/components/TiptapEditor/TiptapEditor';
 import { CanvasEditor } from '@/components/CanvasEditor/CanvasEditor';
 import { UpgradePrompt } from '@/components/UpgradePrompt/UpgradePrompt';
@@ -149,7 +148,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
     }, [isFullscreen, isFocusMode, onBackToMaster]);
 
     // Auto-save with debounce
-    const saveContent = useCallback(async (newContent: string) => {
+    const saveContent = useCallback(async (newContent: string, skipGoalTracking: boolean = false) => {
         if (!selectedItem || (selectedItem.type !== 'file' && selectedItem.type !== 'canvas')) return;
         if (newContent === lastSavedContent.current) return;
 
@@ -184,13 +183,8 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
             setSaveStatus('saved');
             onContentSaved?.(selectedItem.id, newContent);
             
-            // Create a version snapshot (runs in background, doesn't block save)
-            versionService.createVersion(selectedItem.id, newContent).catch(err => {
-                console.error('Failed to create version:', err);
-            });
-            
-            // Track goal progress (only for files with positive word additions)
-            if (selectedItem.type === 'file' && projectId && wordsAdded > 0) {
+            // Track goal progress (only for files with positive word additions, skip if restoring)
+            if (!skipGoalTracking && selectedItem.type === 'file' && projectId && wordsAdded > 0) {
                 goalService.addWords(projectId, wordsAdded)
                     .then(() => {
                         // Dispatch event with words added to update GoalProgress component
@@ -441,7 +435,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                             currentContent={content}
                             onRestore={(restoredContent) => {
                                 setContent(restoredContent);
-                                saveContent(restoredContent);
+                                saveContent(restoredContent, true); // Skip goal tracking for restores
                             }}
                             onClose={() => setShowVersionHistory(false)}
                             isDemo={isDemo}
@@ -464,7 +458,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                         currentContent={content}
                         onRestore={(restoredContent) => {
                             setContent(restoredContent);
-                            saveContent(restoredContent);
+                            saveContent(restoredContent, true); // Skip goal tracking for restores
                         }}
                         onClose={() => setShowVersionHistory(false)}
                         isDemo={isDemo}
@@ -605,8 +599,8 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                     currentContent={content}
                     onRestore={(restoredContent) => {
                         setContent(restoredContent);
-                        // Trigger save of restored content
-                        saveContent(restoredContent);
+                        // Trigger save of restored content (skip goal tracking)
+                        saveContent(restoredContent, true);
                     }}
                     onClose={() => setShowVersionHistory(false)}
                     isDemo={isDemo}

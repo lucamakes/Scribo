@@ -140,17 +140,12 @@ export default function Home() {
         </div>
 
         {/* Product Showcase */}
-        <div className={styles.showcase}>
-          <div className={styles.showcaseContent}>
-            <div className={styles.showcaseImage} onClick={() => router.push('/demo')}>
-              <img
-                src="/app.png"
-                alt="Scribo app interface"
-                className={styles.appScreenshot}
-              />
-            </div>
-          </div>
-        </div>
+        <img
+          src="/app.png"
+          alt="Scribo app interface"
+          className={styles.showcaseImage}
+          onClick={() => router.push('/demo')}
+        />
       </section>
 
       {/* Features Grid */}

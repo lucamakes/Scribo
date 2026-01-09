@@ -76,6 +76,7 @@ export function VersionHistory({
   const [previewVersion, setPreviewVersion] = useState<VersionRow | null>(null);
   const [restoring, setRestoring] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [activeVersionId, setActiveVersionId] = useState<string | null>(null);
 
   // Load versions
   const loadVersions = useCallback(async () => {
@@ -107,7 +108,7 @@ export function VersionHistory({
     if (isDemo) return;
     
     setSaving(true);
-    const result = await versionService.forceCreateVersion(itemId, currentContent);
+    const result = await versionService.createVersion(itemId, currentContent);
     
     if (result.success && result.data) {
       // Reload versions to show the new one
@@ -119,18 +120,12 @@ export function VersionHistory({
   // Handle restore
   const handleRestore = useCallback(async (version: VersionRow) => {
     setRestoring(true);
-    
-    // Create a new version with current content before restoring
-    // This preserves the current state in history (force create, bypass throttling)
-    if (!isDemo) {
-      await versionService.forceCreateVersion(itemId, currentContent);
-    }
-    
+    setActiveVersionId(version.id);
     onRestore(version.content);
     setRestoring(false);
     setPreviewVersion(null);
     onClose();
-  }, [itemId, currentContent, onRestore, onClose, isDemo]);
+  }, [onRestore, onClose]);
 
   // Strip HTML for preview
   const stripHtml = (html: string) => {
@@ -191,25 +186,27 @@ export function VersionHistory({
               <Clock size={32} strokeWidth={1} className={styles.emptyIcon} />
               <p className={styles.emptyText}>No versions saved yet</p>
               <p className={styles.emptyHint}>
-                Versions are saved every 15 minutes or when 250+ words change
+                Click &quot;Save Version&quot; to create a snapshot
               </p>
             </div>
           ) : (
             <div className={styles.versionList}>
               {versions.map((version, index) => {
                 const date = new Date(version.created_at);
-                const isCurrent = index === 0;
+                const isLatest = index === 0;
+                const isActive = activeVersionId === version.id;
                 
                 return (
                   <div
                     key={version.id}
-                    className={`${styles.versionItem} ${isCurrent ? styles.currentVersion : ''}`}
+                    className={`${styles.versionItem} ${isActive ? styles.currentVersion : ''}`}
                   >
                     <div className={styles.versionHeader}>
                       <div className={styles.versionInfo}>
                         <span className={styles.versionNumber}>
                           Version {version.version_number}
-                          {isCurrent && <span className={styles.currentBadge}>Latest</span>}
+                          {isActive && <span className={styles.currentBadge}>Active</span>}
+                          {isLatest && !isActive && <span className={styles.latestBadge}>Latest</span>}
                         </span>
                         <span 
                           className={styles.versionTime}
@@ -236,17 +233,15 @@ export function VersionHistory({
                         <Eye size={14} strokeWidth={1.5} />
                         Preview
                       </button>
-                      {!isCurrent && (
-                        <button
-                          onClick={() => handleRestore(version)}
-                          className={styles.restoreButton}
-                          disabled={restoring}
-                          title="Restore this version"
-                        >
-                          <RotateCcw size={14} strokeWidth={1.5} />
-                          Restore
-                        </button>
-                      )}
+                      <button
+                        onClick={() => handleRestore(version)}
+                        className={styles.restoreButton}
+                        disabled={restoring || isActive}
+                        title={isActive ? "Currently active" : "Restore this version"}
+                      >
+                        <RotateCcw size={14} strokeWidth={1.5} />
+                        {isActive ? 'Active' : 'Restore'}
+                      </button>
                     </div>
                   </div>
                 );

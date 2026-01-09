@@ -189,7 +189,6 @@
   display: none;
   flex-direction: column;
   padding: 16px 24px 24px;
-  border-top: 1px solid #555555;
   background: #ffffff;
 }
 
@@ -416,63 +415,22 @@
 }
 
 /* App Showcase */
-.showcase {
-  padding: 40px 0 0;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.showcaseContent {
-  position: relative;
-}
-
 .showcaseImage {
-  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 1200px;
+  margin: 40px auto 0;
   border-radius: 12px;
-  overflow: hidden;
   border: 1px solid #c7c7c7;
   box-shadow: 0 0 15px rgba(199, 199, 199, 0.30);
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='32' viewBox='0 0 80 32'%3E%3Crect x='0' y='0' width='80' height='32' rx='16' fill='%231a1a1a'/%3E%3Ctext x='40' y='21' font-family='system-ui, sans-serif' font-size='12' font-weight='500' fill='white' text-anchor='middle'%3ETry demo%3C/text%3E%3C/svg%3E") 40 16, pointer;
-  aspect-ratio: 16 / 9;
   animation: scaleIn 0.8s ease-out 0.3s both;
 }
 
-.showcaseImage iframe {
-  cursor: default;
-}
-
-.videoIframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
-}
-
-.playButtonMobile {
-  display: none;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 64px;
-  height: 64px;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 50%;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  pointer-events: none;
-}
-
 @media (max-width: 768px) {
-  .playButtonMobile {
-    display: flex;
-  }
-  
   .showcaseImage {
     cursor: pointer;
+    margin: 24px auto 0;
   }
 }
 
@@ -520,12 +478,6 @@
   width: 100%;
   height: 100%;
   border-radius: 12px;
-}
-
-.appScreenshot {
-  width: 100%;
-  height: auto;
-  display: block;
 }
 
 /* Capabilities Section */

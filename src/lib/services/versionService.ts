@@ -16,50 +16,18 @@ function countWords(html: string): number {
   return text ? text.split(/\s+/).filter(Boolean).length : 0;
 }
 
-// Configuration for smart versioning
-const VERSION_CONFIG = {
-  MIN_TIME_BETWEEN_VERSIONS_MS: 15 * 60 * 1000, // 15 minutes minimum between versions
-  MIN_WORD_CHANGE_FOR_VERSION: 250, // Or 250+ words changed
-};
-
-// Track last version time per item (in-memory cache)
-const lastVersionTime: Map<string, number> = new Map();
-const lastVersionWordCount: Map<string, number> = new Map();
-
 /**
  * Service for version history operations.
+ * Versions are created manually by the user.
  */
 export const versionService = {
   /**
-   * Check if we should create a version based on time and content changes.
-   * Returns true if enough time has passed OR significant content changed.
-   */
-  shouldCreateVersion(itemId: string, newWordCount: number): boolean {
-    const now = Date.now();
-    const lastTime = lastVersionTime.get(itemId) || 0;
-    const lastWords = lastVersionWordCount.get(itemId) ?? newWordCount;
-    
-    const timeSinceLastVersion = now - lastTime;
-    const wordDiff = Math.abs(newWordCount - lastWords);
-    
-    // Create version if: 5+ minutes passed OR 50+ words changed
-    return timeSinceLastVersion >= VERSION_CONFIG.MIN_TIME_BETWEEN_VERSIONS_MS 
-        || wordDiff >= VERSION_CONFIG.MIN_WORD_CHANGE_FOR_VERSION;
-  },
-
-  /**
-   * Create a new version for an item.
-   * Uses smart throttling - only creates if enough time passed or significant changes made.
+   * Create a new version for an item (manual save).
+   * Deduplicates identical content.
    */
   async createVersion(itemId: string, content: string): Promise<ServiceResult<VersionRow | null>> {
     const wordCount = countWords(content);
     
-    // Check if we should create a version
-    if (!this.shouldCreateVersion(itemId, wordCount)) {
-      return { success: true, data: null };
-    }
-    
-    // Try using the database function first
     try {
       // @ts-ignore - Supabase RPC type inference
       const { data: versionId, error: rpcError } = await supabase.rpc('create_item_version', {
@@ -77,10 +45,6 @@ export const versionService = {
         return { success: true, data: null };
       }
 
-      // Update tracking
-      lastVersionTime.set(itemId, Date.now());
-      lastVersionWordCount.set(itemId, wordCount);
-
       // Fetch the created version
       const { data, error } = await supabase
         .from('item_versions')
@@ -94,48 +58,6 @@ export const versionService = {
       return { success: true, data };
     } catch {
       // Fallback: manual implementation if RPC doesn't exist
-      return this.createVersionFallback(itemId, content, wordCount);
-    }
-  },
-
-  /**
-   * Force create a version (bypasses throttling).
-   * Use for manual "save version" or before restoring.
-   */
-  async forceCreateVersion(itemId: string, content: string): Promise<ServiceResult<VersionRow | null>> {
-    const wordCount = countWords(content);
-    
-    try {
-      // @ts-ignore - Supabase RPC type inference
-      const { data: versionId, error: rpcError } = await supabase.rpc('create_item_version', {
-        p_item_id: itemId,
-        p_content: content,
-        p_word_count: wordCount
-      });
-
-      if (rpcError) {
-        throw rpcError;
-      }
-
-      if (!versionId) {
-        return { success: true, data: null };
-      }
-
-      // Update tracking
-      lastVersionTime.set(itemId, Date.now());
-      lastVersionWordCount.set(itemId, wordCount);
-
-      const { data, error } = await supabase
-        .from('item_versions')
-        .select('*')
-        .eq('id', versionId)
-        .single();
-
-      if (error) {
-        return { success: false, error: error.message };
-      }
-      return { success: true, data };
-    } catch {
       return this.createVersionFallback(itemId, content, wordCount);
     }
   },
