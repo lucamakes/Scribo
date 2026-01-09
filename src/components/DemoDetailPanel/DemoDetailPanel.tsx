@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
 import { TiptapEditor } from '@/components/TiptapEditor/TiptapEditor';
 import { CanvasEditor } from '@/components/CanvasEditor/CanvasEditor';
 import { usePreferences } from '@/lib/hooks/usePreferences';
+import { useDemo } from '@/lib/context/DemoContext';
 import {
   Lightbulb,
   Check,
@@ -15,6 +17,9 @@ import {
   EyeClosed,
 } from 'lucide-react';
 import styles from '@/components/DetailPanel/DetailPanel.module.css';
+
+const NUDGE_MILESTONES = [1000, 5000, 10000];
+const NUDGES_STORAGE_KEY = 'scribo_demo_nudges_shown';
 
 interface DemoDetailPanelProps {
   selectedItem: SidebarItemData | null;
@@ -31,14 +36,58 @@ export function DemoDetailPanel({
   onFullscreenOpened,
   onBackToMaster
 }: DemoDetailPanelProps) {
+  const { items } = useDemo();
   const [content, setContent] = useState('');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
+  const [showNudgeModal, setShowNudgeModal] = useState(false);
+  const [currentMilestone, setCurrentMilestone] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
   const lastSavedContent = useRef('');
   const selectedItemIdRef = useRef<string | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const shownNudgesRef = useRef<Set<number>>(new Set());
 
   const { fontSize, lineHeight, textColor } = usePreferences();
+
+  // Load shown nudges from localStorage
+  useEffect(() => {
+    setIsMounted(true);
+    try {
+      const stored = localStorage.getItem(NUDGES_STORAGE_KEY);
+      if (stored) {
+        shownNudgesRef.current = new Set(JSON.parse(stored));
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, []);
+
+  // Calculate total word count across all demo items
+  const totalWordCount = items.reduce((sum, item) => {
+    if (item.type === 'file' && item.content) {
+      const plainText = item.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      return sum + (plainText ? plainText.split(/\s+/).filter(Boolean).length : 0);
+    }
+    return sum;
+  }, 0);
+
+  // Check for milestone nudges
+  useEffect(() => {
+    for (const milestone of NUDGE_MILESTONES) {
+      if (totalWordCount >= milestone && !shownNudgesRef.current.has(milestone)) {
+        setCurrentMilestone(milestone);
+        setShowNudgeModal(true);
+        shownNudgesRef.current.add(milestone);
+        try {
+          localStorage.setItem(NUDGES_STORAGE_KEY, JSON.stringify([...shownNudgesRef.current]));
+        } catch {
+          // Ignore localStorage errors
+        }
+        break;
+      }
+    }
+  }, [totalWordCount]);
 
   // Load content when file or canvas is selected
   useEffect(() => {
@@ -343,13 +392,21 @@ export function DemoDetailPanel({
           placeholder="Start writing your story..."
           isAtLimit={false}
           isPro={true}
-          onLimitBlocked={() => { }}
           focusMode={isFocusMode}
           fontSize={fontSize}
           lineHeight={lineHeight}
           textColor={textColor}
         />
       </div>
+
+      {/* Milestone nudge modal for demo */}
+      {isMounted && showNudgeModal && createPortal(
+        <DemoNudgeModal 
+          wordCount={currentMilestone} 
+          onClose={() => setShowNudgeModal(false)} 
+        />,
+        document.body
+      )}
 
       {isFullscreen && (
         <button
@@ -377,6 +434,100 @@ export function DemoDetailPanel({
     <div className={styles.panel}>
       <div className={styles.fileView}>
         {editorContent}
+      </div>
+    </div>
+  );
+}
+
+// Demo nudge modal component - friendly milestone celebration
+function DemoNudgeModal({ wordCount, onClose }: { wordCount: number; onClose: () => void }) {
+  const formattedCount = wordCount >= 1000 ? `${wordCount / 1000}k` : wordCount.toString();
+  
+  return (
+    <div 
+      style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+      }}
+      onClick={onClose}
+    >
+      <div 
+        style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '32px',
+          maxWidth: '400px',
+          width: '90%',
+          textAlign: 'center',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div style={{ 
+          width: '48px', 
+          height: '48px', 
+          borderRadius: '50%', 
+          backgroundColor: '#f0f0ff', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          margin: '0 auto 16px',
+        }}>
+          <span style={{ fontSize: '24px' }}>🎉</span>
+        </div>
+        <h2 style={{ 
+          fontSize: '20px', 
+          fontWeight: 600, 
+          marginBottom: '8px',
+          color: '#1a1a1a',
+        }}>
+          You've written {formattedCount} words!
+        </h2>
+        <p style={{ 
+          color: '#666', 
+          marginBottom: '24px',
+          lineHeight: 1.5,
+        }}>
+          Nice work! Create a free account to save your writing permanently and access it from anywhere.
+        </p>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <button
+            onClick={onClose}
+            style={{
+              padding: '10px 20px',
+              borderRadius: '8px',
+              border: '1px solid #e0e0e0',
+              backgroundColor: 'white',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: 500,
+            }}
+          >
+            Keep Writing
+          </button>
+          <a
+            href="/auth/signup"
+            style={{
+              padding: '10px 20px',
+              borderRadius: '8px',
+              border: 'none',
+              backgroundColor: '#4f46e5',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: 500,
+              textDecoration: 'none',
+              display: 'inline-block',
+            }}
+          >
+            Create Free Account
+          </a>
+        </div>
       </div>
     </div>
   );

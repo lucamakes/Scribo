@@ -45,7 +45,7 @@ function getDefaultDemoData(): DemoData {
   return {
     project: {
       id: DEMO_PROJECT_ID,
-      name: 'My First Story',
+      name: 'My Demo Project',
       created_at: now,
     },
     items: [

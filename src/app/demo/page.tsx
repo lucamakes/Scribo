@@ -114,7 +114,7 @@ function DemoPageContent() {
       {showBanner && (
         <div className={styles.demoBanner}>
           <span>
-            <strong>Demo mode</strong> — Write up to 15,000 words free. Your work is saved in your browser. 
+            <strong>Demo mode</strong> — Your work is saved in your browser. 
             Create a free account to save permanently.
           </span>
           <button onClick={handleSignUp} className={styles.bannerButton}>

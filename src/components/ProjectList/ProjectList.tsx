@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { ProjectRow } from '@/types/database';
 import { projectService } from '@/lib/services/projectService';
 import { itemService } from '@/lib/services/itemService';
+import { demoMigrationService } from '@/lib/services/demoMigrationService';
 import { ProjectSetup } from '@/components/ProjectSetup/ProjectSetup';
 import { ProjectImportModal } from '@/components/ProjectImportModal';
 import { UserMenu } from '@/components/UserMenu/UserMenu';
@@ -88,6 +89,20 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
   useEffect(() => {
     loadProjects();
   }, [loadProjects]);
+
+  // Auto-migrate demo data on first load
+  useEffect(() => {
+    const migrateDemo = async () => {
+      if (!loading && !demoMigrationService.hasAlreadyMigrated() && demoMigrationService.hasDemoData()) {
+        const result = await demoMigrationService.migrate();
+        if (result.success) {
+          // Reload projects to show the migrated one
+          loadProjects();
+        }
+      }
+    };
+    migrateDemo();
+  }, [loading, loadProjects]);
 
   const handleCreateProject = useCallback((project: { id: string; name: string; createdAt: string }) => {
     setShowCreate(false);

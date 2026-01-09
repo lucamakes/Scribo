@@ -4,11 +4,8 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useSubscription } from '@/lib/hooks/useSubscription';
-import { usePreferences } from '@/lib/hooks/usePreferences';
-import { FontSizeControl } from '@/components/FontSizeControl/FontSizeControl';
-import { LineHeightControl } from '@/components/LineHeightControl/LineHeightControl';
-import { TextColorControl } from '@/components/TextColorControl/TextColorControl';
-import { User, Settings, X, Sparkles, CreditCard, MessageSquare } from 'lucide-react';
+import { SettingsModal } from '@/components/SettingsModal/SettingsModal';
+import { User, Settings, Sparkles, CreditCard, MessageSquare, X, Check } from 'lucide-react';
 import styles from './UserMenu.module.css';
 
 /**
@@ -17,7 +14,6 @@ import styles from './UserMenu.module.css';
 export function UserMenu() {
     const { user, signOut } = useAuth();
     const { isPro, wordCount, wordLimit, percentage, isLoading: subLoading } = useSubscription();
-    const { fontSize, setFontSize, lineHeight, setLineHeight, textColor, setTextColor } = usePreferences();
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
@@ -177,80 +173,10 @@ export function UserMenu() {
             </div>
 
             {showSettings && (
-                <div className={styles.modalOverlay} onClick={() => setShowSettings(false)}>
-                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2 className={styles.modalTitle}>Settings</h2>
-                            <button 
-                                onClick={() => setShowSettings(false)} 
-                                className={styles.closeButton}
-                                aria-label="Close"
-                            >
-                                <X size={20} strokeWidth={1.5} />
-                            </button>
-                        </div>
-                        <div className={styles.modalContent}>
-                            <div className={styles.settingSection}>
-                                <h3 className={styles.sectionTitle}>Editor</h3>
-                                <div className={styles.settingItem}>
-                                    <span className={styles.settingLabel}>Font Size</span>
-                                    <FontSizeControl 
-                                        fontSize={fontSize}
-                                        onFontSizeChange={setFontSize}
-                                    />
-                                </div>
-                                <div className={styles.settingItem}>
-                                    <span className={styles.settingLabel}>Line Height</span>
-                                    <LineHeightControl 
-                                        lineHeight={lineHeight}
-                                        onLineHeightChange={setLineHeight}
-                                    />
-                                </div>
-                                <div className={styles.settingItem}>
-                                    <span className={styles.settingLabel}>Text Color</span>
-                                    <TextColorControl 
-                                        textColor={textColor}
-                                        onTextColorChange={setTextColor}
-                                    />
-                                </div>
-                                <div 
-                                    className={styles.previewText}
-                                    style={{ 
-                                        fontSize: `${fontSize}px`, 
-                                        lineHeight, 
-                                        color: textColor 
-                                    }}
-                                >
-                                    The quick brown fox jumps over the lazy dog. This is how your text will appear in the editor.
-                                </div>
-                            </div>
-
-                            <div className={styles.settingSection}>
-                                <h3 className={styles.sectionTitle}>Account</h3>
-                                <div className={styles.settingItem}>
-                                    <span className={styles.settingLabel}>Email</span>
-                                    <span className={styles.settingValue}>{displayEmail}</span>
-                                </div>
-                                <div className={styles.settingItem}>
-                                    <span className={styles.settingLabel}>Plan</span>
-                                    <span className={styles.settingValue}>{isPro ? 'Pro' : 'Free'}</span>
-                                </div>
-                            </div>
-                            
-                            {!isPro && (
-                                <div className={styles.settingSection}>
-                                    <h3 className={styles.sectionTitle}>Usage</h3>
-                                    <div className={styles.settingItem}>
-                                        <span className={styles.settingLabel}>Words used</span>
-                                        <span className={styles.settingValue}>
-                                            {formattedWordCount} / {formattedLimit}
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                <SettingsModal 
+                    isOpen={showSettings} 
+                    onClose={() => setShowSettings(false)} 
+                />
             )}
 
             {showPricing && (
@@ -265,33 +191,73 @@ export function UserMenu() {
                         </button>
                         
                         <div className={styles.pricingHeader}>
-                            <div className={styles.pricingIcon}>
-                                <Sparkles size={24} strokeWidth={1.5} />
-                            </div>
-                            <h2 className={styles.pricingTitle}>Upgrade to Pro</h2>
-                            <p className={styles.pricingSubtitle}>Unlimited words, unlimited creativity</p>
+                            <h2 className={styles.pricingTitle}>Simple, honest pricing</h2>
+                            <p className={styles.pricingSubtitle}>Start free. Upgrade when you need more words.</p>
                         </div>
 
                         <div className={styles.pricingPlans}>
-                            <button
-                                onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY!)}
-                                className={styles.pricingPlan}
-                                disabled={upgradeLoading}
-                            >
-                                <span className={styles.planName}>Monthly</span>
-                                <span className={styles.planPrice}>$5<span className={styles.planPeriod}>/mo</span></span>
-                            </button>
-                            
-                            <button
-                                onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY!)}
-                                className={`${styles.pricingPlan} ${styles.pricingPlanPrimary}`}
-                                disabled={upgradeLoading}
-                            >
-                                <span className={styles.planBadge}>Best Value</span>
-                                <span className={styles.planName}>Yearly</span>
-                                <span className={styles.planPrice}>$40<span className={styles.planPeriod}>/yr</span></span>
-                                <span className={styles.planSaving}>Save 33%</span>
-                            </button>
+                            {/* Free Plan */}
+                            <div className={styles.pricingPlan}>
+                                <h3 className={styles.planName}>Free</h3>
+                                <div className={styles.planPriceWrap}>
+                                    <span className={styles.planPrice}>$0</span>
+                                    <span className={styles.planPeriod}>/forever</span>
+                                </div>
+                                <ul className={styles.planFeatures}>
+                                    <li><Check size={16} strokeWidth={2} /> 15,000 words</li>
+                                    <li><Check size={16} strokeWidth={2} /> Unlimited projects</li>
+                                    <li><Check size={16} strokeWidth={2} /> All core features</li>
+                                </ul>
+                                <button className={styles.planButton} disabled>
+                                    Current plan
+                                </button>
+                            </div>
+
+                            {/* Pro Monthly */}
+                            <div className={styles.pricingPlan}>
+                                <h3 className={styles.planName}>Pro Monthly</h3>
+                                <div className={styles.planPriceWrap}>
+                                    <span className={styles.planPrice}>$7</span>
+                                    <span className={styles.planPeriod}>/month</span>
+                                </div>
+                                <ul className={styles.planFeatures}>
+                                    <li><Check size={16} strokeWidth={2} /> Unlimited words</li>
+                                    <li><Check size={16} strokeWidth={2} /> Unlimited projects</li>
+                                    <li><Check size={16} strokeWidth={2} /> All core features</li>
+                                    <li><Check size={16} strokeWidth={2} /> Priority support</li>
+                                </ul>
+                                <button
+                                    onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY!)}
+                                    className={styles.planButton}
+                                    disabled={upgradeLoading}
+                                >
+                                    {upgradeLoading ? 'Loading...' : 'Upgrade'}
+                                </button>
+                            </div>
+
+                            {/* Pro Yearly - Recommended */}
+                            <div className={`${styles.pricingPlan} ${styles.pricingPlanPrimary}`}>
+                                <div className={styles.planBadge}>Recommended</div>
+                                <h3 className={styles.planName}>Pro Yearly</h3>
+                                <div className={styles.planPriceWrap}>
+                                    <span className={styles.planPrice}>$55</span>
+                                    <span className={styles.planPeriod}>/year</span>
+                                </div>
+                                <p className={styles.planSavings}>$4.58/month — save $29/year</p>
+                                <ul className={styles.planFeatures}>
+                                    <li><Check size={16} strokeWidth={2} /> Unlimited words</li>
+                                    <li><Check size={16} strokeWidth={2} /> Unlimited projects</li>
+                                    <li><Check size={16} strokeWidth={2} /> All core features</li>
+                                    <li><Check size={16} strokeWidth={2} /> Priority support</li>
+                                </ul>
+                                <button
+                                    onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY!)}
+                                    className={styles.planButtonPrimary}
+                                    disabled={upgradeLoading}
+                                >
+                                    {upgradeLoading ? 'Loading...' : 'Upgrade'}
+                                </button>
+                            </div>
                         </div>
 
                         <p className={styles.pricingFooter}>Cancel anytime. Your writing is always yours.</p>

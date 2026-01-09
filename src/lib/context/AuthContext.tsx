@@ -11,6 +11,9 @@ interface AuthContextType {
     signUp: (email: string, password: string) => Promise<{ error: string | null }>;
     signIn: (email: string, password: string) => Promise<{ error: string | null }>;
     signOut: () => Promise<void>;
+    resetPassword: (email: string) => Promise<{ error: string | null }>;
+    updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
+    deleteAccount: () => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -74,6 +77,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut();
     }, []);
 
+    const resetPassword = useCallback(async (email: string) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/auth/reset-password`,
+        });
+
+        if (error) {
+            return { error: error.message };
+        }
+
+        return { error: null };
+    }, []);
+
+    const updatePassword = useCallback(async (newPassword: string) => {
+        const { error } = await supabase.auth.updateUser({
+            password: newPassword,
+        });
+
+        if (error) {
+            return { error: error.message };
+        }
+
+        return { error: null };
+    }, []);
+
+    const deleteAccount = useCallback(async () => {
+        if (!user) {
+            return { error: 'No user logged in' };
+        }
+
+        try {
+            // Call our API route to delete user data and auth account
+            const response = await fetch('/api/user/delete', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                return { error: data.error || 'Failed to delete account' };
+            }
+
+            // Sign out after deletion
+            await supabase.auth.signOut();
+            return { error: null };
+        } catch {
+            return { error: 'Failed to delete account' };
+        }
+    }, [user]);
+
     const value: AuthContextType = {
         user,
         session,
@@ -81,6 +133,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signIn,
         signOut,
+        resetPassword,
+        updatePassword,
+        deleteAccount,
     };
 
     return (

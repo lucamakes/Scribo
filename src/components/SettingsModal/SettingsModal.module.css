@@ -319,3 +319,125 @@
     width: 100%;
   }
 }
+
+
+/* Danger Zone - Delete Account */
+.dangerZone {
+  margin-top: 16px;
+  padding: 20px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+}
+
+.dangerHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.deleteButton {
+  padding: 10px 16px;
+  background: transparent;
+  border: 1px solid #dc2626;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #dc2626;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.deleteButton:hover {
+  background: #dc2626;
+  color: white;
+}
+
+.deleteConfirm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.deleteWarning {
+  font-size: 13px;
+  color: #991b1b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.deleteError {
+  font-size: 13px;
+  color: #dc2626;
+  margin: 0;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 6px;
+}
+
+.deleteInput {
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1a1a1a;
+}
+
+.deleteInput:focus {
+  outline: none;
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.deleteInput::placeholder {
+  color: #999;
+}
+
+.deleteActions {
+  display: flex;
+  gap: 8px;
+}
+
+.cancelDeleteButton {
+  flex: 1;
+  padding: 10px 16px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cancelDeleteButton:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.confirmDeleteButton {
+  flex: 1;
+  padding: 10px 16px;
+  background: #dc2626;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.confirmDeleteButton:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.confirmDeleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

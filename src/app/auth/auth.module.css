@@ -94,6 +94,19 @@
     color: #999;
 }
 
+.forgotLink {
+    font-size: 12px;
+    color: #6366f1;
+    text-decoration: none;
+    text-align: right;
+    margin-top: 4px;
+}
+
+.forgotLink:hover {
+    color: #4f46e5;
+    text-decoration: underline;
+}
+
 /* Error Banner */
 .errorBanner {
     display: flex;

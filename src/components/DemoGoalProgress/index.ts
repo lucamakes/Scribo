@@ -1,0 +1,1 @@
+export { DemoGoalProgress } from './DemoGoalProgress';

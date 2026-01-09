@@ -169,7 +169,6 @@ export default function Home() {
                 <li><Check size={16} strokeWidth={2} /> 15,000 words</li>
                 <li><Check size={16} strokeWidth={2} /> Unlimited projects</li>
                 <li><Check size={16} strokeWidth={2} /> All core features</li>
-                <li><Check size={16} strokeWidth={2} /> Export to Markdown</li>
               </ul>
               <button onClick={() => router.push('/auth/signup')} className={styles.planButton}>
                 Get started
@@ -179,7 +178,7 @@ export default function Home() {
             <div className={styles.plan}>
               <h3 className={styles.planName}>Pro Monthly</h3>
               <div className={styles.planPrice}>
-                <span className={styles.planAmount}>$5</span>
+                <span className={styles.planAmount}>$7</span>
                 <span className={styles.planPeriod}>/month</span>
               </div>
               <ul className={styles.planFeatures}>
@@ -197,10 +196,10 @@ export default function Home() {
               <div className={styles.planBadge}>Recommended</div>
               <h3 className={styles.planName}>Pro Yearly</h3>
               <div className={styles.planPrice}>
-                <span className={styles.planAmount}>$40</span>
+                <span className={styles.planAmount}>$55</span>
                 <span className={styles.planPeriod}>/year</span>
               </div>
-              <p className={styles.planSavings}>$3.33/month — save $20/year</p>
+              <p className={styles.planSavings}>$4.58/month — save $29/year</p>
               <ul className={styles.planFeatures}>
                 <li><Check size={16} strokeWidth={2} /> Unlimited words</li>
                 <li><Check size={16} strokeWidth={2} /> Unlimited projects</li>

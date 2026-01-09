@@ -1,50 +1,54 @@
 'use client';
 
 import { useState, useCallback, type FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/context/AuthContext';
 import styles from '../auth.module.css';
 
-/**
- * Login page component.
- */
-export default function LoginPage() {
-    const router = useRouter();
-    const { signIn, loading: authLoading } = useAuth();
+export default function ForgotPasswordPage() {
+    const { resetPassword } = useAuth();
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
 
     const handleSubmit = useCallback(async (e: FormEvent) => {
         e.preventDefault();
         setError('');
 
-        if (!email.trim() || !password) {
-            setError('Please fill in all fields');
+        if (!email.trim()) {
+            setError('Please enter your email');
             return;
         }
 
         setLoading(true);
 
-        const { error: signInError } = await signIn(email.trim(), password);
+        const { error: resetError } = await resetPassword(email.trim());
 
-        if (signInError) {
-            setError(signInError);
+        if (resetError) {
+            setError(resetError);
             setLoading(false);
             return;
         }
 
-        router.push('/projects');
-    }, [email, password, signIn, router]);
+        setSuccess(true);
+        setLoading(false);
+    }, [email, resetPassword]);
 
-    if (authLoading) {
+    if (success) {
         return (
             <main className={styles.container}>
                 <div className={styles.card}>
-                    <div className={styles.loadingSpinner}></div>
-                    <p className={styles.loadingText}>Loading...</p>
+                    <div className={styles.successSection}>
+                        <h2 className={styles.successTitle}>Check your email</h2>
+                        <p className={styles.successText}>
+                            We've sent a password reset link to <strong>{email}</strong>. 
+                            Click the link in the email to reset your password.
+                        </p>
+                        <Link href="/auth/login" className={styles.successLink}>
+                            Back to Login
+                        </Link>
+                    </div>
                 </div>
             </main>
         );
@@ -54,8 +58,8 @@ export default function LoginPage() {
         <main className={styles.container}>
             <div className={styles.card}>
                 <div className={styles.logoSection}>
-                    <h1 className={styles.title}>Welcome Back</h1>
-                    <p className={styles.subtitle}>Sign in to continue to your projects</p>
+                    <h1 className={styles.title}>Reset Password</h1>
+                    <p className={styles.subtitle}>Enter your email and we'll send you a reset link</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className={styles.form}>
@@ -80,40 +84,23 @@ export default function LoginPage() {
                         />
                     </div>
 
-                    <div className={styles.field}>
-                        <label htmlFor="password" className={styles.label}>Password</label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            className={styles.input}
-                            autoComplete="current-password"
-                            disabled={loading}
-                        />
-                        <Link href="/auth/forgot-password" className={styles.forgotLink}>
-                            Forgot password?
-                        </Link>
-                    </div>
-
                     <button type="submit" className={styles.submitButton} disabled={loading}>
                         {loading ? (
                             <>
                                 <span className={styles.buttonSpinner}></span>
-                                Signing in...
+                                Sending...
                             </>
                         ) : (
-                            'Sign In'
+                            'Send Reset Link'
                         )}
                     </button>
                 </form>
 
                 <div className={styles.footer}>
                     <p className={styles.footerText}>
-                        Don't have an account?{' '}
-                        <Link href="/auth/signup" className={styles.link}>
-                            Create one
+                        Remember your password?{' '}
+                        <Link href="/auth/login" className={styles.link}>
+                            Sign in
                         </Link>
                     </p>
                 </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Sparkles } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 import { useAuth } from '@/lib/context/AuthContext';
 import styles from './UpgradePrompt.module.css';
 
@@ -49,14 +49,11 @@ export function UpgradePrompt({ type, percentage = 100, onClose }: UpgradePrompt
       <div className={styles.modalOverlay}>
         <div className={styles.warningModal}>
           {onClose && (
-            <button onClick={onClose} className={styles.warningClose} aria-label="Dismiss">
+            <button onClick={onClose} className={styles.closeButton} aria-label="Dismiss">
               <X size={18} strokeWidth={1.5} />
             </button>
           )}
           
-          <div className={styles.warningIcon}>
-            <Sparkles size={24} strokeWidth={1.5} />
-          </div>
           <h2 className={styles.warningTitle}>You&apos;ve used {percentage}% of your free words</h2>
           <p className={styles.warningSubtitle}>
             Upgrade to Pro for unlimited writing
@@ -86,39 +83,79 @@ export function UpgradePrompt({ type, percentage = 100, onClose }: UpgradePrompt
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         {onClose && (
-          <button onClick={onClose} className={styles.modalClose} aria-label="Close">
+          <button onClick={onClose} className={styles.closeButton} aria-label="Close">
             <X size={18} strokeWidth={1.5} />
           </button>
         )}
+        
         <div className={styles.modalHeader}>
-          <div className={styles.modalIcon}>
-            <Sparkles size={24} strokeWidth={1.5} />
-          </div>
-          <h2 className={styles.modalTitle}>You&apos;ve reached your limit</h2>
-          <p className={styles.modalSubtitle}>
-            Upgrade to Pro for unlimited writing
-          </p>
+          <h2 className={styles.modalTitle}>Simple, honest pricing</h2>
+          <p className={styles.modalSubtitle}>Start free. Upgrade when you need more words.</p>
         </div>
 
         <div className={styles.plans}>
-          <button
-            onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY!)}
-            className={styles.planButton}
-            disabled={isLoading}
-          >
-            <span className={styles.planName}>Monthly</span>
-            <span className={styles.planPrice}>$5/mo</span>
-          </button>
-          
-          <button
-            onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY!)}
-            className={`${styles.planButton} ${styles.planButtonPrimary}`}
-            disabled={isLoading}
-          >
-            <span className={styles.planName}>Yearly</span>
-            <span className={styles.planPrice}>$40/yr</span>
-            <span className={styles.planSave}>Save 33%</span>
-          </button>
+          {/* Free Plan */}
+          <div className={styles.plan}>
+            <h3 className={styles.planName}>Free</h3>
+            <div className={styles.planPrice}>
+              <span className={styles.planAmount}>$0</span>
+              <span className={styles.planPeriod}>/forever</span>
+            </div>
+            <ul className={styles.planFeatures}>
+              <li><Check size={16} strokeWidth={2} /> 15,000 words</li>
+              <li><Check size={16} strokeWidth={2} /> Unlimited projects</li>
+              <li><Check size={16} strokeWidth={2} /> All core features</li>
+            </ul>
+            <button className={styles.planButton} disabled>
+              Current plan
+            </button>
+          </div>
+
+          {/* Pro Monthly */}
+          <div className={styles.plan}>
+            <h3 className={styles.planName}>Pro Monthly</h3>
+            <div className={styles.planPrice}>
+              <span className={styles.planAmount}>$7</span>
+              <span className={styles.planPeriod}>/month</span>
+            </div>
+            <ul className={styles.planFeatures}>
+              <li><Check size={16} strokeWidth={2} /> Unlimited words</li>
+              <li><Check size={16} strokeWidth={2} /> Unlimited projects</li>
+              <li><Check size={16} strokeWidth={2} /> All core features</li>
+              <li><Check size={16} strokeWidth={2} /> Priority support</li>
+            </ul>
+            <button
+              onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY!)}
+              className={styles.planButton}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Loading...' : 'Upgrade'}
+            </button>
+          </div>
+
+          {/* Pro Yearly - Recommended */}
+          <div className={`${styles.plan} ${styles.planPrimary}`}>
+            <div className={styles.planBadge}>Recommended</div>
+            <h3 className={styles.planName}>Pro Yearly</h3>
+            <div className={styles.planPrice}>
+              <span className={styles.planAmount}>$55</span>
+              <span className={styles.planPeriod}>/year</span>
+            </div>
+            <p className={styles.planSavings}>$4.58/month — save $29/year</p>
+            <ul className={styles.planFeatures}>
+              <li><Check size={16} strokeWidth={2} /> Unlimited words</li>
+              <li><Check size={16} strokeWidth={2} /> Unlimited projects</li>
+              <li><Check size={16} strokeWidth={2} /> All core features</li>
+              <li><Check size={16} strokeWidth={2} /> Priority support</li>
+            </ul>
+            <button
+              onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY!)}
+              className={styles.planButtonPrimary}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Loading...' : 'Upgrade'}
+            </button>
+          </div>
         </div>
 
         <p className={styles.modalFooter}>

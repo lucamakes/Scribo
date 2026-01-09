@@ -1,8 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Type, AlignLeft, Palette } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { X, Type, AlignLeft, Palette, Trash2 } from 'lucide-react';
 import { usePreferences } from '@/lib/hooks/usePreferences';
+import { useAuth } from '@/lib/context/AuthContext';
+import { useSubscription } from '@/lib/hooks/useSubscription';
 import styles from './SettingsModal.module.css';
 
 interface SettingsModalProps {
@@ -15,12 +18,19 @@ interface SettingsModalProps {
  * Includes font size, line height, and text color settings.
  */
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+  const router = useRouter();
+  const { deleteAccount } = useAuth();
+  const { isPro } = useSubscription();
   const { fontSize, lineHeight, textColor, setFontSize, setLineHeight, setTextColor, isLoading } = usePreferences();
   
   const [localFontSize, setLocalFontSize] = useState(fontSize);
   const [localLineHeight, setLocalLineHeight] = useState(lineHeight);
   const [localTextColor, setLocalTextColor] = useState(textColor);
   const [saving, setSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   // Sync local state when preferences load
   useEffect(() => {
@@ -44,6 +54,24 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setLocalFontSize(18);
     setLocalLineHeight(2.0);
     setLocalTextColor('#4a4a4a');
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') return;
+    
+    setDeleting(true);
+    setDeleteError('');
+
+    const { error } = await deleteAccount();
+
+    if (error) {
+      setDeleteError(error);
+      setDeleting(false);
+      return;
+    }
+
+    // Redirect to home after deletion
+    router.push('/');
   };
 
   const colorPresets = [
@@ -148,6 +176,62 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 >
                   The quick brown fox jumps over the lazy dog. This is how your text will appear in the editor.
                 </p>
+              </div>
+
+              {/* Danger Zone */}
+              <div className={styles.dangerZone}>
+                <div className={styles.dangerHeader}>
+                  <Trash2 size={18} strokeWidth={1.5} />
+                  <span>Danger Zone</span>
+                </div>
+                {!showDeleteConfirm ? (
+                  <button 
+                    onClick={() => setShowDeleteConfirm(true)} 
+                    className={styles.deleteButton}
+                  >
+                    Delete Account
+                  </button>
+                ) : (
+                  <div className={styles.deleteConfirm}>
+                    <p className={styles.deleteWarning}>
+                      This will permanently delete your account and all your projects. This action cannot be undone.
+                      {isPro && (
+                        <> Your Pro subscription will be cancelled immediately and you will not receive a refund for any remaining time.</>
+                      )}
+                    </p>
+                    {deleteError && (
+                      <p className={styles.deleteError}>{deleteError}</p>
+                    )}
+                    <input
+                      type="text"
+                      placeholder='Type "DELETE" to confirm'
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      className={styles.deleteInput}
+                      disabled={deleting}
+                    />
+                    <div className={styles.deleteActions}>
+                      <button 
+                        onClick={() => {
+                          setShowDeleteConfirm(false);
+                          setDeleteConfirmText('');
+                          setDeleteError('');
+                        }} 
+                        className={styles.cancelDeleteButton}
+                        disabled={deleting}
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        onClick={handleDeleteAccount} 
+                        className={styles.confirmDeleteButton}
+                        disabled={deleteConfirmText !== 'DELETE' || deleting}
+                      >
+                        {deleting ? 'Deleting...' : 'Delete Forever'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           )}

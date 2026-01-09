@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
 async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   const userId = session.metadata?.supabase_user_id;
   const subscriptionId = session.subscription as string;
+  const customerId = session.customer as string;
 
   if (!userId) {
     console.error('No user ID in checkout session metadata');
@@ -82,6 +83,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     .update({
       subscription_status: 'pro',
       stripe_subscription_id: subscriptionId,
+      stripe_customer_id: customerId,
       subscription_end_date: null,
     })
     .eq('id', userId);
@@ -110,14 +112,23 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 
   if (subscription.status === 'active' || subscription.status === 'trialing') {
     status = 'pro';
-  } else if (subscription.cancel_at_period_end) {
-    status = 'pro';
-    // Get end date from cancel_at if available
-    if (subscription.cancel_at) {
-      endDate = new Date(subscription.cancel_at * 1000).toISOString();
+    // Always track current period end for active subscriptions
+    if (subscription.current_period_end) {
+      endDate = new Date(subscription.current_period_end * 1000).toISOString();
+    }
+  }
+  
+  // User cancelled but still has access until period end
+  if (subscription.cancel_at_period_end) {
+    status = 'cancelled';
+    // Use cancel_at (when access ends) or current_period_end
+    const cancelTimestamp = subscription.cancel_at || subscription.current_period_end;
+    if (cancelTimestamp) {
+      endDate = new Date(cancelTimestamp * 1000).toISOString();
     }
   } else if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
-    status = 'cancelled';
+    status = 'free';
+    endDate = null;
   }
 
   const { error } = await supabase

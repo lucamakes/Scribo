@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useDemo } from '@/lib/context/DemoContext';
 import type { SidebarItem as SidebarItemData, SidebarItemType, ItemActions, DropPosition } from '@/types/sidebar';
 import { SidebarItem } from '@/components/Sidebar/SidebarItem/SidebarItem';
+import { DemoGoalProgress } from '@/components/DemoGoalProgress';
 import { Telescope, Trash2, Search, X, Folder, File, Layout, Download, Undo, MoreHorizontal } from 'lucide-react';
 import styles from '@/components/Sidebar/SidebarShared.module.css';
 import trashStyles from '@/components/TrashPanel/TrashPanel.module.css';
@@ -283,6 +284,17 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
     return Math.min(baseWidth + (maxDepth * widthPerLevel), 500);
   }, [maxDepth]);
 
+  // Calculate current word count for goals
+  const currentWordCount = useMemo(() => {
+    return items.reduce((sum, item) => {
+      if (item.type === 'file' && item.content) {
+        const plainText = item.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        return sum + (plainText ? plainText.split(/\s+/).filter(Boolean).length : 0);
+      }
+      return sum;
+    }, 0);
+  }, [items]);
+
   // Trash items
   const trashItems = getTrashItems();
 
@@ -373,6 +385,11 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
           onToggleExpand={toggleExpanded}
         />
       </nav>
+
+      {/* Goal Progress */}
+      <div className={styles.goalSection}>
+        <DemoGoalProgress currentWordCount={currentWordCount} />
+      </div>
 
       {/* Trash Panel */}
       {showTrash && (
