@@ -1,0 +1,12 @@
+export { Sidebar } from './Sidebar';
+export { SidebarProvider, useSidebar } from './SidebarContext';
+export { SidebarHeader } from './SidebarHeader/SidebarHeader';
+export { SidebarContent } from './SidebarContent/SidebarContent';
+export { SidebarGoals } from './SidebarGoals/SidebarGoals';
+export { SidebarModals } from './SidebarModals/SidebarModals';
+export { SidebarSearch } from './SidebarSearch/SidebarSearch';
+export { SidebarMenu } from './SidebarMenu/SidebarMenu';
+export { SidebarItem } from './SidebarItem/SidebarItem';
+export { SidebarItemIcon } from './SidebarItem/SidebarItemIcon';
+export { SidebarItemName } from './SidebarItem/SidebarItemName';
+export { SidebarItemActions } from './SidebarItem/SidebarItemActions';

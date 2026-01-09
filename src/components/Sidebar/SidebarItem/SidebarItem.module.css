@@ -153,10 +153,9 @@
   color: #8b5cf6;
 }
 
-
-
 /* Root folder icon is red */
-.rootItem .icon {
+.rootItem .icon,
+.rootIcon {
   color: #ef4444;
 }
 

@@ -5,7 +5,7 @@ import { useDemo } from '@/lib/context/DemoContext';
 import type { SidebarItem as SidebarItemData, SidebarItemType, ItemActions, DropPosition } from '@/types/sidebar';
 import { SidebarItem } from '@/components/Sidebar/SidebarItem/SidebarItem';
 import { Telescope, Trash2, Search, X, Folder, File, Layout, Download, Undo, MoreHorizontal } from 'lucide-react';
-import styles from '@/components/Sidebar/Sidebar.module.css';
+import styles from '@/components/Sidebar/SidebarShared.module.css';
 import trashStyles from '@/components/TrashPanel/TrashPanel.module.css';
 
 interface DemoSidebarProps {
