@@ -1,0 +1,46 @@
+.controls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.toggleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toggleButton:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background: #e5e7eb;
+}
+
+.zoomLevel {
+  font-size: 12px;
+  color: #666;
+  min-width: 40px;
+  text-align: center;
+}

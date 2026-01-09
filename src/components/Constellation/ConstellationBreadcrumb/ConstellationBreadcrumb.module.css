@@ -1,0 +1,45 @@
+.breadcrumb {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.breadcrumbItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breadcrumbButton {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.breadcrumbButton:hover:not(.breadcrumbCurrent) {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.breadcrumbCurrent {
+  color: #333;
+  font-weight: 500;
+  cursor: default;
+}
+
+.breadcrumbSeparator {
+  color: #ccc;
+}

@@ -1,0 +1,64 @@
+.childNode {
+  position: absolute;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.3s ease, transform 0.2s ease;
+  z-index: 4;
+}
+
+.childNode:hover {
+  transform: scale(1.1);
+  z-index: 6;
+}
+
+.childNode.dimmed {
+  opacity: 0.3;
+}
+
+.childNode.isFolder {
+  cursor: pointer;
+}
+
+/* Blue nodes (folders) */
+.blue {
+  background: radial-gradient(circle at 30% 30%, #74c0fc, #1c7ed6);
+  box-shadow: 0 4px 15px rgba(28, 126, 214, 0.4);
+}
+
+/* Yellow nodes (files) */
+.yellow {
+  background: radial-gradient(circle at 30% 30%, #ffd43b, #fab005);
+  box-shadow: 0 4px 15px rgba(250, 176, 5, 0.4);
+}
+
+.nodeTitle {
+  color: white;
+  font-weight: 600;
+  text-align: center;
+  padding: 8px;
+  word-break: break-word;
+  max-width: 90%;
+}
+
+.yellow .nodeTitle {
+  color: #333;
+}
+
+.nodeLabel {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #666;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.childNode:hover .nodeLabel {
+  opacity: 1;
+}

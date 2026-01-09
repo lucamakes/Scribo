@@ -1,0 +1,86 @@
+.infoButton {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 10;
+}
+
+.toggleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.toggleButton:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.infoPanel {
+  position: absolute;
+  bottom: 60px;
+  right: 16px;
+  width: 320px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.infoTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+.infoSubtitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 16px 0 8px 0;
+}
+
+.infoText {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 12px 0;
+}
+
+.infoList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px 0;
+}
+
+.infoList li {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.infoIcon {
+  display: flex;
+  align-items: center;
+  color: #999;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
