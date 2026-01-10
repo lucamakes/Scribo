@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useCallback, type DragEvent, type MouseEvent } from 'react';
+import { useState, useCallback, useRef, type DragEvent, type MouseEvent } from 'react';
 import { ChevronRight } from 'lucide-react';
 import type { SidebarItem as SidebarItemData, DropPosition, ItemActions } from '@/types/sidebar';
 import { SidebarItemIcon } from './SidebarItemIcon';
 import { SidebarItemName } from './SidebarItemName';
-import { SidebarItemActions } from './SidebarItemActions';
+import { SidebarItemActions, type SidebarItemActionsRef } from './SidebarItemActions';
 import styles from './SidebarItem.module.css';
 
 interface SidebarItemProps {
@@ -46,6 +46,11 @@ export function SidebarItem({
 }: SidebarItemProps) {
   const [dropPosition, setDropPosition] = useState<DropPosition | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const actionsRef = useRef<SidebarItemActionsRef>(null);
+
+  const handleMouseLeave = useCallback(() => {
+    actionsRef.current?.closeAddMenu();
+  }, []);
 
   const isFolder = item.type === 'folder';
   const hasChildren = children.length > 0;
@@ -141,6 +146,7 @@ export function SidebarItem({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={handleItemClick}
+        onMouseLeave={handleMouseLeave}
         role="treeitem"
         aria-expanded={isFolder ? isExpanded : undefined}
       >
@@ -172,6 +178,7 @@ export function SidebarItem({
         </div>
 
         <SidebarItemActions
+          ref={actionsRef}
           itemId={item.id}
           isFolder={isFolder}
           isRoot={isRoot}

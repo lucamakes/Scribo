@@ -1,11 +1,15 @@
 'use client';
 
-import { useState, useCallback, type MouseEvent } from 'react';
+import { useState, useCallback, useImperativeHandle, forwardRef, type MouseEvent } from 'react';
 import { Plus, Pencil, X, Folder, File, Layout } from 'lucide-react';
 import type { SidebarItemType } from '@/types/sidebar';
 import IconButton from '@/components/IconButton/IconButton';
 import Dropdown from '@/components/Dropdown/Dropdown';
 import styles from './SidebarItem.module.css';
+
+export interface SidebarItemActionsRef {
+  closeAddMenu: () => void;
+}
 
 interface SidebarItemActionsProps {
   itemId: string;
@@ -17,29 +21,31 @@ interface SidebarItemActionsProps {
   onAdd: (parentId: string, type: SidebarItemType) => void;
 }
 
-export function SidebarItemActions({
-  itemId,
-  isFolder,
-  isRoot,
-  isEditing,
-  onEdit,
-  onDelete,
-  onAdd,
-}: SidebarItemActionsProps) {
+export const SidebarItemActions = forwardRef<SidebarItemActionsRef, SidebarItemActionsProps>(
+  function SidebarItemActions({
+    itemId,
+    isFolder,
+    isRoot,
+    isEditing,
+    onEdit,
+    onDelete,
+    onAdd,
+  }, ref) {
   const [showAddMenu, setShowAddMenu] = useState(false);
 
-  const handleEdit = useCallback((e: MouseEvent) => {
-    e.stopPropagation();
+  useImperativeHandle(ref, () => ({
+    closeAddMenu: () => setShowAddMenu(false),
+  }), []);
+
+  const handleEdit = useCallback(() => {
     if (!isRoot) onEdit(itemId);
   }, [onEdit, itemId, isRoot]);
 
-  const handleDelete = useCallback((e: MouseEvent) => {
-    e.stopPropagation();
+  const handleDelete = useCallback(() => {
     if (!isRoot) onDelete(itemId);
   }, [onDelete, itemId, isRoot]);
 
-  const toggleAddMenu = useCallback((e: MouseEvent) => {
-    e.stopPropagation();
+  const toggleAddMenu = useCallback(() => {
     setShowAddMenu(prev => !prev);
   }, []);
 
@@ -111,4 +117,4 @@ export function SidebarItemActions({
       )}
     </div>
   );
-}
+});

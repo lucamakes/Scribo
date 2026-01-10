@@ -246,6 +246,14 @@
   gap: 8px !important;
 }
 
+.addMenuContent:before {
+    content: "";
+    width: 100px;
+    height: 10px;
+    position: absolute;
+    top: -3px;
+   }
+
 .fileIcon,
 .canvasIcon,
 .folderIcon {
@@ -267,7 +275,7 @@
 }
 
 .canvasIcon {
-  color: #1565a8;
+  color: #8b5cf6;
 }
 
 .folderIcon {
