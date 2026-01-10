@@ -7,7 +7,7 @@ import { useSubscription } from '@/lib/hooks/useSubscription';
 import { SettingsModal } from '@/components/SettingsModal/SettingsModal';
 import Dropdown from '@/components/Dropdown/Dropdown';
 import IconButton from '@/components/IconButton/IconButton';
-import { User, Settings, Sparkles, CreditCard, MessageSquare, X, Check } from 'lucide-react';
+import { User, Settings, Sparkles, CreditCard, MessageSquare, X, Check, KeyRound } from 'lucide-react';
 import styles from './UserMenu.module.css';
 
 /**
@@ -20,6 +20,7 @@ export function UserMenu() {
     const [isOpen, setIsOpen] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [showPricing, setShowPricing] = useState(false);
+    const [showChangePassword, setShowChangePassword] = useState(false);
     const [upgradeLoading, setUpgradeLoading] = useState(false);
 
     const handleLogout = useCallback(async () => {
@@ -144,6 +145,10 @@ export function UserMenu() {
                             <Settings size={16} strokeWidth={1} />
                             Settings
                         </button>
+                        <button onClick={() => { setIsOpen(false); setShowChangePassword(true); }} className={styles.menuButton}>
+                            <KeyRound size={16} strokeWidth={1} />
+                            Change Password
+                        </button>
                         <button onClick={() => { setIsOpen(false); router.push('/feedback'); }} className={styles.menuButton}>
                             <MessageSquare size={16} strokeWidth={1} />
                             Feedback
@@ -247,6 +252,134 @@ export function UserMenu() {
                     </div>
                 </div>
             )}
+
+            {showChangePassword && (
+                <ChangePasswordModal 
+                    isOpen={showChangePassword} 
+                    onClose={() => setShowChangePassword(false)} 
+                />
+            )}
         </>
+    );
+}
+
+// Change Password Modal Component
+function ChangePasswordModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+    const { updatePassword } = useAuth();
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+
+        if (!newPassword || !confirmPassword) {
+            setError('Please fill in all fields');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            setError('Password must be at least 6 characters');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
+
+        setLoading(true);
+
+        const { error: updateError } = await updatePassword(newPassword);
+
+        if (updateError) {
+            setError(updateError);
+            setLoading(false);
+            return;
+        }
+
+        setSuccess(true);
+        setLoading(false);
+
+        setTimeout(() => {
+            onClose();
+            setSuccess(false);
+            setNewPassword('');
+            setConfirmPassword('');
+        }, 1500);
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className={styles.modalOverlay} onClick={onClose}>
+            <div className={styles.changePasswordModal} onClick={(e) => e.stopPropagation()}>
+                <IconButton 
+                    onClick={onClose} 
+                    title="Close"
+                    className={styles.pricingCloseButton}
+                >
+                    <X size={18} strokeWidth={1.5} />
+                </IconButton>
+
+                <div className={styles.changePasswordHeader}>
+                    <h2 className={styles.changePasswordTitle}>Change Password</h2>
+                    <p className={styles.changePasswordSubtitle}>Enter your new password below</p>
+                </div>
+
+                {success ? (
+                    <div className={styles.successMessage}>
+                        <Check size={24} strokeWidth={2} />
+                        <span>Password updated successfully!</span>
+                    </div>
+                ) : (
+                    <form onSubmit={handleSubmit} className={styles.changePasswordForm}>
+                        {error && (
+                            <div className={styles.errorBanner}>
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        <div className={styles.formField}>
+                            <label htmlFor="newPassword" className={styles.formLabel}>New Password</label>
+                            <input
+                                id="newPassword"
+                                type="password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                placeholder="••••••••"
+                                className={styles.formInput}
+                                autoComplete="new-password"
+                                autoFocus
+                                disabled={loading}
+                            />
+                            <span className={styles.formHint}>Minimum 6 characters</span>
+                        </div>
+
+                        <div className={styles.formField}>
+                            <label htmlFor="confirmPassword" className={styles.formLabel}>Confirm Password</label>
+                            <input
+                                id="confirmPassword"
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="••••••••"
+                                className={styles.formInput}
+                                autoComplete="new-password"
+                                disabled={loading}
+                            />
+                        </div>
+
+                        <button type="submit" className={styles.submitButton} disabled={loading}>
+                            {loading ? 'Updating...' : 'Update Password'}
+                        </button>
+                    </form>
+                )}
+            </div>
+        </div>
     );
 }
