@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, type FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/context/AuthContext';
 import styles from '../auth.module.css';
@@ -11,11 +11,52 @@ import styles from '../auth.module.css';
  */
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { signIn, loading: authLoading } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    // Get plan from URL params (monthly or yearly)
+    const plan = searchParams.get('plan');
+
+    // Helper to trigger Stripe checkout
+    const triggerStripeCheckout = useCallback(async (userId: string, planType: string) => {
+        const priceId = planType === 'yearly' 
+            ? process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY 
+            : process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY;
+
+        if (!priceId) {
+            console.error('Stripe price ID not configured');
+            router.push('/projects');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/stripe/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId,
+                    priceId,
+                    returnUrl: window.location.origin,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                console.error('Failed to create checkout session:', data.error);
+                router.push('/projects');
+            }
+        } catch (err) {
+            console.error('Checkout error:', err);
+            router.push('/projects');
+        }
+    }, [router]);
 
     const handleSubmit = useCallback(async (e: FormEvent) => {
         e.preventDefault();
@@ -28,7 +69,7 @@ export default function LoginPage() {
 
         setLoading(true);
 
-        const { error: signInError } = await signIn(email.trim(), password);
+        const { error: signInError, data } = await signIn(email.trim(), password);
 
         if (signInError) {
             setError(signInError);
@@ -36,8 +77,14 @@ export default function LoginPage() {
             return;
         }
 
+        // If user selected a paid plan, redirect to Stripe checkout
+        if (plan && (plan === 'monthly' || plan === 'yearly') && data?.user?.id) {
+            await triggerStripeCheckout(data.user.id, plan);
+            return;
+        }
+
         router.push('/projects');
-    }, [email, password, signIn, router]);
+    }, [email, password, signIn, router, plan, triggerStripeCheckout]);
 
     if (authLoading) {
         return (
@@ -112,7 +159,7 @@ export default function LoginPage() {
                 <div className={styles.footer}>
                     <p className={styles.footerText}>
                         Don't have an account?{' '}
-                        <Link href="/auth/signup" className={styles.link}>
+                        <Link href={plan ? `/auth/signup?plan=${plan}` : '/auth/signup'} className={styles.link}>
                             Create one
                         </Link>
                     </p>

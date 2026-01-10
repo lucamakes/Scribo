@@ -207,7 +207,7 @@ export default function Home() {
                 <li><Check size={16} strokeWidth={2} /> All core features</li>
                 <li><Check size={16} strokeWidth={2} /> Priority support</li>
               </ul>
-              <Button onClick={() => router.push('/auth/signup')} variant="secondary">
+              <Button onClick={() => router.push('/auth/signup?plan=monthly')} variant="secondary">
                 Get Pro Monthly
               </Button>
             </div>
@@ -226,7 +226,7 @@ export default function Home() {
                 <li><Check size={16} strokeWidth={2} /> All core features</li>
                 <li><Check size={16} strokeWidth={2} /> Priority support</li>
               </ul>
-              <Button onClick={() => router.push('/auth/signup')}>
+              <Button onClick={() => router.push('/auth/signup?plan=yearly')}>
                 Get Pro Yearly
               </Button>
             </div>
