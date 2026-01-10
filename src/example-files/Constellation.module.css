@@ -278,8 +278,8 @@
   justify-content: center;
   height: 28px;
   padding: 0 10px;
-  background: none;
-  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border: 1px solid #b3b3b3;
   border-radius: 6px;
   color: #000000;
   font-size: 13px;
@@ -330,37 +330,12 @@
   transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
-.toggleButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  background: none;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  cursor: pointer;
-  color: #000000;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.toggleButton:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
-}
-
-.toggleButton:active {
-  background: #e5e7eb;
-}
-
 .zoomLevel {
   font-size: 12px;
   font-weight: 500;
   color: #000000;
   min-width: 40px;
-  height: 28px;
+  height: 32px;
   text-align: center;
   padding: 0 4px;
   display: flex;

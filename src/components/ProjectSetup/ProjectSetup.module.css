@@ -72,12 +72,12 @@
 }
 
 .templateCardSelected {
-  background-color: #6366f126;
-  border-color: #6366f1;
+  background-color: #1565a826;
+  border-color: #1565a8;
 }
 
 .templateCardSelected:hover {
-  background-color: #6366f126;
+  background-color: #1565a826;
 }
 
 .templateIcon {
@@ -93,8 +93,8 @@
 }
 
 .templateCardSelected .templateIcon {
-  background-color: #6366f126;
-  color: #6366f1;
+  background-color: #1565a826;
+  color: #1565a8;
 }
 
 .templateInfo {
@@ -127,13 +127,13 @@
 }
 
 .templateCardSelected .radioButton {
-  border-color: #6366f1;
+  border-color: #1565a8;
 }
 
 .radioButtonInner {
   width: 10px;
   height: 10px;
-  background-color: #6366f1;
+  background-color: #1565a8;
   border-radius: 50%;
 }
 

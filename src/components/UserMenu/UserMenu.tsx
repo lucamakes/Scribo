@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useSubscription } from '@/lib/hooks/useSubscription';
 import { SettingsModal } from '@/components/SettingsModal/SettingsModal';
+import Dropdown from '@/components/Dropdown/Dropdown';
+import IconButton from '@/components/IconButton/IconButton';
 import { User, Settings, Sparkles, CreditCard, MessageSquare, X, Check } from 'lucide-react';
 import styles from './UserMenu.module.css';
 
@@ -19,7 +21,6 @@ export function UserMenu() {
     const [showSettings, setShowSettings] = useState(false);
     const [showPricing, setShowPricing] = useState(false);
     const [upgradeLoading, setUpgradeLoading] = useState(false);
-    const menuRef = useRef<HTMLDivElement>(null);
 
     const handleLogout = useCallback(async () => {
         await signOut();
@@ -83,23 +84,6 @@ export function UserMenu() {
         }
     }, [user]);
 
-    // Close menu when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
-        };
-
-        if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [isOpen]);
-
     if (!user) return null;
 
     const displayEmail = user.email || 'User';
@@ -108,17 +92,17 @@ export function UserMenu() {
 
     return (
         <>
-            <div className={styles.container} ref={menuRef}>
-                <button 
-                    onClick={() => setIsOpen(!isOpen)} 
-                    className={styles.accountButton}
-                    aria-label="Account menu"
+            <div className={styles.container}>
+                <IconButton
+                    onClick={() => setIsOpen(!isOpen)}
+                    size="medium"
+                    title="Account menu"
                 >
-                    <User size={18} strokeWidth={1.5} />
-                </button>
+                    <User size={18} strokeWidth={1} />
+                </IconButton>
 
                 {isOpen && (
-                    <div className={styles.dropdown}>
+                    <Dropdown onClose={() => setIsOpen(false)} direction="vertical">
                         <div className={styles.dropdownHeader}>
                             <span className={styles.email}>{displayEmail}</span>
                         </div>
@@ -143,7 +127,7 @@ export function UserMenu() {
                                 className={styles.menuButton}
                                 disabled={upgradeLoading}
                             >
-                                <CreditCard size={16} strokeWidth={1.5} />
+                                <CreditCard size={16} strokeWidth={1} />
                                 Manage Subscription
                             </button>
                         ) : (
@@ -151,23 +135,23 @@ export function UserMenu() {
                                 onClick={handleShowPricing} 
                                 className={styles.upgradeButton}
                             >
-                                <Sparkles size={16} strokeWidth={1.5} />
+                                <Sparkles size={16} strokeWidth={1} />
                                 Upgrade to Pro
                             </button>
                         )}
 
                         <button onClick={handleOpenSettings} className={styles.menuButton}>
-                            <Settings size={16} strokeWidth={1.5} />
+                            <Settings size={16} strokeWidth={1} />
                             Settings
                         </button>
                         <button onClick={() => { setIsOpen(false); router.push('/feedback'); }} className={styles.menuButton}>
-                            <MessageSquare size={16} strokeWidth={1.5} />
+                            <MessageSquare size={16} strokeWidth={1} />
                             Feedback
                         </button>
                         <button onClick={handleLogout} className={styles.logoutButton}>
                             Log out
                         </button>
-                    </div>
+                    </Dropdown>
                 )}
             </div>
 
@@ -181,13 +165,13 @@ export function UserMenu() {
             {showPricing && (
                 <div className={styles.modalOverlay} onClick={() => setShowPricing(false)}>
                     <div className={styles.pricingModal} onClick={(e) => e.stopPropagation()}>
-                        <button 
+                        <IconButton 
                             onClick={() => setShowPricing(false)} 
+                            title="Close"
                             className={styles.pricingCloseButton}
-                            aria-label="Close"
                         >
                             <X size={18} strokeWidth={1.5} />
-                        </button>
+                        </IconButton>
                         
                         <div className={styles.pricingHeader}>
                             <h2 className={styles.pricingTitle}>Simple, honest pricing</h2>

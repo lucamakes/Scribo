@@ -3,6 +3,7 @@
 import { Telescope, MoreHorizontal } from 'lucide-react';
 import { useSidebar } from '../SidebarContext';
 import { SidebarMenu } from '../SidebarMenu/SidebarMenu';
+import IconButton from '@/components/IconButton/IconButton';
 import styles from './SidebarHeader.module.css';
 
 interface SidebarHeaderProps {
@@ -19,24 +20,21 @@ export function SidebarHeader({ onToggleBlankView, onBackToProjects, onOpenSetti
       <span className={styles.title}>{project.name}</span>
       <div className={styles.headerActions}>
         {onToggleBlankView && (
-          <button
+          <IconButton
             onClick={onToggleBlankView}
-            className={styles.iconButton}
-            type="button"
-            aria-label="Constellation View"
             title="Constellation View"
+            size="medium"
           >
             <Telescope size={18} strokeWidth={1} />
-          </button>
+          </IconButton>
         )}
-        <button 
-          className={styles.iconButton} 
-          title="Menu" 
-          aria-label="Menu"
+        <IconButton
           onClick={() => setShowMenu(prev => !prev)}
+          title="Menu"
+          size="medium"
         >
           <MoreHorizontal size={18} strokeWidth={1} />
-        </button>
+        </IconButton>
         
         {showMenu && (
           <SidebarMenu

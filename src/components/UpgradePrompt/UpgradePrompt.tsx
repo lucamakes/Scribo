@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { X, Check } from 'lucide-react';
 import { useAuth } from '@/lib/context/AuthContext';
+import IconButton from '@/components/IconButton/IconButton';
+import Button from '@/components/Button/Button';
 import styles from './UpgradePrompt.module.css';
 
 interface UpgradePromptProps {
@@ -49,9 +51,9 @@ export function UpgradePrompt({ type, percentage = 100, onClose }: UpgradePrompt
       <div className={styles.modalOverlay}>
         <div className={styles.warningModal}>
           {onClose && (
-            <button onClick={onClose} className={styles.closeButton} aria-label="Dismiss">
+            <IconButton onClick={onClose} title="Dismiss" className={styles.closeButton}>
               <X size={18} strokeWidth={1.5} />
-            </button>
+            </IconButton>
           )}
           
           <h2 className={styles.warningTitle}>You&apos;ve used {percentage}% of your free words</h2>
@@ -60,19 +62,12 @@ export function UpgradePrompt({ type, percentage = 100, onClose }: UpgradePrompt
           </p>
 
           <div className={styles.warningActions}>
-            <button
-              onClick={onClose}
-              className={styles.warningDismiss}
-            >
+            <Button onClick={onClose} variant="secondary">
               Continue writing
-            </button>
-            <button
-              onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY!)}
-              className={styles.warningUpgrade}
-              disabled={isLoading}
-            >
+            </Button>
+            <Button onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY!)} disabled={isLoading}>
               Upgrade to Pro
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -83,9 +78,9 @@ export function UpgradePrompt({ type, percentage = 100, onClose }: UpgradePrompt
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         {onClose && (
-          <button onClick={onClose} className={styles.closeButton} aria-label="Close">
+          <IconButton onClick={onClose} title="Close" className={styles.closeButton}>
             <X size={18} strokeWidth={1.5} />
-          </button>
+          </IconButton>
         )}
         
         <div className={styles.modalHeader}>

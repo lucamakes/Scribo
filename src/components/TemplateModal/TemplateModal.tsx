@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { X, FileText, BookOpen, Briefcase, Newspaper, Scroll, Sparkles } from 'lucide-react';
+import IconButton from '@/components/IconButton/IconButton';
+import Button from '@/components/Button/Button';
 import styles from './TemplateModal.module.css';
 
 interface TemplateModalProps {
@@ -97,13 +99,9 @@ export function TemplateModal({ isOpen, onClose, onSelectTemplate }: TemplateMod
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <header className={styles.header}>
           <h2 className={styles.title}>Choose a Template</h2>
-          <button
-            onClick={onClose}
-            className={styles.closeButton}
-            aria-label="Close"
-          >
-            <X size={18} strokeWidth={1} />
-          </button>
+          <IconButton onClick={onClose} title="Close">
+            <X size={18} strokeWidth={1.5} />
+          </IconButton>
         </header>
 
         <div className={styles.content}>
@@ -141,16 +139,12 @@ export function TemplateModal({ isOpen, onClose, onSelectTemplate }: TemplateMod
         </div>
 
         <footer className={styles.footer}>
-          <button onClick={onClose} className={styles.cancelButton}>
+          <Button onClick={onClose} variant="secondary">
             Cancel
-          </button>
-          <button
-            onClick={handleSelect}
-            className={styles.selectButton}
-            disabled={!selectedTemplate}
-          >
+          </Button>
+          <Button onClick={handleSelect} disabled={!selectedTemplate}>
             Continue
-          </button>
+          </Button>
         </footer>
       </div>
     </div>

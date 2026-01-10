@@ -12,6 +12,7 @@ import Constellation from '@/example-files/Constellation';
 import { projectService } from '@/lib/services/projectService';
 import { itemService } from '@/lib/services/itemService';
 import { itemsToChildData } from '@/lib/utils/sidebarToConstellation';
+import IconButton from '@/components/IconButton/IconButton';
 import { X, ArrowLeft } from 'lucide-react';
 import styles from './ProjectPage.module.css';
 
@@ -166,14 +167,13 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     if (showBlankView) {
         return (
             <div className={styles.blankView}>
-                <button
+                <IconButton
                     onClick={toggleBlankView}
+                    title="Close constellation view"
                     className={styles.blankToggleButton}
-                    type="button"
-                    aria-label="Close constellation view"
                 >
                     <X size={18} strokeWidth={1} />
-                </button>
+                </IconButton>
                 {itemsLoading ? (
                     <div className={styles.loadingContainer}>
                         <div className={styles.spinner}></div>

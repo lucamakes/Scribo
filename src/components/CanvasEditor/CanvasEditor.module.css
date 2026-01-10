@@ -21,7 +21,7 @@
   align-items: center;
   justify-content: center;
   padding: 8px;
-  border: 1px solid #999999;
+  border: 1px solid #b3b3b3;
   border-radius: 6px;
   background: #ffffff;
   color: #555555;
@@ -60,9 +60,9 @@
 }
 
 .toolButton.active {
-  background: #6366f1;
+  background: #1565a8;
   color: white;
-  border-color: #6366f1;
+  border-color: #1565a8;
 }
 
 .divider {
@@ -103,7 +103,7 @@
   height: 32px;
   padding: 0;
   background: #ffffff;
-  border: 1px solid #999999;
+  border: 1px solid #b3b3b3;
   border-radius: 6px;
   cursor: pointer;
   color: #555555;
@@ -206,7 +206,7 @@
 }
 
 .connectionPreview {
-  stroke: #6366f1;
+  stroke: #1565a8;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-dasharray: 6 4;
@@ -263,8 +263,8 @@
 }
 
 .node.selected {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2), 0 4px 12px rgba(0,0,0,0.15);
+  border-color: #1a78c2;
+  box-shadow: 0 0 0 3px rgba(26, 120, 194, 0.2), 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .node.connecting {
@@ -307,8 +307,8 @@
 }
 
 .connectBtn:hover {
-  background: #6366f1;
-  border-color: #6366f1;
+  background: #1565a8;
+  border-color: #1565a8;
   color: #fff;
   transform: scale(1.1);
 }
@@ -481,9 +481,9 @@
 }
 
 .shape.selected {
-  border-color: #6366f1;
+  border-color: #1a78c2;
   border-style: solid;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 0 3px rgba(26, 120, 194, 0.15);
 }
 
 .shape:active {
@@ -520,7 +520,7 @@ input.shapeLabel {
   right: -4px;
   width: 12px;
   height: 12px;
-  background: #6366f1;
+  background: #1565a8;
   border: 2px solid #fff;
   border-radius: 2px;
   cursor: se-resize;
@@ -532,7 +532,7 @@ input.shapeLabel {
   position: absolute;
   width: 120px;
   height: 4px;
-  background: #6366f1;
+  background: #1565a8;
   border-radius: 2px;
   opacity: 0.6;
   pointer-events: none;
@@ -565,8 +565,8 @@ input.shapeLabel {
 }
 
 .stackBackground.selected {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  border-color: #1a78c2;
+  box-shadow: 0 0 0 3px rgba(26, 120, 194, 0.15);
 }
 
 .stackBackground:active {

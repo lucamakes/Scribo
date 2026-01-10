@@ -19,14 +19,14 @@ import {
 import styles from './FeedbackSection.module.css';
 
 const TYPE_CONFIG: Record<FeedbackType, { label: string; icon: typeof Lightbulb; color: string }> = {
-  feature: { label: 'Feature', icon: Lightbulb, color: '#6366f1' },
+  feature: { label: 'Feature', icon: Lightbulb, color: '#1565a8' },
   bug: { label: 'Bug', icon: Bug, color: '#ef4444' },
   improvement: { label: 'Improvement', icon: Sparkles, color: '#10b981' },
 };
 
 const STATUS_CONFIG: Record<FeedbackStatus, { label: string; icon: typeof Clock; color: string }> = {
   open: { label: 'Open', icon: Clock, color: '#6b7280' },
-  planned: { label: 'Planned', icon: Check, color: '#6366f1' },
+  planned: { label: 'Planned', icon: Check, color: '#1565a8' },
   in_progress: { label: 'In Progress', icon: Clock, color: '#f59e0b' },
   completed: { label: 'Completed', icon: CheckCircle2, color: '#10b981' },
   closed: { label: 'Closed', icon: XCircle, color: '#6b7280' },

@@ -132,7 +132,7 @@
   appearance: none;
   width: 18px;
   height: 18px;
-  background: #6366f1;
+  background: #1565a8;
   border-radius: 50%;
   cursor: pointer;
   transition: transform 0.15s ease;
@@ -145,7 +145,7 @@
 .slider::-moz-range-thumb {
   width: 18px;
   height: 18px;
-  background: #6366f1;
+  background: #1565a8;
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -180,8 +180,8 @@
 }
 
 .colorButtonActive {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+  border-color: #1a78c2;
+  box-shadow: 0 0 0 2px rgba(26, 120, 194, 0.3);
 }
 
 .colorPicker {
@@ -230,7 +230,6 @@
   justify-content: space-between;
   padding: 16px 24px;
   border-top: 1px solid #e5e7eb;
-  background: #fafafa;
 }
 
 .footerRight {
@@ -276,7 +275,7 @@
 
 .saveButton {
   padding: 10px 20px;
-  background: #6366f1;
+  background: #1565a8;
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -287,7 +286,7 @@
 }
 
 .saveButton:hover:not(:disabled) {
-  background: #4f46e5;
+  background: #1565a8;
 }
 
 .saveButton:disabled {

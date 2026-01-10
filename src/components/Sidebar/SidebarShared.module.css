@@ -139,7 +139,7 @@
 .menuContent {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 10px;
+  border-radius: 8px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
   padding: 6px;
   min-width: 180px;
@@ -166,7 +166,7 @@
   padding: 12px 14px;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   color: #333;
   font-size: 14px;
   font-weight: 450;

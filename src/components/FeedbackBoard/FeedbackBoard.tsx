@@ -19,17 +19,19 @@ import {
   LogIn,
   ArrowLeft
 } from 'lucide-react';
+import IconButton from '@/components/IconButton/IconButton';
+import Button from '@/components/Button/Button';
 import styles from './FeedbackBoard.module.css';
 
 const TYPE_CONFIG: Record<FeedbackType, { label: string; icon: typeof Lightbulb; color: string }> = {
-  feature: { label: 'Feature', icon: Lightbulb, color: '#6366f1' },
+  feature: { label: 'Feature', icon: Lightbulb, color: '#1565a8' },
   bug: { label: 'Bug', icon: Bug, color: '#ef4444' },
   improvement: { label: 'Improvement', icon: Sparkles, color: '#10b981' },
 };
 
 const STATUS_CONFIG: Record<FeedbackStatus, { label: string; icon: typeof Clock; color: string }> = {
   open: { label: 'Open', icon: Clock, color: '#6b7280' },
-  planned: { label: 'Planned', icon: Check, color: '#6366f1' },
+  planned: { label: 'Planned', icon: Check, color: '#1565a8' },
   in_progress: { label: 'In Progress', icon: Clock, color: '#f59e0b' },
   completed: { label: 'Completed', icon: CheckCircle2, color: '#10b981' },
   closed: { label: 'Closed', icon: XCircle, color: '#6b7280' },
@@ -144,9 +146,9 @@ export default function FeedbackBoard({ showBackButton = false }: FeedbackBoardP
   return (
     <section id="feedback" className={styles.feedbackBoard}>
       {showBackButton && (
-        <button onClick={() => router.push('/')} className={styles.backButton}>
-          <ArrowLeft size={20} strokeWidth={1.5} />
-        </button>
+        <IconButton onClick={() => router.push('/')} title="Back to home" className={styles.backButton}>
+          <ArrowLeft size={20} strokeWidth={1} />
+        </IconButton>
       )}
 
       <div className={styles.feedbackHeader}>
@@ -158,15 +160,15 @@ export default function FeedbackBoard({ showBackButton = false }: FeedbackBoardP
         </div>
         <div className={styles.feedbackActions}>
           {!user && (
-            <button onClick={() => router.push('/auth/login')} className={styles.loginButton}>
-              <LogIn size={18} strokeWidth={1.5} />
+            <Button onClick={() => router.push('/auth/login')} variant="secondary">
+              <LogIn size={18} strokeWidth={1} />
               Log in
-            </button>
+            </Button>
           )}
-          <button onClick={handleNewFeedback} className={styles.newButton}>
-            <Plus size={18} strokeWidth={2} />
+          <Button onClick={handleNewFeedback}>
+            <Plus size={18} strokeWidth={1} />
             New Feedback
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -255,9 +257,9 @@ export default function FeedbackBoard({ showBackButton = false }: FeedbackBoardP
 
             {hasMore && (
               <div className={styles.loadMoreContainer}>
-                <button onClick={handleLoadMore} className={styles.loadMoreButton}>
+                <Button onClick={handleLoadMore} variant="secondary">
                   Load More
-                </button>
+                </Button>
               </div>
             )}
           </>
@@ -270,19 +272,19 @@ export default function FeedbackBoard({ showBackButton = false }: FeedbackBoardP
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2>Sign in to continue</h2>
-              <button onClick={() => setShowLoginPrompt(false)} className={styles.closeButton}>
-                <X size={20} strokeWidth={1.5} />
-              </button>
+              <IconButton onClick={() => setShowLoginPrompt(false)} title="Close">
+                <X size={18} strokeWidth={1.5} />
+              </IconButton>
             </div>
             <div className={styles.modalContent}>
               <p>You need to be logged in to vote or submit feedback.</p>
               <div className={styles.modalActions}>
-                <button onClick={() => router.push('/auth/login')} className={styles.primaryButton}>
+                <Button onClick={() => router.push('/auth/login')}>
                   Log in
-                </button>
-                <button onClick={() => router.push('/auth/signup')} className={styles.secondaryButton}>
+                </Button>
+                <Button onClick={() => router.push('/auth/signup')} variant="secondary">
                   Sign up
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -295,9 +297,9 @@ export default function FeedbackBoard({ showBackButton = false }: FeedbackBoardP
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2>Submit Feedback</h2>
-              <button onClick={() => setShowNewForm(false)} className={styles.closeButton}>
-                <X size={20} strokeWidth={1.5} />
-              </button>
+              <IconButton onClick={() => setShowNewForm(false)} title="Close">
+                <X size={18} strokeWidth={1.5} />
+              </IconButton>
             </div>
             <form onSubmit={handleSubmit} className={styles.feedbackForm}>
               <div className={styles.formGroup}>
@@ -344,12 +346,12 @@ export default function FeedbackBoard({ showBackButton = false }: FeedbackBoardP
                 />
               </div>
               <div className={styles.modalActions}>
-                <button type="button" onClick={() => setShowNewForm(false)} className={styles.secondaryButton}>
+                <Button type="button" onClick={() => setShowNewForm(false)} variant="secondary">
                   Cancel
-                </button>
-                <button type="submit" disabled={submitting || !newTitle.trim()} className={styles.primaryButton}>
+                </Button>
+                <Button type="submit" disabled={submitting || !newTitle.trim()}>
                   {submitting ? 'Submitting...' : 'Submit Feedback'}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

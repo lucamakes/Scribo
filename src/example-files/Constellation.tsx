@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { Orbit, CircleDot, ZoomIn, ZoomOut, RotateCcw, ChevronRight, Info } from 'lucide-react';
+import IconButton from '@/components/IconButton/IconButton';
 import styles from './Constellation.module.css';
 import { DEFAULT_CHILDREN, ROOT_SIZE } from './constants';
 import { type ConstellationProps } from './types';
@@ -92,76 +93,61 @@ export default function Constellation({
       </div>
 
       <div className={styles.controls}>
-        <button
-          className={styles.toggleButton}
+        <IconButton
           onClick={(e) => {
             e.stopPropagation();
             toggleShowOnlyTwoCircles();
           }}
-          type="button"
-          aria-label={showOnlyTwoCircles ? 'Show All Orbits' : 'Simplify View (2 Orbits)'}
           title={showOnlyTwoCircles ? 'Show All Orbits' : 'Simplify View (2 Orbits)'}
         >
           {showOnlyTwoCircles ? <Orbit size={16} strokeWidth={1} /> : <CircleDot size={16} strokeWidth={1} />}
-        </button>
+        </IconButton>
 
         <div className={styles.divider} />
 
-        <button
-          className={styles.toggleButton}
+        <IconButton
           onClick={(e) => {
             e.stopPropagation();
             zoomIn();
           }}
-          type="button"
-          aria-label="Zoom In"
           title="Zoom In"
         >
           <ZoomIn size={16} strokeWidth={1} />
-        </button>
+        </IconButton>
 
         <span className={styles.zoomLevel}>{Math.round(zoom * 100)}%</span>
 
-        <button
-          className={styles.toggleButton}
+        <IconButton
           onClick={(e) => {
             e.stopPropagation();
             zoomOut();
           }}
-          type="button"
-          aria-label="Zoom Out"
           title="Zoom Out"
         >
           <ZoomOut size={16} strokeWidth={1} />
-        </button>
+        </IconButton>
 
-        <button
-          className={styles.toggleButton}
+        <IconButton
           onClick={(e) => {
             e.stopPropagation();
             resetView();
           }}
-          type="button"
-          aria-label="Reset View"
           title="Reset View"
         >
           <RotateCcw size={16} strokeWidth={1} />
-        </button>
+        </IconButton>
       </div>
 
       <div className={styles.infoButton}>
-        <button
-          className={styles.toggleButton}
+        <IconButton
           onClick={(e) => {
             e.stopPropagation();
             setShowInfo(!showInfo);
           }}
-          type="button"
-          aria-label="Information"
           title="Information"
         >
           <Info size={16} strokeWidth={1} />
-        </button>
+        </IconButton>
       </div>
 
       {showInfo && (

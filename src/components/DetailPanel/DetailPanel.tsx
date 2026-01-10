@@ -9,6 +9,7 @@ import { TiptapEditor } from '@/components/TiptapEditor/TiptapEditor';
 import { CanvasEditor } from '@/components/CanvasEditor/CanvasEditor';
 import { UpgradePrompt } from '@/components/UpgradePrompt/UpgradePrompt';
 import { VersionHistory } from '@/components/VersionHistory/VersionHistory';
+import IconButton from '@/components/IconButton/IconButton';
 import { useSubscription } from '@/lib/hooks/useSubscription';
 import { usePreferences } from '@/lib/hooks/usePreferences';
 import {
@@ -371,9 +372,9 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                             : selectedItem.name}
                     </h2>
                     <div className={styles.canvasHeaderRight}>
-                        <button
+                        <IconButton
                             onClick={() => saveContent(content)}
-                            className={`${styles.saveButton} ${content === lastSavedContent.current ? styles.saved : styles.unsaved}`}
+                            className={content === lastSavedContent.current ? styles.saved : styles.unsaved}
                             disabled={saveStatus === 'saving' || content === lastSavedContent.current}
                             title={content === lastSavedContent.current ? 'All changes saved' : 'Save now'}
                         >
@@ -382,28 +383,26 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                             ) : (
                                 <div className={styles.unsavedDot} />
                             )}
-                        </button>
-                        <button
+                        </IconButton>
+                        <IconButton
                             onClick={() => setShowVersionHistory(true)}
-                            className={styles.historyButton}
                             title="Version history"
                         >
                             <History size={16} strokeWidth={1.5} />
-                        </button>
-                        <button
+                        </IconButton>
+                        <IconButton
                             onClick={onBackToMaster}
                             className={styles.mobileCloseButton}
                             title="Back to files"
                         >
                             <X size={18} strokeWidth={1.5} />
-                        </button>
-                        <button
+                        </IconButton>
+                        <IconButton
                             onClick={toggleFullscreen}
-                            className={styles.fullscreenButton}
                             title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
                         >
                             {isFullscreen ? <Minimize2 size={18} strokeWidth={1} /> : <Maximize2 size={18} strokeWidth={1} />}
-                        </button>
+                        </IconButton>
                     </div>
                 </div>
                 {error && (
@@ -488,9 +487,9 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                     </h2>
                 </div>
                 <div className={styles.fileHeaderRight}>
-                        <button
+                        <IconButton
                             onClick={() => saveContent(content)}
-                            className={`${styles.saveButton} ${content === lastSavedContent.current ? styles.saved : styles.unsaved}`}
+                            className={content === lastSavedContent.current ? styles.saved : styles.unsaved}
                             disabled={saveStatus === 'saving' || content === lastSavedContent.current}
                             title={content === lastSavedContent.current ? 'All changes saved' : 'Save now (Ctrl+S)'}
                         >
@@ -499,14 +498,13 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                             ) : (
                                 <div className={styles.unsavedDot} />
                             )}
-                        </button>
-                        <button
+                        </IconButton>
+                        <IconButton
                             onClick={() => setShowVersionHistory(true)}
-                            className={styles.historyButton}
                             title="Version history"
                         >
                             <History size={16} strokeWidth={1.5} />
-                        </button>
+                        </IconButton>
                         <div className={styles.statistics}>
                             <span className={styles.stat}>
                                 {wordCount.toLocaleString()} words
@@ -520,20 +518,19 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                                 {pageCount} pages
                             </span>
                         </div>
-                        <button
+                        <IconButton
                             onClick={onBackToMaster}
                             className={styles.mobileCloseButton}
                             title="Back to files"
                         >
                             <X size={18} strokeWidth={1.5} />
-                        </button>
-                        <button
+                        </IconButton>
+                        <IconButton
                             onClick={toggleFullscreen}
-                            className={styles.fullscreenButton}
                             title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
                         >
                             {isFullscreen ? <Minimize2 size={18} strokeWidth={1} /> : <Maximize2 size={18} strokeWidth={1} />}
-                        </button>
+                        </IconButton>
                     </div>
                 </div>
 

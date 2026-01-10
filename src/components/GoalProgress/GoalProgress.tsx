@@ -5,6 +5,8 @@ import { Target, Settings, X, Check } from 'lucide-react';
 import { goalService, type ProjectGoals } from '@/lib/services/goalService';
 import { projectService } from '@/lib/services/projectService';
 import type { GoalPeriod } from '@/types/database';
+import IconButton from '@/components/IconButton/IconButton';
+import Button from '@/components/Button/Button';
 import styles from './GoalProgress.module.css';
 
 interface GoalProgressProps {
@@ -129,14 +131,15 @@ export function GoalProgress({ projectId, currentWordCount }: GoalProgressProps)
   if (!goals?.wordCountGoal) {
     return (
       <>
-        <button
+        <Button
           onClick={() => setShowSettings(true)}
-          className={styles.setGoalButton}
+          variant="secondary"
           title="Set word count goal"
+          className={styles.setGoalButton}
         >
           <Target size={14} strokeWidth={1.5} />
           <span>Set Goal</span>
-        </button>
+        </Button>
 
         {showSettings && (
           <GoalSettingsModal
@@ -243,9 +246,9 @@ function GoalSettingsModal({
             <Target size={18} strokeWidth={1.5} />
             Word Count Goal
           </h3>
-          <button onClick={onClose} className={styles.closeButton}>
+          <IconButton onClick={onClose} title="Close">
             <X size={18} strokeWidth={1.5} />
-          </button>
+          </IconButton>
         </div>
 
         <div className={styles.modalContent}>
@@ -293,21 +296,17 @@ function GoalSettingsModal({
 
         <div className={styles.modalFooter}>
           {hasExistingGoal && (
-            <button onClick={onClear} className={styles.clearButton} disabled={saving}>
+            <Button onClick={onClear} variant="secondary" disabled={saving} className={styles.clearButton}>
               Remove Goal
-            </button>
+            </Button>
           )}
           <div className={styles.footerRight}>
-            <button onClick={onClose} className={styles.cancelButton}>
+            <Button onClick={onClose} variant="secondary">
               Cancel
-            </button>
-            <button 
-              onClick={onSave} 
-              className={styles.saveButton}
-              disabled={saving || !wordGoal}
-            >
+            </Button>
+            <Button onClick={onSave} disabled={saving || !wordGoal}>
               {saving ? 'Saving...' : 'Save Goal'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

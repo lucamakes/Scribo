@@ -2,7 +2,8 @@
 
 import { ArrowLeft, Download, Search, Trash2, Settings } from 'lucide-react';
 import { useSidebar } from '../SidebarContext';
-import styles from './SidebarMenu.module.css';
+import IconButton from '@/components/IconButton/IconButton';
+import Dropdown from '@/components/Dropdown/Dropdown';
 
 interface SidebarMenuProps {
   onBackToProjects?: () => void;
@@ -15,49 +16,46 @@ export function SidebarMenu({ onBackToProjects, onOpenSettings }: SidebarMenuPro
   const closeMenu = () => setShowMenu(false);
 
   return (
-    <div className={styles.menuDropdown}>
-      <div className={styles.menuBackdrop} onClick={closeMenu} />
-      <div className={styles.menuContent}>
-        {onBackToProjects && !isDemo && (
-          <button
-            onClick={() => { onBackToProjects(); closeMenu(); }}
-            className={styles.menuItem}
-          >
-            <ArrowLeft size={16} strokeWidth={1} />
-            <span>Back to Projects</span>
-          </button>
-        )}
-        <button
-          onClick={() => { setShowSearch(true); closeMenu(); }}
-          className={styles.menuItem}
+    <Dropdown onClose={closeMenu}>
+      {onBackToProjects && !isDemo && (
+        <IconButton
+          onClick={() => { onBackToProjects(); closeMenu(); }}
+          size="medium"
+          title="Back to Projects"
         >
-          <Search size={16} strokeWidth={1} />
-          <span>Search</span>
-        </button>
-        <button
-          onClick={() => { setShowExport(true); closeMenu(); }}
-          className={styles.menuItem}
+          <ArrowLeft size={14} strokeWidth={1} />
+        </IconButton>
+      )}
+      <IconButton
+        onClick={() => { setShowSearch(true); closeMenu(); }}
+        size="medium"
+        title="Search"
+      >
+        <Search size={14} strokeWidth={1} />
+      </IconButton>
+      <IconButton
+        onClick={() => { setShowExport(true); closeMenu(); }}
+        size="medium"
+        title="Export"
+      >
+        <Download size={14} strokeWidth={1} />
+      </IconButton>
+      <IconButton
+        onClick={() => { setShowTrash(true); closeMenu(); }}
+        size="medium"
+        title="Trash"
+      >
+        <Trash2 size={14} strokeWidth={1} />
+      </IconButton>
+      {onOpenSettings && (
+        <IconButton
+          onClick={() => { onOpenSettings(); closeMenu(); }}
+          size="medium"
+          title="Settings"
         >
-          <Download size={16} strokeWidth={1} />
-          <span>Export</span>
-        </button>
-        <button
-          onClick={() => { setShowTrash(true); closeMenu(); }}
-          className={styles.menuItem}
-        >
-          <Trash2 size={16} strokeWidth={1} />
-          <span>Trash</span>
-        </button>
-        {onOpenSettings && (
-          <button
-            onClick={() => { onOpenSettings(); closeMenu(); }}
-            className={styles.menuItem}
-          >
-            <Settings size={16} strokeWidth={1} />
-            <span>Settings</span>
-          </button>
-        )}
-      </div>
-    </div>
+          <Settings size={14} strokeWidth={1} />
+        </IconButton>
+      )}
+    </Dropdown>
   );
 }

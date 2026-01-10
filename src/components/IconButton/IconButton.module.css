@@ -1,0 +1,41 @@
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid #b3b3b3;
+  color: #555555;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.iconButton:hover:not(:disabled) {
+  border-color: #333333;
+  color: #333333;
+}
+
+.iconButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.iconButton svg {
+  color: inherit;
+}
+
+/* Small variant - 24px */
+.small {
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  
+}
+
+/* Medium variant - 32px */
+.medium {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}

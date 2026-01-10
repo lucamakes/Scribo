@@ -19,8 +19,8 @@
 }
 
 .colorButton.selected {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+  border-color: #1a78c2;
+  box-shadow: 0 0 0 2px rgba(26, 120, 194, 0.3);
 }
 
 @media (max-width: 480px) {

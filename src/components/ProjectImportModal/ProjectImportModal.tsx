@@ -5,6 +5,8 @@ import { X, Upload, FileText, FileType, BookOpen, FolderOpen } from 'lucide-reac
 import { projectService } from '@/lib/services/projectService';
 import { itemService } from '@/lib/services/itemService';
 import { supabase } from '@/lib/supabase';
+import IconButton from '@/components/IconButton/IconButton';
+import Button from '@/components/Button/Button';
 import styles from './ProjectImportModal.module.css';
 
 interface ProjectImportModalProps {
@@ -269,9 +271,9 @@ export function ProjectImportModal({ isOpen, onClose, onProjectCreated }: Projec
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2 className={styles.title}>Import Project</h2>
-          <button onClick={handleClose} className={styles.closeButton} aria-label="Close">
-            <X size={20} strokeWidth={1.5} />
-          </button>
+          <IconButton onClick={handleClose} title="Close">
+            <X size={18} strokeWidth={1.5} />
+          </IconButton>
         </div>
 
         {step === 'source' && (
@@ -420,16 +422,12 @@ export function ProjectImportModal({ isOpen, onClose, onProjectCreated }: Projec
             {error && <div className={styles.error}>{error}</div>}
 
             <div className={styles.actions}>
-              <button onClick={handleClose} className={styles.cancelButton}>
+              <Button onClick={handleClose} variant="secondary">
                 Cancel
-              </button>
-              <button
-                onClick={handleCreateProject}
-                disabled={!projectName.trim() || importing}
-                className={styles.createButton}
-              >
+              </Button>
+              <Button onClick={handleCreateProject} disabled={!projectName.trim() || importing}>
                 {importing ? 'Creating...' : 'Create Project'}
-              </button>
+              </Button>
             </div>
           </div>
         )}

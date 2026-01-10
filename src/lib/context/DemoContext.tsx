@@ -215,7 +215,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
           width: '32px',
           height: '32px',
           border: '2px solid #e5e7eb',
-          borderTopColor: '#6366f1',
+          borderTopColor: '#1565a8',
           borderRadius: '50%',
           animation: 'spin 0.8s linear infinite'
         }} />

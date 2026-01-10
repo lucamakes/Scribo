@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { versionService } from '@/lib/services/versionService';
 import type { VersionRow } from '@/types/version';
 import { History, X, RotateCcw, Eye, Clock, FileText, Save } from 'lucide-react';
+import IconButton from '@/components/IconButton/IconButton';
+import Button from '@/components/Button/Button';
 import styles from './VersionHistory.module.css';
 
 interface VersionHistoryProps {
@@ -148,18 +150,17 @@ export function VersionHistory({
             <h2 className={styles.title}>Version History</h2>
           </div>
           <div className={styles.headerRight}>
-            <button 
+            <Button 
               onClick={handleSaveVersion} 
-              className={styles.saveVersionButton}
               disabled={saving || isDemo}
               title="Save current version"
             >
               <Save size={16} strokeWidth={1.5} />
               {saving ? 'Saving...' : 'Save Version'}
-            </button>
-            <button onClick={onClose} className={styles.closeButton} title="Close">
+            </Button>
+            <IconButton onClick={onClose} title="Close">
               <X size={18} strokeWidth={1.5} />
-            </button>
+            </IconButton>
           </div>
         </div>
 
@@ -256,12 +257,9 @@ export function VersionHistory({
             <div className={styles.previewModal} onClick={e => e.stopPropagation()}>
               <div className={styles.previewHeader}>
                 <h3>Version {previewVersion.version_number} Preview</h3>
-                <button 
-                  onClick={() => setPreviewVersion(null)} 
-                  className={styles.closeButton}
-                >
+                <IconButton onClick={() => setPreviewVersion(null)} title="Close">
                   <X size={18} strokeWidth={1.5} />
-                </button>
+                </IconButton>
               </div>
               <div 
                 className={styles.previewContent}
@@ -271,14 +269,10 @@ export function VersionHistory({
                 <span className={styles.previewMeta}>
                   {previewVersion.word_count.toLocaleString()} words • {formatFullDate(new Date(previewVersion.created_at))}
                 </span>
-                <button
-                  onClick={() => handleRestore(previewVersion)}
-                  className={styles.restoreButtonPrimary}
-                  disabled={restoring}
-                >
+                <Button onClick={() => handleRestore(previewVersion)} disabled={restoring}>
                   <RotateCcw size={14} strokeWidth={1.5} />
                   Restore this version
-                </button>
+                </Button>
               </div>
             </div>
           </div>

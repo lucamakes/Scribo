@@ -3,6 +3,8 @@
 import { useState, useCallback, type MouseEvent } from 'react';
 import { Plus, Pencil, X, Folder, File, Layout } from 'lucide-react';
 import type { SidebarItemType } from '@/types/sidebar';
+import IconButton from '@/components/IconButton/IconButton';
+import Dropdown from '@/components/Dropdown/Dropdown';
 import styles from './SidebarItem.module.css';
 
 interface SidebarItemActionsProps {
@@ -41,20 +43,17 @@ export function SidebarItemActions({
     setShowAddMenu(prev => !prev);
   }, []);
 
-  const handleAddFile = useCallback((e: MouseEvent) => {
-    e.stopPropagation();
+  const handleAddFile = useCallback(() => {
     onAdd(itemId, 'file');
     setShowAddMenu(false);
   }, [onAdd, itemId]);
 
-  const handleAddFolder = useCallback((e: MouseEvent) => {
-    e.stopPropagation();
+  const handleAddFolder = useCallback(() => {
     onAdd(itemId, 'folder');
     setShowAddMenu(false);
   }, [onAdd, itemId]);
 
-  const handleAddCanvas = useCallback((e: MouseEvent) => {
-    e.stopPropagation();
+  const handleAddCanvas = useCallback(() => {
     onAdd(itemId, 'canvas');
     setShowAddMenu(false);
   }, [onAdd, itemId]);
@@ -63,46 +62,51 @@ export function SidebarItemActions({
     <div className={styles.actions}>
       {!isEditing && isFolder && (
         <div className={styles.addWrapper}>
-          <button
+          <IconButton
             onClick={toggleAddMenu}
-            className={styles.actionBtn}
-            aria-label="Add"
+            size="small"
             title="Add item"
           >
             <Plus size={14} strokeWidth={1} />
-          </button>
+          </IconButton>
           {showAddMenu && (
-            <div className={styles.addMenu}>
-              <button onClick={handleAddFile} className={styles.menuItem}>
-                <span className={styles.menuFileIcon}>
-                  <File size={14} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} />
-                </span> 
-                New File
-              </button>
-              <button onClick={handleAddCanvas} className={styles.menuItem}>
-                <span className={styles.menuCanvasIcon}>
-                  <Layout size={14} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} />
-                </span> 
-                New Canvas
-              </button>
-              <button onClick={handleAddFolder} className={styles.menuItem}>
-                <span className={styles.menuFolderIcon}>
-                  <Folder size={14} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} />
-                </span> 
-                New Folder
-              </button>
-            </div>
+            <Dropdown onClose={() => setShowAddMenu(false)} className={styles.addMenuContent}>
+              <div onClick={handleAddFile} className={styles.fileIcon} title="New File">
+                <File 
+                  size={16} 
+                  strokeWidth={1.5} 
+                  fill="currentColor" 
+                  fillOpacity={0.15}
+                />
+              </div>
+              <div onClick={handleAddCanvas} className={styles.canvasIcon} title="New Canvas">
+                <Layout 
+                  size={16} 
+                  strokeWidth={1.5} 
+                  fill="currentColor" 
+                  fillOpacity={0.15}
+                />
+              </div>
+              <div onClick={handleAddFolder} className={styles.folderIcon} title="New Folder">
+                <Folder 
+                  size={16} 
+                  strokeWidth={1.5} 
+                  fill="currentColor" 
+                  fillOpacity={0.15}
+                />
+              </div>
+            </Dropdown>
           )}
         </div>
       )}
       {!isEditing && !isRoot && (
         <>
-          <button onClick={handleEdit} className={styles.actionBtn} aria-label="Edit" title="Rename">
+          <IconButton onClick={handleEdit} size="small" title="Rename">
             <Pencil size={12} strokeWidth={1} />
-          </button>
-          <button onClick={handleDelete} className={styles.actionBtn} aria-label="Delete" title="Delete">
+          </IconButton>
+          <IconButton onClick={handleDelete} size="small" title="Delete">
             <X size={12} strokeWidth={1} />
-          </button>
+          </IconButton>
         </>
       )}
     </div>

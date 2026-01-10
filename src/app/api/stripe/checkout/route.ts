@@ -20,18 +20,52 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user from database
-    const { data: user, error: userError } = await supabase
+    // Try to get user from database first
+    let { data: user } = await supabase
       .from('users')
       .select('id, email, stripe_customer_id')
       .eq('id', userId)
       .single();
 
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+    // If user not in users table yet, get from auth and create record
+    if (!user) {
+      const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(userId);
+      
+      if (authError || !authUser?.user) {
+        return NextResponse.json(
+          { error: 'User not found', details: authError?.message },
+          { status: 404 }
+        );
+      }
+
+      // Create user record in users table
+      const { data: newUser, error: createError } = await supabase
+        .from('users')
+        .insert({
+          id: userId,
+          email: authUser.user.email,
+        })
+        .select('id, email, stripe_customer_id')
+        .single();
+
+      if (createError) {
+        // User might have been created by a trigger, try fetching again
+        const { data: retryUser } = await supabase
+          .from('users')
+          .select('id, email, stripe_customer_id')
+          .eq('id', userId)
+          .single();
+        
+        if (!retryUser) {
+          return NextResponse.json(
+            { error: 'Failed to create user record', details: createError.message },
+            { status: 500 }
+          );
+        }
+        user = retryUser;
+      } else {
+        user = newUser;
+      }
     }
 
     // Get or create Stripe customer
@@ -74,8 +108,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error('Stripe checkout error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to create checkout session' },
+      { error: 'Failed to create checkout session', details: errorMessage },
       { status: 500 }
     );
   }

@@ -6,6 +6,8 @@ import { X, Type, AlignLeft, Palette, Trash2 } from 'lucide-react';
 import { usePreferences } from '@/lib/hooks/usePreferences';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useSubscription } from '@/lib/hooks/useSubscription';
+import IconButton from '@/components/IconButton/IconButton';
+import Button from '@/components/Button/Button';
 import styles from './SettingsModal.module.css';
 
 interface SettingsModalProps {
@@ -78,7 +80,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     { color: '#1a1a1a', name: 'Dark' },
     { color: '#4a4a4a', name: 'Default' },
     { color: '#666666', name: 'Gray' },
-    { color: '#8b5cf6', name: 'Purple' },
+    { color: '#1565a8', name: 'Purple' },
     { color: '#0ea5e9', name: 'Blue' },
     { color: '#10b981', name: 'Green' },
   ];
@@ -88,9 +90,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
         <div className={styles.header}>
           <h2 className={styles.title}>Settings</h2>
-          <button onClick={onClose} className={styles.closeButton}>
-            <X size={20} strokeWidth={1.5} />
-          </button>
+          <IconButton onClick={onClose} title="Close">
+            <X size={18} strokeWidth={1.5} />
+          </IconButton>
         </div>
 
         <div className={styles.content}>
@@ -238,16 +240,16 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         </div>
 
         <div className={styles.footer}>
-          <button onClick={handleReset} className={styles.resetButton}>
+          <Button onClick={handleReset} variant="secondary">
             Reset to Defaults
-          </button>
+          </Button>
           <div className={styles.footerRight}>
-            <button onClick={onClose} className={styles.cancelButton}>
+            <Button onClick={onClose} variant="secondary">
               Cancel
-            </button>
-            <button onClick={handleSave} className={styles.saveButton} disabled={saving}>
+            </Button>
+            <Button onClick={handleSave} disabled={saving}>
               {saving ? 'Saving...' : 'Save Changes'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

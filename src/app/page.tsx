@@ -7,7 +7,15 @@ import { ArrowRight, Check, Clock, Users, Menu, X } from 'lucide-react';
 import FeedbackBoard from '@/components/FeedbackBoard/FeedbackBoard';
 import FAQSection from '@/components/FAQSection/FAQSection';
 import BentoFeatures from '@/components/BentoFeatures/BentoFeatures';
+import Button from '@/components/Button/Button';
 import styles from './page.module.css';
+
+interface Stats {
+  users: number;
+  words: number;
+  usersFormatted: string;
+  wordsFormatted: string;
+}
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -15,12 +23,21 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
     setMounted(true);
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    // Fetch stats
+    fetch('/api/stats')
+      .then(res => res.json())
+      .then(data => setStats(data))
+      .catch(err => console.error('Failed to fetch stats:', err));
   }, []);
 
   useEffect(() => {
@@ -54,13 +71,13 @@ export default function Home() {
             <button onClick={() => router.push('/auth/login')} className={styles.navLink}>
               Log in
             </button>
-            <button onClick={() => router.push('/demo')} className={styles.navCtaSecondary}>
+            <Button onClick={() => router.push('/demo')} variant="secondary">
               Try Demo
-            </button>
-            <button onClick={() => router.push('/auth/signup')} className={styles.navCta}>
+            </Button>
+            <Button onClick={() => router.push('/auth/signup')}>
               Start Free
-              <ArrowRight size={16} strokeWidth={2} />
-            </button>
+              <ArrowRight size={16} strokeWidth={1} />
+            </Button>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -83,13 +100,13 @@ export default function Home() {
             <button onClick={() => { router.push('/auth/login'); setMobileMenuOpen(false); }} className={styles.mobileNavLink}>
               Log in
             </button>
-            <button onClick={() => { router.push('/demo'); setMobileMenuOpen(false); }} className={styles.mobileNavButton}>
+            <Button onClick={() => { router.push('/demo'); setMobileMenuOpen(false); }} variant="secondary">
               Try Demo
-            </button>
-            <button onClick={() => { router.push('/auth/signup'); setMobileMenuOpen(false); }} className={styles.mobileNavButtonPrimary}>
+            </Button>
+            <Button onClick={() => { router.push('/auth/signup'); setMobileMenuOpen(false); }}>
               Start Free
-              <ArrowRight size={16} strokeWidth={2} />
-            </button>
+              <ArrowRight size={16} strokeWidth={1} />
+            </Button>
           </nav>
         )}
       </header>
@@ -117,18 +134,21 @@ export default function Home() {
           {/* Social Proof Stat */}
           <div className={styles.heroStat}>
             <Users size={18} strokeWidth={1.5} />
-            <span>Join <strong>2,400+</strong> writers who&apos;ve written <strong>12M+ words</strong> with Scribo</span>
+            <span>
+              Join <strong>{stats?.usersFormatted || '2,400+'}+</strong> writers who&apos;ve written{' '}
+              <strong>{stats?.wordsFormatted || '12M'}+ words</strong> with Scribo
+            </span>
           </div>
 
           {/* CTA with Risk Reversal */}
           <div className={styles.heroCta}>
-            <button onClick={() => router.push('/demo')} className={styles.secondaryButton}>
+            <Button onClick={() => router.push('/demo')} variant="secondary" className={styles.heroButton}>
               Try Demo — No signup
-            </button>
-            <button onClick={() => router.push('/auth/signup')} className={styles.primaryButton}>
+            </Button>
+            <Button onClick={() => router.push('/auth/signup')} className={styles.heroButton}>
               Start Writing Free
-              <ArrowRight size={18} strokeWidth={2} />
-            </button>
+              <ArrowRight size={18} strokeWidth={1} />
+            </Button>
           </div>
           <p className={styles.heroMicrocopy}>
             <Check size={14} strokeWidth={2} /> No credit card required
@@ -170,9 +190,9 @@ export default function Home() {
                 <li><Check size={16} strokeWidth={2} /> Unlimited projects</li>
                 <li><Check size={16} strokeWidth={2} /> All core features</li>
               </ul>
-              <button onClick={() => router.push('/auth/signup')} className={styles.planButton}>
+              <Button onClick={() => router.push('/auth/signup')} variant="secondary">
                 Get started
-              </button>
+              </Button>
             </div>
 
             <div className={styles.plan}>
@@ -187,9 +207,9 @@ export default function Home() {
                 <li><Check size={16} strokeWidth={2} /> All core features</li>
                 <li><Check size={16} strokeWidth={2} /> Priority support</li>
               </ul>
-              <button onClick={() => router.push('/auth/signup')} className={styles.planButton}>
-                Start free trial
-              </button>
+              <Button onClick={() => router.push('/auth/signup')} variant="secondary">
+                Get Pro Monthly
+              </Button>
             </div>
 
             <div className={`${styles.plan} ${styles.planPrimary}`}>
@@ -206,19 +226,19 @@ export default function Home() {
                 <li><Check size={16} strokeWidth={2} /> All core features</li>
                 <li><Check size={16} strokeWidth={2} /> Priority support</li>
               </ul>
-              <button onClick={() => router.push('/auth/signup')} className={styles.planButtonPrimary}>
-                Start free trial
-              </button>
+              <Button onClick={() => router.push('/auth/signup')}>
+                Get Pro Yearly
+              </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Feedback Board */}
-      <FeedbackBoard />
-
       {/* FAQ */}
       <FAQSection />
+
+      {/* Feedback Board */}
+      <FeedbackBoard />
 
       {/* Final CTA */}
       <section className={styles.finalCta}>
@@ -226,10 +246,10 @@ export default function Home() {
           <h2 className={styles.finalCtaTitle}>Ready to finish your story?</h2>
           <p className={styles.finalCtaSubtitle}>Join thousands of writers who&apos;ve found their flow.</p>
           <div className={styles.finalCtaButtons}>
-            <button onClick={() => router.push('/auth/signup')} className={styles.primaryButton}>
+            <Button onClick={() => router.push('/auth/signup')}>
               Start Writing Free
-              <ArrowRight size={18} strokeWidth={2} />
-            </button>
+              <ArrowRight size={18} strokeWidth={1} />
+            </Button>
           </div>
           <p className={styles.heroMicrocopy}>
             <Check size={14} strokeWidth={2} /> No credit card required

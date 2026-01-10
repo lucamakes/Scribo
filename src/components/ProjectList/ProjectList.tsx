@@ -8,6 +8,8 @@ import { demoMigrationService } from '@/lib/services/demoMigrationService';
 import { ProjectSetup } from '@/components/ProjectSetup/ProjectSetup';
 import { ProjectImportModal } from '@/components/ProjectImportModal';
 import { UserMenu } from '@/components/UserMenu/UserMenu';
+import IconButton from '@/components/IconButton/IconButton';
+import Button from '@/components/Button/Button';
 import { Pencil, X, Plus, ChevronRight, Upload, BookOpen, Copy } from 'lucide-react';
 import styles from './ProjectList.module.css';
 
@@ -261,9 +263,9 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
                     <div className={styles.actions}>
                       {editingId === project.id ? null : (
                         <>
-                          <button
-                            onClick={(e) => handleDuplicate(e, project.id)}
-                            className={styles.actionButton}
+                          <IconButton
+                            onClick={(e) => handleDuplicate(e as any, project.id)}
+                            size="medium"
                             title="Duplicate"
                             disabled={duplicatingId === project.id}
                           >
@@ -272,21 +274,22 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
                             ) : (
                               <Copy size={14} strokeWidth={1} />
                             )}
-                          </button>
-                          <button
-                            onClick={(e) => handleStartEdit(e, project)}
-                            className={styles.actionButton}
+                          </IconButton>
+                          <IconButton
+                            onClick={(e) => handleStartEdit(e as any, project)}
+                            size="medium"
                             title="Rename"
                           >
                             <Pencil size={14} strokeWidth={1} />
-                          </button>
-                          <button
-                            onClick={(e) => handleStartDelete(e, project.id)}
-                            className={`${styles.actionButton} ${styles.deleteButton}`}
+                          </IconButton>
+                          <IconButton
+                            onClick={(e) => handleStartDelete(e as any, project.id)}
+                            size="medium"
                             title="Delete"
+                            className={styles.deleteButton}
                           >
                             <X size={14} strokeWidth={1} />
-                          </button>
+                          </IconButton>
                         </>
                       )}
                     </div>
@@ -298,18 +301,19 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
         </div>
 
         <div className={styles.buttonGroup}>
-          <button
+          <Button
             onClick={() => setShowCreate(true)}
+            variant="primary"
             className={styles.createButton}
           >
-            <Plus size={16} strokeWidth={1} style={{ marginRight: '6px' }} /> Create New Project
-          </button>
-          <button
+            <Plus size={16} strokeWidth={1} /> Create New Project
+          </Button>
+          <Button
             onClick={() => setShowImport(true)}
-            className={styles.importButton}
+            variant="secondary"
           >
-            <Upload size={16} strokeWidth={1} style={{ marginRight: '6px' }} /> Import Project
-          </button>
+            <Upload size={16} strokeWidth={1} /> Import Project
+          </Button>
         </div>
 
         <ProjectImportModal

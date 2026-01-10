@@ -5,26 +5,7 @@
   z-index: 10;
 }
 
-.toggleButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
 
-.toggleButton:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
-}
 
 .infoPanel {
   position: absolute;

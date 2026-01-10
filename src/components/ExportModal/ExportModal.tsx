@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { X, Download, FileText } from 'lucide-react';
+import IconButton from '@/components/IconButton/IconButton';
+import Button from '@/components/Button/Button';
 import styles from './ExportModal.module.css';
 import { itemService } from '@/lib/services/itemService';
 import { exportProject, type ExportFormat } from '@/lib/services/exportService';
@@ -67,13 +69,9 @@ export function ExportModal({ isOpen, onClose, projectName, projectId }: ExportM
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <header className={styles.header}>
           <h2 className={styles.title}>Export Project</h2>
-          <button
-            onClick={onClose}
-            className={styles.closeButton}
-            aria-label="Close"
-          >
-            <X size={18} strokeWidth={1} />
-          </button>
+          <IconButton onClick={onClose} title="Close">
+            <X size={18} strokeWidth={1.5} />
+          </IconButton>
         </header>
 
         <div className={styles.content}>
@@ -131,21 +129,13 @@ export function ExportModal({ isOpen, onClose, projectName, projectId }: ExportM
         </div>
 
         <footer className={styles.footer}>
-          <button
-            onClick={onClose}
-            className={styles.cancelButton}
-            disabled={exporting}
-          >
+          <Button onClick={onClose} variant="secondary" disabled={exporting}>
             Cancel
-          </button>
-          <button
-            onClick={handleExport}
-            className={styles.exportButton}
-            disabled={exporting}
-          >
-            <Download size={16} strokeWidth={1} />
+          </Button>
+          <Button onClick={handleExport} disabled={exporting}>
+            <Download size={16} strokeWidth={1.5} />
             {exporting ? 'Exporting...' : 'Export'}
-          </button>
+          </Button>
         </footer>
       </div>
     </div>

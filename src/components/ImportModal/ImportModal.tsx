@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { X, Upload, FileText, FileType, BookOpen } from 'lucide-react';
+import IconButton from '@/components/IconButton/IconButton';
 import styles from './ImportModal.module.css';
 
 interface ImportModalProps {
@@ -217,9 +218,9 @@ export function ImportModal({ isOpen, onClose, onImport, projectId }: ImportModa
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2 className={styles.title}>Import Files</h2>
-          <button onClick={onClose} className={styles.closeButton} aria-label="Close">
-            <X size={20} strokeWidth={1.5} />
-          </button>
+          <IconButton onClick={onClose} title="Close">
+            <X size={18} strokeWidth={1.5} />
+          </IconButton>
         </div>
 
         {!selectedSource ? (
