@@ -20,7 +20,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'Can I export my work?',
-    answer: 'Yes! Free users can export to Markdown and plain text. Pro users get additional export formats including Word (.docx). Your writing is always yours to take with you.',
+    answer: 'Yes! Pro users get additional export formats including Word (.docx). Your writing is always yours to take with you.',
   },
   {
     question: 'Is my writing private and secure?',
