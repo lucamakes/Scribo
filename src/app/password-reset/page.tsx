@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useCallback, useEffect, type FormEvent } from 'react';
+import { useState, useCallback, useEffect, type FormEvent, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/context/AuthContext';
 import styles from './password-reset.module.css';
 
-export default function PasswordResetPage() {
+function PasswordResetForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { updatePassword, session, loading: authLoading } = useAuth();
@@ -169,5 +169,26 @@ export default function PasswordResetPage() {
                 </form>
             </div>
         </main>
+    );
+}
+
+function PasswordResetFallback() {
+    return (
+        <main className={styles.container}>
+            <div className={styles.card}>
+                <div className={styles.loadingSection}>
+                    <div className={styles.spinner}></div>
+                    <p className={styles.loadingText}>Loading...</p>
+                </div>
+            </div>
+        </main>
+    );
+}
+
+export default function PasswordResetPage() {
+    return (
+        <Suspense fallback={<PasswordResetFallback />}>
+            <PasswordResetForm />
+        </Suspense>
     );
 }

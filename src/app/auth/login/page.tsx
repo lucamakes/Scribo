@@ -1,15 +1,12 @@
 'use client';
 
-import { useState, useCallback, type FormEvent } from 'react';
+import { useState, useCallback, type FormEvent, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/context/AuthContext';
 import styles from '../auth.module.css';
 
-/**
- * Login page component.
- */
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { signIn, loading: authLoading } = useAuth();
@@ -166,5 +163,24 @@ export default function LoginPage() {
                 </div>
             </div>
         </main>
+    );
+}
+
+function LoginFallback() {
+    return (
+        <main className={styles.container}>
+            <div className={styles.card}>
+                <div className={styles.loadingSpinner}></div>
+                <p className={styles.loadingText}>Loading...</p>
+            </div>
+        </main>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<LoginFallback />}>
+            <LoginForm />
+        </Suspense>
     );
 }

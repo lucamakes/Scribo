@@ -1,18 +1,15 @@
 'use client';
 
-import { useState, useCallback, useEffect, type FormEvent } from 'react';
+import { useState, useCallback, type FormEvent, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/context/AuthContext';
 import styles from '../auth.module.css';
 
-/**
- * Signup page component.
- */
-export default function SignupPage() {
+function SignupForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { signUp, signIn, loading: authLoading, user } = useAuth();
+    const { signUp, signIn, loading: authLoading } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -218,5 +215,24 @@ export default function SignupPage() {
                 </div>
             </div>
         </main>
+    );
+}
+
+function SignupFallback() {
+    return (
+        <main className={styles.container}>
+            <div className={styles.card}>
+                <div className={styles.loadingSpinner}></div>
+                <p className={styles.loadingText}>Loading...</p>
+            </div>
+        </main>
+    );
+}
+
+export default function SignupPage() {
+    return (
+        <Suspense fallback={<SignupFallback />}>
+            <SignupForm />
+        </Suspense>
     );
 }
