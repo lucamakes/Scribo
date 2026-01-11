@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  // Disable Turbopack to avoid internal build errors
+  turbo: false,
 };
 
 export default nextConfig;
