@@ -2,15 +2,6 @@
    SIDEBAR ITEM STYLES - Tree View Design
    ============================================ */
 
-:root {
-  --sidebar-text-color: #37352f;
-  --sidebar-line-color: #e0e0e0;
-  --sidebar-hover-bg: #f0f0f0;
-  --sidebar-icon-color: #000000;
-  --sidebar-btn-bg: #e5e7eb;
-  --sidebar-selected-bg: rgba(26, 120, 194, 0.15);
-}
-
 /* ============================================
    ITEM WRAPPER & HIERARCHY LINES
    ============================================ */
