@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect, type DragEvent, type MouseEvent, type TouchEvent } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, MoreHorizontal, Pencil, Trash2, Plus, FileText, FolderPlus, LayoutGrid } from 'lucide-react';
 import type { SidebarItem as SidebarItemData, DropPosition, ItemActions } from '@/types/sidebar';
 import { SidebarItemIcon } from './SidebarItemIcon';
 import { SidebarItemName } from './SidebarItemName';
@@ -50,7 +50,9 @@ export function SidebarItem({
   const [dropPosition, setDropPosition] = useState<DropPosition | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const actionsRef = useRef<SidebarItemActionsRef>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const isScrollingRef = useRef(false);
 
@@ -62,6 +64,29 @@ export function SidebarItem({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    if (!showMobileMenu) return;
+    
+    const handleClickOutside = (e: Event) => {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
+        setShowMobileMenu(false);
+      }
+    };
+
+    // Small delay to prevent immediate close
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }, 10);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showMobileMenu]);
+
   const handleMouseLeave = useCallback(() => {
     actionsRef.current?.closeAddMenu();
   }, []);
@@ -71,8 +96,44 @@ export function SidebarItem({
   const isSelected = selectedItemId === item.id;
   const isEditing = editingId === item.id;
 
-  // Touch handlers to prevent selection while scrolling
+  // Mobile menu handlers
+  const handleMobileMenuToggle = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+    setShowMobileMenu(prev => !prev);
+  }, []);
+
+  const handleMobileRename = useCallback(() => {
+    actions.onEdit(item.id);
+    setShowMobileMenu(false);
+  }, [actions, item.id]);
+
+  const handleMobileDelete = useCallback(() => {
+    actions.onDelete(item.id);
+    setShowMobileMenu(false);
+  }, [actions, item.id]);
+
+  const handleMobileAddFile = useCallback(() => {
+    actions.onAdd(item.id, 'file');
+    setShowMobileMenu(false);
+  }, [actions, item.id]);
+
+  const handleMobileAddFolder = useCallback(() => {
+    actions.onAdd(item.id, 'folder');
+    setShowMobileMenu(false);
+  }, [actions, item.id]);
+
+  const handleMobileAddCanvas = useCallback(() => {
+    actions.onAdd(item.id, 'canvas');
+    setShowMobileMenu(false);
+  }, [actions, item.id]);
+
+  // Touch handlers
   const handleTouchStart = useCallback((e: TouchEvent) => {
+    // Don't track touches on menu button or menu
+    if ((e.target as HTMLElement).closest(`.${styles.mobileMenuButton}`) ||
+        (e.target as HTMLElement).closest(`.${styles.mobileMenu}`)) {
+      return;
+    }
     // Don't track touches that start on action buttons
     if ((e.target as HTMLElement).closest(`.${styles.actions}`)) {
       touchStartRef.current = null;
@@ -104,20 +165,23 @@ export function SidebarItem({
     
     // Clean tap on mobile
     if (touchStartRef.current && isMobile) {
-      if (isFolder) {
-        // Folders: just expand/collapse, don't select
-        if (onToggleExpand) {
-          onToggleExpand(item.id);
+      // Close menu if open
+      if (showMobileMenu) {
+        setShowMobileMenu(false);
+      } else {
+        if (isFolder) {
+          if (onToggleExpand) {
+            onToggleExpand(item.id);
+          }
+        } else if (!isRoot) {
+          actions.onSelect(item);
         }
-      } else if (!isRoot) {
-        // Files: let parent handle two-tap logic
-        actions.onSelect(item);
       }
     }
     
     touchStartRef.current = null;
     isScrollingRef.current = false;
-  }, [isFolder, isRoot, actions, item, onToggleExpand, isMobile]);
+  }, [isFolder, isRoot, actions, item, onToggleExpand, isMobile, showMobileMenu]);
 
   // Drag handlers
   const handleDragStart = useCallback((e: DragEvent<HTMLDivElement>) => {
@@ -174,12 +238,11 @@ export function SidebarItem({
     setDropPosition(null);
   }, [item.id, dropPosition, onDrop, isRoot]);
 
-  // Click handler - only for mouse (desktop), touch is handled separately
+  // Click handler - only for mouse (desktop)
   const handleItemClick = useCallback((e: MouseEvent) => {
     if ((e.target as HTMLElement).closest(`.${styles.actions}`)) return;
-
-    // Skip if this was a touch event (handled by touch handlers)
-    if (touchStartRef.current !== null) return;
+    if ((e.target as HTMLElement).closest(`.${styles.mobileMenuButton}`)) return;
+    if ((e.target as HTMLElement).closest(`.${styles.mobileMenu}`)) return;
 
     if (isFolder && hasChildren && onToggleExpand) {
       onToggleExpand(item.id);
@@ -204,7 +267,7 @@ export function SidebarItem({
     >
       <div
         className={`${styles.item} ${isRoot ? styles.rootItem : ''} ${isDragging ? styles.dragging : ''} ${isSelected ? styles.selected : ''} ${getDropClass()}`}
-        draggable={!isRoot}
+        draggable={!isRoot && !isMobile}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onDragOver={handleDragOver}
@@ -245,6 +308,7 @@ export function SidebarItem({
           />
         </div>
 
+        {/* Desktop: hover actions */}
         <SidebarItemActions
           ref={actionsRef}
           itemId={item.id}
@@ -254,6 +318,50 @@ export function SidebarItem({
           onEdit={actions.onEdit}
           onDelete={actions.onDelete}
         />
+
+        {/* Mobile: always-visible ⋯ button */}
+        {isMobile && !isRoot && !isEditing && (
+          <div className={styles.mobileMenuWrapper} ref={mobileMenuRef}>
+            <button
+              className={styles.mobileMenuButton}
+              onClick={handleMobileMenuToggle}
+              onTouchEnd={(e) => { e.stopPropagation(); handleMobileMenuToggle(e); }}
+              aria-label="Item actions"
+            >
+              <MoreHorizontal size={18} strokeWidth={1.5} />
+            </button>
+
+            {showMobileMenu && (
+              <div className={styles.mobileMenu}>
+                {isFolder && (
+                  <>
+                    <button className={styles.mobileMenuItem} onClick={handleMobileAddFile}>
+                      <FileText size={16} strokeWidth={1.5} />
+                      <span>New File</span>
+                    </button>
+                    <button className={styles.mobileMenuItem} onClick={handleMobileAddFolder}>
+                      <FolderPlus size={16} strokeWidth={1.5} />
+                      <span>New Folder</span>
+                    </button>
+                    <button className={styles.mobileMenuItem} onClick={handleMobileAddCanvas}>
+                      <LayoutGrid size={16} strokeWidth={1.5} />
+                      <span>New Canvas</span>
+                    </button>
+                    <div className={styles.mobileMenuDivider} />
+                  </>
+                )}
+                <button className={styles.mobileMenuItem} onClick={handleMobileRename}>
+                  <Pencil size={16} strokeWidth={1.5} />
+                  <span>Rename</span>
+                </button>
+                <button className={`${styles.mobileMenuItem} ${styles.danger}`} onClick={handleMobileDelete}>
+                  <Trash2 size={16} strokeWidth={1.5} />
+                  <span>Delete</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {isFolder && isExpanded && hasChildren && (
