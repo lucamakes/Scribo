@@ -16,6 +16,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
 }
 
 .breadcrumbButton {
@@ -27,6 +28,9 @@
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .breadcrumbButton:hover:not(.breadcrumbCurrent) {
@@ -42,4 +46,30 @@
 
 .breadcrumbSeparator {
   color: #ccc;
+  flex-shrink: 0;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .breadcrumb {
+    top: 12px;
+    left: 12px;
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    left: calc(12px + env(safe-area-inset-left, 0px));
+    right: calc(56px + env(safe-area-inset-right, 0px));
+    padding: 6px 10px;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .breadcrumbItem {
+    flex-shrink: 1;
+    min-width: 20px;
+  }
+
+  .breadcrumbButton {
+    font-size: 13px;
+    padding: 4px 6px;
+    max-width: 100%;
+  }
 }

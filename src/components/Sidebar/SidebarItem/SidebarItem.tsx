@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect, type DragEvent, type MouseEvent, type TouchEvent } from 'react';
-import { ChevronRight, MoreHorizontal, Pencil, Trash2, Plus, FileText, FolderPlus, LayoutGrid } from 'lucide-react';
+import { ChevronRight, MoreHorizontal, Pencil, Trash2, FileText, FolderPlus, LayoutGrid } from 'lucide-react';
 import type { SidebarItem as SidebarItemData, DropPosition, ItemActions } from '@/types/sidebar';
 import { SidebarItemIcon } from './SidebarItemIcon';
 import { SidebarItemName } from './SidebarItemName';
 import { SidebarItemActions, type SidebarItemActionsRef } from './SidebarItemActions';
+import { BottomSheet, BottomSheetItem, BottomSheetDivider } from '@/components/BottomSheet/BottomSheet';
 import styles from './SidebarItem.module.css';
 
 interface SidebarItemProps {
@@ -50,9 +51,8 @@ export function SidebarItem({
   const [dropPosition, setDropPosition] = useState<DropPosition | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showBottomSheet, setShowBottomSheet] = useState(false);
   const actionsRef = useRef<SidebarItemActionsRef>(null);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const isScrollingRef = useRef(false);
 
@@ -64,29 +64,6 @@ export function SidebarItem({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Close mobile menu when clicking outside
-  useEffect(() => {
-    if (!showMobileMenu) return;
-    
-    const handleClickOutside = (e: Event) => {
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
-        setShowMobileMenu(false);
-      }
-    };
-
-    // Small delay to prevent immediate close
-    const timeoutId = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
-    }, 10);
-
-    return () => {
-      clearTimeout(timeoutId);
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, [showMobileMenu]);
-
   const handleMouseLeave = useCallback(() => {
     actionsRef.current?.closeAddMenu();
   }, []);
@@ -96,42 +73,45 @@ export function SidebarItem({
   const isSelected = selectedItemId === item.id;
   const isEditing = editingId === item.id;
 
-  // Mobile menu handlers
-  const handleMobileMenuToggle = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+  // Bottom sheet handlers
+  const handleOpenBottomSheet = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
-    setShowMobileMenu(prev => !prev);
+    setShowBottomSheet(true);
   }, []);
 
-  const handleMobileRename = useCallback(() => {
+  const handleCloseBottomSheet = useCallback(() => {
+    setShowBottomSheet(false);
+  }, []);
+
+  const handleRename = useCallback(() => {
     actions.onEdit(item.id);
-    setShowMobileMenu(false);
+    setShowBottomSheet(false);
   }, [actions, item.id]);
 
-  const handleMobileDelete = useCallback(() => {
+  const handleDelete = useCallback(() => {
     actions.onDelete(item.id);
-    setShowMobileMenu(false);
+    setShowBottomSheet(false);
   }, [actions, item.id]);
 
-  const handleMobileAddFile = useCallback(() => {
+  const handleAddFile = useCallback(() => {
     actions.onAdd(item.id, 'file');
-    setShowMobileMenu(false);
+    setShowBottomSheet(false);
   }, [actions, item.id]);
 
-  const handleMobileAddFolder = useCallback(() => {
+  const handleAddFolder = useCallback(() => {
     actions.onAdd(item.id, 'folder');
-    setShowMobileMenu(false);
+    setShowBottomSheet(false);
   }, [actions, item.id]);
 
-  const handleMobileAddCanvas = useCallback(() => {
+  const handleAddCanvas = useCallback(() => {
     actions.onAdd(item.id, 'canvas');
-    setShowMobileMenu(false);
+    setShowBottomSheet(false);
   }, [actions, item.id]);
 
   // Touch handlers
   const handleTouchStart = useCallback((e: TouchEvent) => {
-    // Don't track touches on menu button or menu
-    if ((e.target as HTMLElement).closest(`.${styles.mobileMenuButton}`) ||
-        (e.target as HTMLElement).closest(`.${styles.mobileMenu}`)) {
+    // Don't track touches on menu button
+    if ((e.target as HTMLElement).closest(`.${styles.mobileMenuButton}`)) {
       return;
     }
     // Don't track touches that start on action buttons
@@ -155,7 +135,7 @@ export function SidebarItem({
     }
   }, []);
 
-  const handleTouchEnd = useCallback(() => {
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
     // If user was scrolling, don't trigger anything
     if (isScrollingRef.current) {
       touchStartRef.current = null;
@@ -163,25 +143,25 @@ export function SidebarItem({
       return;
     }
     
-    // Clean tap on mobile
-    if (touchStartRef.current && isMobile) {
-      // Close menu if open
-      if (showMobileMenu) {
-        setShowMobileMenu(false);
-      } else {
-        if (isFolder) {
-          if (onToggleExpand) {
-            onToggleExpand(item.id);
-          }
-        } else if (!isRoot) {
-          actions.onSelect(item);
-        }
+    // If touch didn't start on this item (e.g., started on menu button), ignore
+    if (!touchStartRef.current) {
+      return;
+    }
+    
+    // Clean tap on mobile - toggle folder or select file
+    if (isMobile) {
+      e.preventDefault();
+      
+      if (isFolder && onToggleExpand) {
+        onToggleExpand(item.id);
+      } else if (!isRoot) {
+        actions.onSelect(item);
       }
     }
     
     touchStartRef.current = null;
     isScrollingRef.current = false;
-  }, [isFolder, isRoot, actions, item, onToggleExpand, isMobile, showMobileMenu]);
+  }, [isFolder, isRoot, actions, item, onToggleExpand, isMobile]);
 
   // Drag handlers
   const handleDragStart = useCallback((e: DragEvent<HTMLDivElement>) => {
@@ -240,9 +220,11 @@ export function SidebarItem({
 
   // Click handler - only for mouse (desktop)
   const handleItemClick = useCallback((e: MouseEvent) => {
+    // Skip click handling on mobile - touch events handle it
+    if (isMobile) return;
+    
     if ((e.target as HTMLElement).closest(`.${styles.actions}`)) return;
     if ((e.target as HTMLElement).closest(`.${styles.mobileMenuButton}`)) return;
-    if ((e.target as HTMLElement).closest(`.${styles.mobileMenu}`)) return;
 
     if (isFolder && hasChildren && onToggleExpand) {
       onToggleExpand(item.id);
@@ -251,7 +233,7 @@ export function SidebarItem({
     if (!isRoot) {
       actions.onSelect(item);
     }
-  }, [isFolder, isRoot, actions, item, hasChildren, onToggleExpand]);
+  }, [isFolder, isRoot, actions, item, hasChildren, onToggleExpand, isMobile]);
 
   const getDropClass = () => {
     if (!dropPosition) return '';
@@ -319,48 +301,16 @@ export function SidebarItem({
           onDelete={actions.onDelete}
         />
 
-        {/* Mobile: always-visible ⋯ button */}
+        {/* Mobile: ⋯ button that opens bottom sheet */}
         {isMobile && !isRoot && !isEditing && (
-          <div className={styles.mobileMenuWrapper} ref={mobileMenuRef}>
-            <button
-              className={styles.mobileMenuButton}
-              onClick={handleMobileMenuToggle}
-              onTouchEnd={(e) => { e.stopPropagation(); handleMobileMenuToggle(e); }}
-              aria-label="Item actions"
-            >
-              <MoreHorizontal size={18} strokeWidth={1.5} />
-            </button>
-
-            {showMobileMenu && (
-              <div className={styles.mobileMenu}>
-                {isFolder && (
-                  <>
-                    <button className={styles.mobileMenuItem} onClick={handleMobileAddFile}>
-                      <FileText size={16} strokeWidth={1.5} />
-                      <span>New File</span>
-                    </button>
-                    <button className={styles.mobileMenuItem} onClick={handleMobileAddFolder}>
-                      <FolderPlus size={16} strokeWidth={1.5} />
-                      <span>New Folder</span>
-                    </button>
-                    <button className={styles.mobileMenuItem} onClick={handleMobileAddCanvas}>
-                      <LayoutGrid size={16} strokeWidth={1.5} />
-                      <span>New Canvas</span>
-                    </button>
-                    <div className={styles.mobileMenuDivider} />
-                  </>
-                )}
-                <button className={styles.mobileMenuItem} onClick={handleMobileRename}>
-                  <Pencil size={16} strokeWidth={1.5} />
-                  <span>Rename</span>
-                </button>
-                <button className={`${styles.mobileMenuItem} ${styles.danger}`} onClick={handleMobileDelete}>
-                  <Trash2 size={16} strokeWidth={1.5} />
-                  <span>Delete</span>
-                </button>
-              </div>
-            )}
-          </div>
+          <button
+            className={styles.mobileMenuButton}
+            onClick={handleOpenBottomSheet}
+            onTouchEnd={(e) => { e.stopPropagation(); handleOpenBottomSheet(e); }}
+            aria-label="Item actions"
+          >
+            <MoreHorizontal size={18} strokeWidth={1.5} />
+          </button>
         )}
       </div>
 
@@ -369,6 +319,45 @@ export function SidebarItem({
           {children.sort((a, b) => a.order - b.order).map(child => renderItem(child, depth + 1))}
         </div>
       )}
+
+      {/* Bottom sheet for mobile actions */}
+      <BottomSheet
+        isOpen={showBottomSheet}
+        onClose={handleCloseBottomSheet}
+        title={item.name}
+      >
+        {isFolder && (
+          <>
+            <BottomSheetItem
+              icon={<FileText size={20} strokeWidth={1.5} />}
+              label="New File"
+              onClick={handleAddFile}
+            />
+            <BottomSheetItem
+              icon={<FolderPlus size={20} strokeWidth={1.5} />}
+              label="New Folder"
+              onClick={handleAddFolder}
+            />
+            <BottomSheetItem
+              icon={<LayoutGrid size={20} strokeWidth={1.5} />}
+              label="New Canvas"
+              onClick={handleAddCanvas}
+            />
+            <BottomSheetDivider />
+          </>
+        )}
+        <BottomSheetItem
+          icon={<Pencil size={20} strokeWidth={1.5} />}
+          label="Rename"
+          onClick={handleRename}
+        />
+        <BottomSheetItem
+          icon={<Trash2 size={20} strokeWidth={1.5} />}
+          label="Delete"
+          onClick={handleDelete}
+          danger
+        />
+      </BottomSheet>
     </div>
   );
 }

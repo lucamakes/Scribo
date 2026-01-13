@@ -17,7 +17,7 @@ export function ConstellationControls() {
   return (
     <div className={styles.controls}>
       <button
-        className={styles.toggleButton}
+        className={styles.controlButton}
         onClick={(e) => {
           e.stopPropagation();
           toggleShowOnlyTwoCircles();
@@ -31,36 +31,40 @@ export function ConstellationControls() {
 
       <div className={styles.divider} />
 
-      <button
-        className={styles.toggleButton}
-        onClick={(e) => {
-          e.stopPropagation();
-          zoomIn();
-        }}
-        type="button"
-        aria-label="Zoom In"
-        title="Zoom In"
-      >
-        <ZoomIn size={16} strokeWidth={1} />
-      </button>
+      <div className={styles.zoomControls}>
+        <button
+          className={styles.controlButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            zoomOut();
+          }}
+          type="button"
+          aria-label="Zoom Out"
+          title="Zoom Out"
+        >
+          <ZoomOut size={16} strokeWidth={1} />
+        </button>
 
-      <span className={styles.zoomLevel}>{Math.round(zoom * 100)}%</span>
+        <span className={styles.zoomLevel}>{Math.round(zoom * 100)}%</span>
+
+        <button
+          className={styles.controlButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            zoomIn();
+          }}
+          type="button"
+          aria-label="Zoom In"
+          title="Zoom In"
+        >
+          <ZoomIn size={16} strokeWidth={1} />
+        </button>
+      </div>
+
+      <div className={styles.divider} />
 
       <button
-        className={styles.toggleButton}
-        onClick={(e) => {
-          e.stopPropagation();
-          zoomOut();
-        }}
-        type="button"
-        aria-label="Zoom Out"
-        title="Zoom Out"
-      >
-        <ZoomOut size={16} strokeWidth={1} />
-      </button>
-
-      <button
-        className={styles.toggleButton}
+        className={styles.controlButton}
         onClick={(e) => {
           e.stopPropagation();
           resetView();

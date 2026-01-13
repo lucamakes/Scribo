@@ -104,29 +104,19 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     }, [router]);
 
     const handleSelectItem = useCallback((item: SidebarItemData | null) => {
-        // On mobile with two-tap behavior for files
-        if (isMobile && item && item.type !== 'folder') {
-            if (lastSelectedIdRef.current === item.id) {
-                // Second tap on same item - open detail panel
-                setSelectedItem(item);
-                setShowDetailOnMobile(true);
-            } else {
-                // First tap - just highlight, don't open detail
-                setSelectedItem(item);
-                lastSelectedIdRef.current = item.id;
-                // Don't show detail panel yet
-            }
-        } else if (item && item.type === 'folder') {
-            // Folders on mobile: just select, never show detail panel
+        if (item && item.type === 'folder') {
+            // Folders: just select on desktop, don't select on mobile
             setSelectedItem(isMobile ? null : item);
             lastSelectedIdRef.current = null;
-        } else {
-            // Desktop behavior or null selection
+        } else if (item) {
+            // Files and canvases: open immediately on both mobile and desktop
             setSelectedItem(item);
-            if (item) {
-                setShowDetailOnMobile(true);
-            }
-            lastSelectedIdRef.current = item?.id ?? null;
+            setShowDetailOnMobile(true);
+            lastSelectedIdRef.current = item.id;
+        } else {
+            // Null selection
+            setSelectedItem(null);
+            lastSelectedIdRef.current = null;
         }
     }, [isMobile]);
 

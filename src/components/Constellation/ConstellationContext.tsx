@@ -104,8 +104,13 @@ export function ConstellationProvider({
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isRootHovered, setIsRootHovered] = useState(false);
   
-  // Zoom & pan
-  const [zoom, setZoom] = useState(0.9);
+  // Zoom & pan - default to 0.75 on mobile, 0.9 on desktop
+  const [zoom, setZoom] = useState(() => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      return 0.75;
+    }
+    return 0.9;
+  });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   
@@ -296,7 +301,9 @@ export function ConstellationProvider({
   }, []);
 
   const resetView = useCallback(() => {
-    setZoom(0.9);
+    // Reset to 0.75 on mobile, 0.9 on desktop
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    setZoom(isMobile ? 0.75 : 0.9);
     setOffset({ x: 0, y: 0 });
   }, []);
 
