@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { Orbit, CircleDot, ZoomIn, ZoomOut, RotateCcw, ChevronRight, Info } from 'lucide-react';
+import { Orbit, CircleDot, ZoomIn, ZoomOut, RotateCcw, ChevronRight, Info, X } from 'lucide-react';
 import IconButton from '@/components/IconButton/IconButton';
 import styles from './Constellation.module.css';
 import { DEFAULT_CHILDREN, ROOT_SIZE } from './constants';
@@ -111,49 +111,56 @@ export default function Constellation({
       </div>
 
       <div className={styles.controls}>
-        <IconButton
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleShowOnlyTwoCircles();
-          }}
-          title={showOnlyTwoCircles ? 'Show All Orbits' : 'Simplify View (2 Orbits)'}
-        >
-          {showOnlyTwoCircles ? <Orbit size={16} strokeWidth={1} /> : <CircleDot size={16} strokeWidth={1} />}
-        </IconButton>
+        <div className={styles.orbToggle}>
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleShowOnlyTwoCircles();
+            }}
+            title={showOnlyTwoCircles ? 'Show All Orbits' : 'Simplify View (2 Orbits)'}
+          >
+            {showOnlyTwoCircles ? <Orbit size={16} strokeWidth={1} /> : <CircleDot size={16} strokeWidth={1} />}
+          </IconButton>
+        </div>
 
-        <div className={styles.divider} />
+        <div className={styles.zoomControls}>
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              zoomOut();
+            }}
+            title="Zoom Out"
+            className={styles.ghostButton}
+          >
+            <ZoomOut size={16} strokeWidth={1} />
+          </IconButton>
 
-        <IconButton
-          onClick={(e) => {
-            e.stopPropagation();
-            zoomIn();
-          }}
-          title="Zoom In"
-        >
-          <ZoomIn size={16} strokeWidth={1} />
-        </IconButton>
+          <span className={styles.zoomLevel}>{Math.round(zoom * 100)}%</span>
 
-        <span className={styles.zoomLevel}>{Math.round(zoom * 100)}%</span>
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              zoomIn();
+            }}
+            title="Zoom In"
+            className={styles.ghostButton}
+          >
+            <ZoomIn size={16} strokeWidth={1} />
+          </IconButton>
 
-        <IconButton
-          onClick={(e) => {
-            e.stopPropagation();
-            zoomOut();
-          }}
-          title="Zoom Out"
-        >
-          <ZoomOut size={16} strokeWidth={1} />
-        </IconButton>
+          <div className={styles.divider} />
 
-        <IconButton
-          onClick={(e) => {
-            e.stopPropagation();
-            resetView();
-          }}
-          title="Reset View"
-        >
-          <RotateCcw size={16} strokeWidth={1} />
-        </IconButton>
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              resetView();
+            }}
+            title="Reset View"
+            className={styles.ghostButton}
+          >
+            <RotateCcw size={16} strokeWidth={1} />
+          </IconButton>
+        </div>
       </div>
 
       <div className={styles.infoButton}>
@@ -169,30 +176,43 @@ export default function Constellation({
       </div>
 
       {showInfo && (
-        <div className={styles.infoPanel}>
-          <h3 className={styles.infoTitle}>Constellation View</h3>
-          <p className={styles.infoText}>
-            Get a different kind of overview of your project. This visual representation helps you see the big picture and identify areas that need attention.
-          </p>
-          <p className={styles.infoText}>
-            <strong>Orb sizes:</strong> Smaller orbs represent files or folders with fewer words, while larger orbs contain more content. This makes it easy to spot which parts of your project need more work.
-          </p>
-          <ul className={styles.infoList}>
-            <li><strong>Navigate:</strong> Click folders to explore deeper levels</li>
-            <li><strong>Open files:</strong> Click file orbs to open them in the editor</li>
-            <li><strong>Go back:</strong> Click the center orb or use breadcrumbs</li>
-          </ul>
-          <h4 className={styles.infoSubtitle}>Controls</h4>
-          <ul className={styles.infoList}>
-            <li><span className={styles.infoIcon}><CircleDot size={14} strokeWidth={1.5} /></span> <strong>Simplify view:</strong> Show only 2 orbits for cleaner look</li>
-            <li><span className={styles.infoIcon}><Orbit size={14} strokeWidth={1.5} /></span> <strong>Show all orbits:</strong> Display all orbital rings</li>
-            <li><span className={styles.infoIcon}><ZoomIn size={14} strokeWidth={1.5} /></span> <strong>Zoom in:</strong> Get a closer look (or use mouse wheel)</li>
-            <li><span className={styles.infoIcon}><ZoomOut size={14} strokeWidth={1.5} /></span> <strong>Zoom out:</strong> See more of the view</li>
-            <li><span className={styles.infoIcon}><RotateCcw size={14} strokeWidth={1.5} /></span> <strong>Reset view:</strong> Return to default zoom and position</li>
-          </ul>
-          <p className={styles.infoText}>
-            <strong>Tip:</strong> Click and drag anywhere to pan around the constellation.
-          </p>
+        <div className={styles.infoOverlay} onClick={() => setShowInfo(false)}>
+          <div className={styles.infoPanel} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.infoPanelHeader}>
+              <h3 className={styles.infoTitle}>Constellation View</h3>
+              <IconButton
+                onClick={() => setShowInfo(false)}
+                title="Close"
+                size="small"
+              >
+                <X size={14} strokeWidth={1.5} />
+              </IconButton>
+            </div>
+            <div className={styles.infoPanelContent}>
+              <p className={styles.infoText}>
+                Get a different kind of overview of your project. This visual representation helps you see the big picture and identify areas that need attention.
+              </p>
+              <p className={styles.infoText}>
+                <strong>Orb sizes:</strong> Smaller orbs represent files or folders with fewer words, while larger orbs contain more content. This makes it easy to spot which parts of your project need more work.
+              </p>
+              <ul className={styles.infoList}>
+                <li><strong>Navigate:</strong> Click folders to explore deeper levels</li>
+                <li><strong>Open files:</strong> Click file orbs to open them in the editor</li>
+                <li><strong>Go back:</strong> Click the center orb or use breadcrumbs</li>
+              </ul>
+              <h4 className={styles.infoSubtitle}>Controls</h4>
+              <ul className={styles.infoList}>
+                <li><span className={styles.infoIcon}><CircleDot size={14} strokeWidth={1.5} /></span> <strong>Simplify view:</strong> Show only 2 orbits for cleaner look</li>
+                <li><span className={styles.infoIcon}><Orbit size={14} strokeWidth={1.5} /></span> <strong>Show all orbits:</strong> Display all orbital rings</li>
+                <li><span className={styles.infoIcon}><ZoomIn size={14} strokeWidth={1.5} /></span> <strong>Zoom in:</strong> Get a closer look (or use mouse wheel)</li>
+                <li><span className={styles.infoIcon}><ZoomOut size={14} strokeWidth={1.5} /></span> <strong>Zoom out:</strong> See more of the view</li>
+                <li><span className={styles.infoIcon}><RotateCcw size={14} strokeWidth={1.5} /></span> <strong>Reset view:</strong> Return to default zoom and position</li>
+              </ul>
+              <p className={styles.infoText}>
+                <strong>Tip:</strong> Click and drag anywhere to pan around the constellation.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
