@@ -9,6 +9,7 @@ import { SidebarContent } from './SidebarContent/SidebarContent';
 import { SidebarGoals } from './SidebarGoals/SidebarGoals';
 import { SidebarModals } from './SidebarModals/SidebarModals';
 import { SidebarSearch } from './SidebarSearch/SidebarSearch';
+import { AddItemModal } from './AddItemModal/AddItemModal';
 import styles from './Sidebar.module.css';
 
 interface SidebarProps {
@@ -26,7 +27,7 @@ function SidebarInner({ onToggleBlankView, onBackToProjects, onOpenSettings }: {
   onBackToProjects?: () => void;
   onOpenSettings?: () => void;
 }) {
-  const { project, items, rootId, expandedIds, loading, error } = useSidebar();
+  const { project, items, rootId, expandedIds, loading, error, addModalParentId, setAddModalParentId, actions } = useSidebar();
 
   // Calculate max VISIBLE depth based on expanded folders
   const maxDepth = useMemo(() => {
@@ -85,6 +86,14 @@ function SidebarInner({ onToggleBlankView, onBackToProjects, onOpenSettings }: {
       <SidebarGoals />
       <SidebarModals />
       <SidebarSearch />
+      
+      {addModalParentId && (
+        <AddItemModal
+          parentId={addModalParentId}
+          onAdd={actions.onAdd}
+          onClose={() => setAddModalParentId(null)}
+        />
+      )}
     </aside>
   );
 }

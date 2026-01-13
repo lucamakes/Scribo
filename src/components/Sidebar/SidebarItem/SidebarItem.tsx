@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, type DragEvent, type MouseEvent } from 'react';
+import { useState, useCallback, useRef, useEffect, type DragEvent, type MouseEvent, type TouchEvent } from 'react';
 import { ChevronRight } from 'lucide-react';
 import type { SidebarItem as SidebarItemData, DropPosition, ItemActions } from '@/types/sidebar';
 import { SidebarItemIcon } from './SidebarItemIcon';
@@ -27,6 +27,9 @@ interface SidebarItemProps {
   onCancelEdit?: () => void;
 }
 
+// Threshold in pixels - if touch moves more than this, it's a scroll not a tap
+const SCROLL_THRESHOLD = 10;
+
 export function SidebarItem({
   item,
   children,
@@ -46,7 +49,18 @@ export function SidebarItem({
 }: SidebarItemProps) {
   const [dropPosition, setDropPosition] = useState<DropPosition | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const actionsRef = useRef<SidebarItemActionsRef>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const isScrollingRef = useRef(false);
+
+  // Detect mobile on mount
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleMouseLeave = useCallback(() => {
     actionsRef.current?.closeAddMenu();
@@ -56,6 +70,54 @@ export function SidebarItem({
   const hasChildren = children.length > 0;
   const isSelected = selectedItemId === item.id;
   const isEditing = editingId === item.id;
+
+  // Touch handlers to prevent selection while scrolling
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    // Don't track touches that start on action buttons
+    if ((e.target as HTMLElement).closest(`.${styles.actions}`)) {
+      touchStartRef.current = null;
+      return;
+    }
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    isScrollingRef.current = false;
+  }, []);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const touch = e.touches[0];
+    const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
+    const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
+    
+    if (deltaX > SCROLL_THRESHOLD || deltaY > SCROLL_THRESHOLD) {
+      isScrollingRef.current = true;
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    // If user was scrolling, don't trigger anything
+    if (isScrollingRef.current) {
+      touchStartRef.current = null;
+      isScrollingRef.current = false;
+      return;
+    }
+    
+    // Clean tap on mobile
+    if (touchStartRef.current && isMobile) {
+      if (isFolder) {
+        // Folders: just expand/collapse, don't select
+        if (onToggleExpand) {
+          onToggleExpand(item.id);
+        }
+      } else if (!isRoot) {
+        // Files: let parent handle two-tap logic
+        actions.onSelect(item);
+      }
+    }
+    
+    touchStartRef.current = null;
+    isScrollingRef.current = false;
+  }, [isFolder, isRoot, actions, item, onToggleExpand, isMobile]);
 
   // Drag handlers
   const handleDragStart = useCallback((e: DragEvent<HTMLDivElement>) => {
@@ -112,9 +174,12 @@ export function SidebarItem({
     setDropPosition(null);
   }, [item.id, dropPosition, onDrop, isRoot]);
 
-  // Click handler
+  // Click handler - only for mouse (desktop), touch is handled separately
   const handleItemClick = useCallback((e: MouseEvent) => {
     if ((e.target as HTMLElement).closest(`.${styles.actions}`)) return;
+
+    // Skip if this was a touch event (handled by touch handlers)
+    if (touchStartRef.current !== null) return;
 
     if (isFolder && hasChildren && onToggleExpand) {
       onToggleExpand(item.id);
@@ -133,8 +198,8 @@ export function SidebarItem({
   };
 
   return (
-    <div 
-      className={`${styles.itemWrapper} ${!isFolder || !hasChildren ? styles.noChevron : ''}`} 
+    <div
+      className={`${styles.itemWrapper} ${!isFolder || !hasChildren ? styles.noChevron : ''}`}
       data-item-id={item.id}
     >
       <div
@@ -146,6 +211,9 @@ export function SidebarItem({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={handleItemClick}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         onMouseLeave={handleMouseLeave}
         role="treeitem"
         aria-expanded={isFolder ? isExpanded : undefined}
@@ -165,7 +233,7 @@ export function SidebarItem({
           </span>
 
           <SidebarItemIcon type={item.type} isRoot={isRoot} />
-          
+
           <SidebarItemName
             name={item.name}
             isRoot={isRoot}
@@ -185,7 +253,6 @@ export function SidebarItem({
           isEditing={isEditing}
           onEdit={actions.onEdit}
           onDelete={actions.onDelete}
-          onAdd={actions.onAdd}
         />
       </div>
 

@@ -287,3 +287,76 @@
         opacity: 1;
     }
 }
+
+/* Mobile - Fullscreen */
+@media (max-width: 768px) {
+    .overlay {
+        padding: 0;
+    }
+
+    .panel {
+        width: 100%;
+        height: 100dvh;
+        max-width: 100%;
+        max-height: 100dvh;
+        border-radius: 0;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .header {
+        padding: 20px;
+    }
+
+    .closeButton {
+        width: 40px;
+        height: 40px;
+    }
+
+    .title {
+        font-size: 18px;
+    }
+
+    .subtitle {
+        padding: 0 20px;
+        font-size: 14px;
+    }
+
+    .content {
+        flex: 1;
+        padding: 0 20px;
+    }
+
+    .item {
+        padding: 14px 16px;
+    }
+
+    .itemName {
+        font-size: 15px;
+    }
+
+    .itemExpiry {
+        font-size: 12px;
+    }
+
+    .restoreButton,
+    .deleteButton {
+        width: 36px;
+        height: 36px;
+    }
+
+    .footer {
+        padding: 16px 20px;
+        padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .emptyButton {
+        padding: 14px 16px;
+        font-size: 15px;
+    }
+
+    .error {
+        margin: 0 20px 12px;
+        font-size: 14px;
+    }
+}

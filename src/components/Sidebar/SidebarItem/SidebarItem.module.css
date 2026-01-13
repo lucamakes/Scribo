@@ -238,12 +238,12 @@
 }
 
 .addMenuContent:before {
-    content: "";
-    width: 100px;
-    height: 10px;
-    position: absolute;
-    top: -3px;
-   }
+  content: "";
+  width: 100px;
+  height: 10px;
+  position: absolute;
+  top: -3px;
+}
 
 .fileIcon,
 .canvasIcon,
@@ -324,4 +324,73 @@
 
 .emptyZoneActive {
   background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* ============================================
+   MOBILE: Scale up ~1.4x for touch targets
+   ============================================ */
+
+@media (max-width: 768px) {
+  .itemWrapper {
+    line-height: 39px;
+    margin-bottom: 20px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .itemWrapper::after{
+    height: 35px;
+  }
+
+  .itemWrapper:first-child {
+    margin-top: 14px;
+  }
+
+  .item {
+    padding: 6px 11px;
+    min-height: 39px;
+    touch-action: pan-y;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Show actions when item is selected on mobile */
+  .item.selected .actions {
+    display: flex;
+  }
+
+  .chevron {
+    width: 14px;
+    height: 14px;
+    margin-right: 8px;
+  }
+
+  .icon {
+    width: 25px;
+    height: 25px;
+  }
+
+  .fileDot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .name {
+    font-size: 20px;
+    margin-left: 11px;
+  }
+
+  .editInput {
+    font-size: 18px;
+    padding: 3px 8px;
+    margin-left: 11px;
+  }
+
+  .rootName {
+    font-size: 20px;
+  }
+
+  .children {
+    margin-left: 34px;
+  }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Orbit, CircleDot, ZoomIn, ZoomOut, RotateCcw, ChevronRight, Info } from 'lucide-react';
 import IconButton from '@/components/IconButton/IconButton';
 import styles from './Constellation.module.css';
@@ -53,12 +53,29 @@ export default function Constellation({
   } = useConstellation(childrenData, canvasRef, rootName);
 
   const [showInfo, setShowInfo] = useState(false);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const isAnyHovered = hoveredIndex !== null || isRootHovered;
   
   // Calculate total words for current level
   const totalWords = calculateTotalWords(currentChildren);
   const totalReadingTime = calculateReadingTime(totalWords);
+
+  // Clear selection when clicking background
+  const handleBackgroundClick = () => {
+    if (isMobile) {
+      setSelectedNodeId(null);
+    }
+  };
 
   return (
     <section
@@ -69,6 +86,7 @@ export default function Constellation({
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onClick={handleBackgroundClick}
     >
       <div className={styles.breadcrumb}>
         {navigationStack.map((level, index) => (
@@ -229,12 +247,13 @@ export default function Constellation({
           const hasChildren = node.data.children && node.data.children.length > 0;
           const isFolder = node.data.color === 'blue' && hasChildren;
           const isFile = node.data.color === 'yellow' || !isFolder;
+          const isSelected = selectedNodeId === node.data.id;
 
           return (
             <div
               key={`${node.data.id}-${index}`}
               className={`${styles.node} ${styles.childNode} ${styles[node.data.color]
-                } ${isDimmed ? styles.dimmed : ''} ${isFolder ? styles.isFolder : ''}`}
+                } ${isDimmed ? styles.dimmed : ''} ${isFolder ? styles.isFolder : ''} ${isSelected ? styles.nodeSelected : ''}`}
               style={{
                 width: scaledSize,
                 height: scaledSize,
@@ -245,10 +264,27 @@ export default function Constellation({
               onMouseLeave={handleNodeMouseLeave}
               onClick={(e) => {
                 e.stopPropagation();
-                if (isFolder) {
-                  navigateInto(node.data);
-                } else if (isFile && onFileClick) {
-                  onFileClick(node.data.id);
+                // On mobile: two-tap behavior for both files and folders
+                if (isMobile) {
+                  if (selectedNodeId === node.data.id) {
+                    // Second tap - navigate
+                    setSelectedNodeId(null);
+                    if (isFolder) {
+                      navigateInto(node.data);
+                    } else if (isFile && onFileClick) {
+                      onFileClick(node.data.id);
+                    }
+                  } else {
+                    // First tap - just select to show word count
+                    setSelectedNodeId(node.data.id);
+                  }
+                } else {
+                  // Desktop: navigate immediately
+                  if (isFolder) {
+                    navigateInto(node.data);
+                  } else if (isFile && onFileClick) {
+                    onFileClick(node.data.id);
+                  }
                 }
               }}
               aria-label={isFolder ? `Open ${node.data.name}` : node.data.name}

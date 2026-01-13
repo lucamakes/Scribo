@@ -8,6 +8,7 @@ import FeedbackBoard from '@/components/FeedbackBoard/FeedbackBoard';
 import FAQSection from '@/components/FAQSection/FAQSection';
 import BentoFeatures from '@/components/BentoFeatures/BentoFeatures';
 import Button from '@/components/Button/Button';
+import { Logo } from '@/components/Logo/Logo';
 import styles from './page.module.css';
 
 interface Stats {
@@ -59,14 +60,13 @@ export default function Home() {
       {/* Sticky Header */}
       <header className={`${styles.header} ${scrolled ? styles.headerScrolled : ''}`}>
         <div className={styles.headerContent}>
-          <div className={styles.logo}>
-            <span className={styles.logoText}>Scribo</span>
-          </div>
+          <Logo />
 
           {/* Desktop Nav */}
           <nav className={styles.nav}>
             <a href="#features" className={styles.navLink}>Features</a>
             <a href="#pricing" className={styles.navLink}>Pricing</a>
+            <a href="#faq" className={styles.navLink}>FAQ</a>
             <a href="#feedback" className={styles.navLink}>Feedback</a>
             <button onClick={() => router.push('/auth/login')} className={styles.navLink}>
               Log in
@@ -95,6 +95,7 @@ export default function Home() {
           <nav className={styles.mobileNav}>
             <a href="#features" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Features</a>
             <a href="#pricing" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Pricing</a>
+            <a href="#faq" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>FAQ</a>
             <a href="#feedback" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Feedback</a>
             <div className={styles.mobileNavDivider} />
             <button onClick={() => { router.push('/auth/login'); setMobileMenuOpen(false); }} className={styles.mobileNavLink}>
@@ -262,9 +263,7 @@ export default function Home() {
         <div className={styles.footerContent}>
           <div className={styles.footerGrid}>
             <div className={styles.footerBrand}>
-              <div className={styles.footerLogo}>
-                <span className={styles.logoText}>Scribo</span>
-              </div>
+              <Logo />
               <p className={styles.footerTagline}>
                 Distraction-free writing for authors who want to finish their book.
               </p>
@@ -287,8 +286,8 @@ export default function Home() {
 
               <div className={styles.footerColumn}>
                 <h4>Legal</h4>
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms">Terms of Service</a>
               </div>
             </div>
           </div>

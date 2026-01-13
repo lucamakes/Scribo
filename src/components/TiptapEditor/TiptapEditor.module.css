@@ -326,53 +326,140 @@
    ============================================ */
 
 @media (max-width: 768px) {
+    .toolbarWrapper {
+        padding: 0 16px;
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        z-index: 10;
+    }
+
     .toolbar {
-        padding: 16px 0;
+        padding: 12px 0;
+        gap: 2px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .toolbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .toolbarGroup {
+        flex-shrink: 0;
+    }
+
+    .toolbarButton {
+        min-width: 40px;
+        height: 40px;
+        font-size: 15px;
+        flex-shrink: 0;
+    }
+
+    .divider {
+        margin: 0 4px;
+        height: 20px;
+        flex-shrink: 0;
+    }
+
+    .editorWrapper {
+        padding: 0 16px 100px 16px;
+        margin-bottom: 0;
+    }
+
+    .editorContent {
+        font-size: 17px;
+        line-height: 1.8;
+    }
+
+    .editor :global(.tiptap) {
+        padding-top: 16px;
+        padding-bottom: 40px;
+    }
+
+    .editor :global(.tiptap > * + *) {
+        margin-top: 1.2em;
+    }
+
+    .editor :global(.tiptap h1) {
+        font-size: 1.6em;
+        margin-top: 1.5em;
+        margin-bottom: 0.6em;
+    }
+
+    .editor :global(.tiptap h2) {
+        font-size: 1.35em;
+        margin-top: 1.3em;
+        margin-bottom: 0.5em;
+    }
+
+    .editor :global(.tiptap h3) {
+        font-size: 1.15em;
+        margin-top: 1.2em;
+        margin-bottom: 0.4em;
+    }
+
+    .editor :global(.tiptap p) {
+        margin-bottom: 0.8em;
+    }
+
+    .editor :global(.tiptap blockquote) {
+        padding-left: 0.8em;
+        margin: 1.2em 0;
+        font-size: 0.95em;
+    }
+
+    .editor :global(.tiptap ul),
+    .editor :global(.tiptap ol) {
+        padding-left: 1.2em;
+    }
+
+    .editor :global(.tiptap li) {
+        margin: 0.4em 0;
+    }
+
+    .editor :global(.tiptap pre) {
+        padding: 0.8em;
+        font-size: 0.85em;
+        overflow-x: auto;
+    }
+
+    .editor :global(.tiptap code) {
+        font-size: 0.85em;
+        padding: 0.1em 0.3em;
+    }
+}
+
+@media (max-width: 480px) {
+    .toolbarWrapper {
+        padding: 0 12px;
+    }
+
+    .toolbar {
+        padding: 10px 0;
         gap: 2px;
     }
 
     .toolbarButton {
         min-width: 36px;
         height: 36px;
+        padding: 0 6px;
+        font-size: 14px;
     }
 
     .divider {
-        margin: 0 4px;
+        margin: 0 3px;
     }
 
     .editorWrapper {
-        padding: 0 16px 16px 16px;
+        padding: 0 14px 80px 14px;
     }
 
     .editorContent {
         font-size: 16px;
-    }
-
-    .editor :global(.tiptap h1) {
-        font-size: 1.75em;
-    }
-
-    .editor :global(.tiptap h2) {
-        font-size: 1.4em;
-    }
-
-    .editor :global(.tiptap h3) {
-        font-size: 1.2em;
-    }
-}
-
-@media (max-width: 480px) {
-    .toolbar {
-        padding: 12px 0;
-    }
-
-    .toolbarButton {
-        min-width: 32px;
-        height: 32px;
-        padding: 0 6px;
-    }
-
-    .editorWrapper {
-        padding: 0 12px 12px 12px;
+        line-height: 1.75;
     }
 }

@@ -52,7 +52,7 @@ export default function FAQSection() {
   };
 
   return (
-    <section className={styles.section}>
+    <section id="faq" className={styles.section}>
       <div className={styles.content}>
         <h2 className={styles.title}>Frequently asked questions</h2>
         <p className={styles.subtitle}>Everything you need to know about Scribo</p>

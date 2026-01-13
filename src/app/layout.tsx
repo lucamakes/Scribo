@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/context/AuthContext";
 import { PostHogProvider } from "@/components/PostHogProvider/PostHogProvider";
@@ -14,10 +14,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
   title: "Scribo",
   description: "Organize your creative projects",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -27,6 +34,11 @@ export const metadata: Metadata = {
     apple: "/apple-icon.png",
   },
   themeColor: "#ffffff",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Scribo",
+  },
 };
 
 export default function RootLayout({

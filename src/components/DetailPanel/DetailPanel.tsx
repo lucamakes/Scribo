@@ -19,8 +19,6 @@ import {
     Maximize2,
     Minimize2,
     AlertTriangle,
-    Eye,
-    EyeClosed,
     History
 } from 'lucide-react';
 import styles from './DetailPanel.module.css';
@@ -53,20 +51,31 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [error, setError] = useState<string | null>(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [isFocusMode, setIsFocusMode] = useState(false);
     const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
     const [showLimitModal, setShowLimitModal] = useState(false);
     const [showVersionHistory, setShowVersionHistory] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    const [showCanvasUnavailable, setShowCanvasUnavailable] = useState(false);
     const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const lastSavedContent = useRef('');
     const selectedItemIdRef = useRef<string | null>(null);
-    
+
     const { isPro, percentage, isAtLimit, refresh: refreshSubscription } = useSubscription();
     const { fontSize, lineHeight, textColor } = usePreferences();
 
+    // Detect mobile viewport
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     // Track if component is mounted (for portal)
     const [isMounted, setIsMounted] = useState(false);
-    
+
     useEffect(() => {
         setIsMounted(true);
     }, []);
@@ -127,8 +136,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
     // Handle Escape key to exit fullscreen
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && (isFullscreen || isFocusMode)) {
-                setIsFocusMode(false);
+            if (e.key === 'Escape' && isFullscreen) {
                 setIsFullscreen(false);
                 // On mobile, also go back to master
                 if (window.innerWidth <= 768) {
@@ -137,7 +145,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
             }
         };
 
-        if (isFullscreen || isFocusMode) {
+        if (isFullscreen) {
             document.addEventListener('keydown', handleKeyDown);
             document.body.style.overflow = 'hidden';
         }
@@ -146,7 +154,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
             document.removeEventListener('keydown', handleKeyDown);
             document.body.style.overflow = '';
         };
-    }, [isFullscreen, isFocusMode, onBackToMaster]);
+    }, [isFullscreen, onBackToMaster]);
 
     // Auto-save with debounce
     const saveContent = useCallback(async (newContent: string, skipGoalTracking: boolean = false) => {
@@ -183,21 +191,21 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
             lastSavedContent.current = newContent;
             setSaveStatus('saved');
             onContentSaved?.(selectedItem.id, newContent);
-            
+
             // Track goal progress (only for files with positive word additions, skip if restoring)
             if (!skipGoalTracking && selectedItem.type === 'file' && projectId && wordsAdded > 0) {
                 goalService.addWords(projectId, wordsAdded)
                     .then(() => {
                         // Dispatch event with words added to update GoalProgress component
-                        window.dispatchEvent(new CustomEvent('goalProgressUpdated', { 
-                            detail: { wordsAdded } 
+                        window.dispatchEvent(new CustomEvent('goalProgressUpdated', {
+                            detail: { wordsAdded }
                         }));
                     })
                     .catch(err => {
                         console.error('Failed to track goal progress:', err);
                     });
             }
-            
+
             // Refresh subscription word count after save (only for files)
             if (selectedItem.type === 'file') {
                 refreshSubscription();
@@ -232,24 +240,12 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
     const toggleFullscreen = useCallback(() => {
         const newFullscreenState = !isFullscreen;
         setIsFullscreen(newFullscreenState);
-        
+
         // On mobile, if exiting fullscreen, go back to master
         if (!newFullscreenState && window.innerWidth <= 768) {
             onBackToMaster?.();
         }
     }, [isFullscreen, onBackToMaster]);
-
-    // Toggle focus mode
-    const toggleFocusMode = useCallback(() => {
-        setIsFocusMode(prev => {
-            const newFocusMode = !prev;
-            // If entering focus mode and not in fullscreen, enable fullscreen
-            if (newFocusMode && !isFullscreen) {
-                setIsFullscreen(true);
-            }
-            return newFocusMode;
-        });
-    }, [isFullscreen]);
 
     // Cleanup timeout on unmount
     useEffect(() => {
@@ -349,9 +345,37 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
 
     // Canvas view - mindmap editor
     if (selectedItem.type === 'canvas') {
+        // On mobile, show "coming soon" message instead of canvas
+        if (isMobile) {
+            return (
+                <div className={styles.panel}>
+                    <button
+                        onClick={onBackToMaster}
+                        className={styles.mobileBackButton}
+                        aria-label="Back to files"
+                    >
+                        <X size={20} strokeWidth={1.5} />
+                    </button>
+                    <div className={styles.canvasUnavailable}>
+                        <div className={styles.canvasUnavailableIcon}>🎨</div>
+                        <h3 className={styles.canvasUnavailableTitle}>Canvas Editor</h3>
+                        <p className={styles.canvasUnavailableText}>
+                            The canvas editor will be available in the app version. Stay tuned!
+                        </p>
+                        <button
+                            onClick={onBackToMaster}
+                            className={styles.canvasUnavailableButton}
+                        >
+                            Go Back
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
         const handleCanvasChange = (newContent: string) => {
             setContent(newContent);
-            
+
             // Clear existing timeout
             if (saveTimeoutRef.current) {
                 clearTimeout(saveTimeoutRef.current);
@@ -367,8 +391,8 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
             <div className={styles.canvasView}>
                 <div className={styles.canvasHeader}>
                     <h2 className={styles.fileName}>
-                        {selectedItem.name.length > 25 
-                            ? selectedItem.name.slice(0, 25) + '...' 
+                        {selectedItem.name.length > 25
+                            ? selectedItem.name.slice(0, 25) + '...'
                             : selectedItem.name}
                     </h2>
                     <div className={styles.canvasHeaderRight}>
@@ -397,12 +421,14 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                         >
                             <X size={18} strokeWidth={1.5} />
                         </IconButton>
-                        <IconButton
-                            onClick={toggleFullscreen}
-                            title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
-                        >
-                            {isFullscreen ? <Minimize2 size={18} strokeWidth={1} /> : <Maximize2 size={18} strokeWidth={1} />}
-                        </IconButton>
+                        {!isMobile && (
+                            <IconButton
+                                onClick={toggleFullscreen}
+                                title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
+                            >
+                                {isFullscreen ? <Minimize2 size={18} strokeWidth={1} /> : <Maximize2 size={18} strokeWidth={1} />}
+                            </IconButton>
+                        )}
                     </div>
                 </div>
                 {error && (
@@ -475,64 +501,66 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
     const wordCount = plainText ? plainText.split(/\s+/).filter(Boolean).length : 0;
     const readingTime = Math.ceil(wordCount / 225); // 225 words per minute average
     const pageCount = (wordCount / 250).toFixed(1); // ~250 words per page
-    
+
     const editorContent = (
         <>
-            <div className={`${styles.fileHeader} ${isFocusMode ? styles.fileHeaderHidden : ''}`}>
+            <div className={styles.fileHeader}>
                 <div className={styles.fileHeaderLeft}>
                     <h2 className={styles.fileName}>
-                        {selectedItem.name.length > 25 
-                            ? selectedItem.name.slice(0, 25) + '...' 
+                        {selectedItem.name.length > 25
+                            ? selectedItem.name.slice(0, 25) + '...'
                             : selectedItem.name}
                     </h2>
                 </div>
                 <div className={styles.fileHeaderRight}>
-                        <IconButton
-                            onClick={() => saveContent(content)}
-                            className={content === lastSavedContent.current ? styles.saved : styles.unsaved}
-                            disabled={saveStatus === 'saving' || content === lastSavedContent.current}
-                            title={content === lastSavedContent.current ? 'All changes saved' : 'Save now (Ctrl+S)'}
-                        >
-                            {content === lastSavedContent.current ? (
-                                <Check size={16} strokeWidth={2} />
-                            ) : (
-                                <div className={styles.unsavedDot} />
-                            )}
-                        </IconButton>
-                        <IconButton
-                            onClick={() => setShowVersionHistory(true)}
-                            title="Version history"
-                        >
-                            <History size={16} strokeWidth={1.5} />
-                        </IconButton>
-                        <div className={styles.statistics}>
-                            <span className={styles.stat}>
-                                {wordCount.toLocaleString()} words
-                            </span>
-                            <span className={styles.statDivider}>•</span>
-                            <span className={styles.stat}>
-                                {readingTime} min read
-                            </span>
-                            <span className={styles.statDivider}>•</span>
-                            <span className={styles.stat}>
-                                {pageCount} pages
-                            </span>
-                        </div>
-                        <IconButton
-                            onClick={onBackToMaster}
-                            className={styles.mobileCloseButton}
-                            title="Back to files"
-                        >
-                            <X size={18} strokeWidth={1.5} />
-                        </IconButton>
+                    <IconButton
+                        onClick={() => saveContent(content)}
+                        className={content === lastSavedContent.current ? styles.saved : styles.unsaved}
+                        disabled={saveStatus === 'saving' || content === lastSavedContent.current}
+                        title={content === lastSavedContent.current ? 'All changes saved' : 'Save now (Ctrl+S)'}
+                    >
+                        {content === lastSavedContent.current ? (
+                            <Check size={16} strokeWidth={2} />
+                        ) : (
+                            <div className={styles.unsavedDot} />
+                        )}
+                    </IconButton>
+                    <IconButton
+                        onClick={() => setShowVersionHistory(true)}
+                        title="Version history"
+                    >
+                        <History size={16} strokeWidth={1.5} />
+                    </IconButton>
+                    <div className={styles.statistics}>
+                        <span className={styles.stat}>
+                            {wordCount.toLocaleString()} words
+                        </span>
+                        <span className={styles.statDivider}>•</span>
+                        <span className={styles.stat}>
+                            {readingTime} min read
+                        </span>
+                        <span className={styles.statDivider}>•</span>
+                        <span className={styles.stat}>
+                            {pageCount} pages
+                        </span>
+                    </div>
+                    <IconButton
+                        onClick={onBackToMaster}
+                        className={styles.mobileCloseButton}
+                        title="Back to files"
+                    >
+                        <X size={18} strokeWidth={1.5} />
+                    </IconButton>
+                    {!isMobile && (
                         <IconButton
                             onClick={toggleFullscreen}
                             title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
                         >
                             {isFullscreen ? <Minimize2 size={18} strokeWidth={1} /> : <Maximize2 size={18} strokeWidth={1} />}
                         </IconButton>
-                    </div>
+                    )}
                 </div>
+            </div>
 
             {error && (
                 <div className={styles.errorBanner}>
@@ -548,7 +576,6 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                     isAtLimit={isDemo ? false : isAtLimit}
                     isPro={isDemo ? true : isPro}
                     onLimitBlocked={handleLimitBlocked}
-                    focusMode={isFocusMode}
                     fontSize={fontSize}
                     lineHeight={lineHeight}
                     textColor={textColor}
@@ -557,9 +584,9 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
 
             {/* Show upgrade warning at 80%+ usage - rendered via portal */}
             {isMounted && !isDemo && !isPro && percentage >= 80 && percentage < 100 && showUpgradeBanner && createPortal(
-                <UpgradePrompt 
-                    type="banner" 
-                    percentage={Math.round(percentage)} 
+                <UpgradePrompt
+                    type="banner"
+                    percentage={Math.round(percentage)}
                     onClose={handleDismissUpgradeBanner}
                 />,
                 document.body
@@ -567,25 +594,11 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
 
             {/* Show limit modal when user tries to type at 100% - rendered via portal */}
             {isMounted && !isDemo && showLimitModal && createPortal(
-                <UpgradePrompt 
-                    type="modal" 
+                <UpgradePrompt
+                    type="modal"
                     onClose={() => setShowLimitModal(false)}
                 />,
                 document.body
-            )}
-
-            {isFullscreen && (
-                <button
-                    onClick={toggleFocusMode}
-                    className={`${styles.focusButton} ${isFocusMode ? styles.focusButtonActive : ''}`}
-                    title={isFocusMode ? 'Exit focus mode' : 'Enter focus mode (hide header)'}
-                >
-                    {isFocusMode ? (
-                        <EyeClosed size={18} strokeWidth={1} />
-                    ) : (
-                        <Eye size={18} strokeWidth={1} />
-                    )}
-                </button>
             )}
 
             {/* Version History Panel */}
@@ -611,7 +624,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
     if (isFullscreen) {
         return (
             <>
-              
+
                 <div className={styles.fullscreenOverlay}>
                     <div className={styles.fullscreenEditor}>
                         {editorContent}

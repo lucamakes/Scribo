@@ -52,3 +52,26 @@
   color: #555555;
   border-color: #333333;
 }
+
+/* Mobile: Scale up for touch */
+@media (max-width: 768px) {
+  .header {
+    height: 73px;
+    padding: 0 22px;
+  }
+
+  .headerActions {
+    gap: 8px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .iconButton {
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+    margin-left: 6px;
+  }
+}

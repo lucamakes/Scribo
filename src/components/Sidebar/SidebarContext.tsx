@@ -14,18 +14,18 @@ interface SidebarContextValue {
   project: Project;
   items: SidebarItemData[];
   rootId: string;
-  
+
   // Loading/error state
   loading: boolean;
   error: string | null;
-  
+
   // Selection state
   selectedItemId: string | null;
-  
+
   // Expansion state
   expandedIds: Set<string>;
   toggleExpanded: (id: string) => void;
-  
+
   // Edit state
   editingId: string | null;
   editName: string;
@@ -33,11 +33,11 @@ interface SidebarContextValue {
   startEditing: (id: string) => void;
   saveEdit: () => Promise<void>;
   cancelEdit: () => void;
-  
+
   // Actions
   actions: ItemActions;
   handleDrop: (draggedId: string, targetId: string, position: DropPosition) => Promise<void>;
-  
+
   // Modals
   showTrash: boolean;
   setShowTrash: (show: boolean) => void;
@@ -47,14 +47,16 @@ interface SidebarContextValue {
   setShowSearch: (show: boolean) => void;
   showMenu: boolean;
   setShowMenu: (show: boolean) => void;
-  
+  addModalParentId: string | null;
+  setAddModalParentId: (parentId: string | null) => void;
+
   // Search
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  
+
   // Reload
   reloadItems: () => Promise<void>;
-  
+
   // Demo mode
   isDemo: boolean;
 }
@@ -128,18 +130,19 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
   const [items, setItems] = useState<SidebarItemData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // UI state
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set([ROOT_ID]));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
-  
+
   // Modal state
   const [showTrash, setShowTrash] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  
+  const [addModalParentId, setAddModalParentId] = useState<string | null>(null);
+
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -244,11 +247,11 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
 
     const newItem = dbItemToSidebarItem(result.data as any, ROOT_ID);
     setItems(prev => [...prev, newItem]);
-    
+
     if (!expandedIds.has(parentId)) {
       setExpandedIds(prev => new Set([...prev, parentId]));
     }
-    
+
     setEditingId(newItem.id);
     setEditName(newItem.name);
   }, [project.id, ROOT_ID, expandedIds]);
@@ -375,6 +378,8 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
     setShowSearch,
     showMenu,
     setShowMenu,
+    addModalParentId,
+    setAddModalParentId,
     searchQuery,
     setSearchQuery,
     reloadItems: loadItems,
@@ -383,7 +388,7 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
     project, items, ROOT_ID, loading, error, selectedItemId,
     expandedIds, toggleExpanded, editingId, editName, startEditing,
     saveEdit, cancelEdit, actions, handleDrop, showTrash, showExport,
-    showSearch, showMenu, searchQuery, loadItems, isDemo
+    showSearch, showMenu, addModalParentId, searchQuery, loadItems, isDemo
   ]);
 
   return (

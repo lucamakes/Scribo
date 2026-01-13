@@ -1,32 +1,71 @@
 'use client';
 
-import { Info, CircleDot, Orbit, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { Info, CircleDot, Orbit, ZoomIn, ZoomOut, RotateCcw, X } from 'lucide-react';
 import { useConstellation } from '../ConstellationContext';
+import IconButton from '@/components/IconButton/IconButton';
 import styles from './ConstellationInfoPanel.module.css';
 
 export function ConstellationInfoPanel() {
   const { showInfo, setShowInfo } = useConstellation();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Close panel when clicking outside
+  useEffect(() => {
+    if (!showInfo) return;
+
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (
+        panelRef.current && 
+        !panelRef.current.contains(target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(target)
+      ) {
+        setShowInfo(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showInfo, setShowInfo]);
 
   return (
     <>
       <div className={styles.infoButton}>
-        <button
-          className={styles.toggleButton}
+        <IconButton
+          ref={buttonRef}
           onClick={(e) => {
             e.stopPropagation();
             setShowInfo(!showInfo);
           }}
-          type="button"
-          aria-label="Information"
           title="Information"
+          size="medium"
+          active={showInfo}
         >
           <Info size={16} strokeWidth={1} />
-        </button>
+        </IconButton>
       </div>
 
       {showInfo && (
-        <div className={styles.infoPanel}>
-          <h3 className={styles.infoTitle}>Constellation View</h3>
+        <div className={styles.infoPanel} ref={panelRef}>
+          <div className={styles.panelHeader}>
+            <h3 className={styles.infoTitle}>Constellation View</h3>
+            <IconButton
+              onClick={() => setShowInfo(false)}
+              title="Close"
+              size="small"
+              className={styles.closeButton}
+            >
+              <X size={14} strokeWidth={1.5} />
+            </IconButton>
+          </div>
           <p className={styles.infoText}>
             Get a different kind of overview of your project. This visual representation helps you see the big picture and identify areas that need attention.
           </p>

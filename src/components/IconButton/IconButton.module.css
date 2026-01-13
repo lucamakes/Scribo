@@ -16,6 +16,12 @@
   color: #333333;
 }
 
+.active {
+  background: var(--color-bg-hover, #f3f4f6);
+  border-color: #333333;
+  color: #333333;
+}
+
 .iconButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -30,7 +36,7 @@
   width: 24px;
   height: 24px;
   border-radius: 5px;
-  
+
 }
 
 /* Medium variant - 32px */
@@ -38,4 +44,19 @@
   width: 32px;
   height: 32px;
   border-radius: 6px;
+}
+
+/* Mobile: Scale up for touch */
+@media (max-width: 768px) {
+  .small {
+    width: 34px;
+    height: 34px;
+    border-radius: 7px;
+  }
+
+  .medium {
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+  }
 }

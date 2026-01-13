@@ -16,10 +16,15 @@ export async function POST(request: NextRequest) {
     const body = await request.text();
     const signature = request.headers.get('stripe-signature')!;
 
+    console.log('=== WEBHOOK RECEIVED ===');
+    console.log('Signature present:', !!signature);
+
     let event: Stripe.Event;
 
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      console.log('✅ Signature verified');
+      console.log('Event type:', event.type);
     } catch (err) {
       console.error('Webhook signature verification failed:', err);
       return NextResponse.json(
@@ -73,12 +78,74 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   const subscriptionId = session.subscription as string;
   const customerId = session.customer as string;
 
+  console.log('=== CHECKOUT COMPLETE ===');
+  console.log('User ID:', userId);
+  console.log('Subscription ID:', subscriptionId);
+  console.log('Customer ID:', customerId);
+  console.log('Session metadata:', session.metadata);
+
   if (!userId) {
     console.error('No user ID in checkout session metadata');
     return;
   }
 
-  const { error } = await supabase
+  // First check if user exists in users table
+  const { data: existingUser, error: fetchError } = await supabase
+    .from('users')
+    .select('id, email, subscription_status')
+    .eq('id', userId)
+    .single();
+
+  console.log('Existing user:', existingUser);
+  console.log('Fetch error:', fetchError);
+
+  // If user doesn't exist, create them first
+  if (fetchError?.code === 'PGRST116' || !existingUser) {
+    console.log('User not found in users table, fetching from auth...');
+    
+    const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(userId);
+    
+    if (authError || !authUser?.user) {
+      console.error('Failed to fetch user from auth:', authError);
+      return;
+    }
+
+    console.log('Creating user record...');
+    const { error: insertError } = await supabase
+      .from('users')
+      .insert({
+        id: userId,
+        email: authUser.user.email,
+        subscription_status: 'pro',
+        stripe_subscription_id: subscriptionId,
+        stripe_customer_id: customerId,
+        subscription_end_date: null,
+      });
+
+    if (insertError) {
+      console.error('Failed to create user record:', insertError);
+      // Try updating instead (might have been created by trigger)
+      const { data: updatedUser, error: updateError } = await supabase
+        .from('users')
+        .update({
+          subscription_status: 'pro',
+          stripe_subscription_id: subscriptionId,
+          stripe_customer_id: customerId,
+          subscription_end_date: null,
+        })
+        .eq('id', userId)
+        .select();
+
+      console.log('Update after insert fail - result:', updatedUser);
+      console.log('Update after insert fail - error:', updateError);
+    } else {
+      console.log('✅ Successfully created user with pro status');
+    }
+    return;
+  }
+
+  // User exists, update their subscription
+  const { data: updatedUser, error } = await supabase
     .from('users')
     .update({
       subscription_status: 'pro',
@@ -86,10 +153,16 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       stripe_customer_id: customerId,
       subscription_end_date: null,
     })
-    .eq('id', userId);
+    .eq('id', userId)
+    .select();
+
+  console.log('Update result:', updatedUser);
+  console.log('Update error:', error);
 
   if (error) {
     console.error('Failed to update user subscription:', error);
+  } else {
+    console.log('✅ Successfully updated user to pro');
   }
 }
 

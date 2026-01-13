@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, type FormEvent, Suspense } from 'reac
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/context/AuthContext';
+import { Logo } from '@/components/Logo/Logo';
 import styles from './password-reset.module.css';
 
 function PasswordResetForm() {
@@ -121,7 +122,7 @@ function PasswordResetForm() {
         <main className={styles.container}>
             <div className={styles.card}>
                 <div className={styles.header}>
-                    <div className={styles.logo}>Scribo</div>
+                    <Logo size="small" />
                     <h1 className={styles.title}>Set New Password</h1>
                     <p className={styles.subtitle}>Enter your new password below</p>
                 </div>

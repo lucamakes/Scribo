@@ -311,3 +311,106 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Mobile: Compact modal */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .label {
+    font-size: 11px;
+  }
+
+  .settingsButton {
+    width: 24px;
+    height: 24px;
+  }
+
+  .progressBar {
+    height: 5px;
+  }
+
+  .stats {
+    font-size: 12px;
+  }
+
+  /* Compact modal for mobile */
+  .modalOverlay {
+    padding: 12px;
+  }
+
+  .modal {
+    width: 90%;
+    max-width: 280px;
+    border-radius: 8px;
+  }
+
+  .modalHeader {
+    padding: 10px 12px;
+  }
+
+  .modalTitle {
+    font-size: 14px;
+    gap: 6px;
+  }
+
+  .closeButton {
+    width: 26px;
+    height: 26px;
+  }
+
+  .modalContent {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .field {
+    gap: 4px;
+  }
+
+  .fieldLabel {
+    font-size: 12px;
+  }
+
+  .input {
+    padding: 8px 10px;
+    font-size: 15px;
+    border-radius: 6px;
+  }
+
+  .periodOptions {
+    gap: 4px;
+  }
+
+  .periodButton {
+    padding: 8px 6px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+
+  .periodHint {
+    font-size: 10px;
+  }
+
+  .modalFooter {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+
+  .footerRight {
+    gap: 4px;
+  }
+
+  .clearButton,
+  .cancelButton {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .saveButton {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}

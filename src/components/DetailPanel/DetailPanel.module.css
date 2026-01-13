@@ -97,7 +97,7 @@
   display: none;
 }
 
-.panel > .mobileBackButton {
+.panel>.mobileBackButton {
   display: none;
   position: fixed;
   top: 16px;
@@ -117,17 +117,17 @@
   flex-shrink: 0;
 }
 
-.panel > .mobileBackButton svg {
+.panel>.mobileBackButton svg {
   color: inherit;
 }
 
-.panel > .mobileBackButton:hover {
+.panel>.mobileBackButton:hover {
   background: #f5f5f5;
   border-color: #333333;
 }
 
 @media (max-width: 768px) {
-  .panel > .mobileBackButton {
+  .panel>.mobileBackButton {
     display: flex;
   }
 }
@@ -771,12 +771,17 @@
   }
 
   .fileHeader {
-    padding: 16px;
+    padding: 20px 16px;
     flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .fileHeaderLeft {
+    gap: 10px;
   }
 
   .fileHeaderRight {
-    gap: 8px;
+    gap: 10px;
   }
 
   .statistics {
@@ -785,6 +790,10 @@
 
   .fileName {
     font-size: 16px;
+  }
+
+  .editorContainer {
+    padding: 0;
   }
 
   .folderName {
@@ -806,16 +815,26 @@
   }
 
   .focusButton {
-    bottom: 16px;
-    left: 16px;
+    bottom: 20px;
+    left: 20px;
     width: 44px;
     height: 44px;
+    z-index: 1000;
   }
 }
 
 @media (max-width: 480px) {
   .fileHeader {
-    padding: 12px;
+    padding: 16px 12px;
+    gap: 10px;
+  }
+
+  .fileHeaderLeft {
+    gap: 8px;
+  }
+
+  .fileHeaderRight {
+    gap: 8px;
   }
 
   .fileName {
@@ -826,6 +845,79 @@
   .fullscreenButton {
     width: 36px;
     height: 36px;
+  }
+
+  .editorContainer {
+    padding: 0;
+  }
+}
+
+/* ============================================
+   MOBILE: Scale up ~1.4x for touch targets
+   ============================================ */
+
+@media (max-width: 768px) {
+  .fileHeader {
+    padding: 24px;
+    gap: 17px;
+  }
+
+  .fileName {
+    font-size: 22px;
+  }
+
+  .saveButton,
+  .historyButton,
+  .mobileCloseButton {
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+  }
+
+  .panel>.mobileBackButton {
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+    top: 22px;
+    right: 22px;
+  }
+
+  .focusButton {
+    width: 56px;
+    height: 56px;
+    border-radius: 11px;
+  }
+
+  .emptyIcon {
+    font-size: 67px;
+  }
+
+  .emptyTitle {
+    font-size: 25px;
+  }
+
+  .emptyDescription {
+    font-size: 18px;
+  }
+
+  .folderName {
+    font-size: 28px;
+  }
+
+  .infoCard {
+    padding: 22px;
+  }
+
+  .infoLabel {
+    font-size: 14px;
+  }
+
+  .infoValue {
+    font-size: 18px;
+  }
+
+  .tipText {
+    font-size: 16px;
   }
 }
 
@@ -870,4 +962,55 @@
   .canvasHeader {
     padding: 16px;
   }
+}
+
+/* ============================================
+   CANVAS UNAVAILABLE (Mobile)
+   ============================================ */
+
+.canvasUnavailable {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  max-width: 280px;
+}
+
+.canvasUnavailableIcon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.canvasUnavailableTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.canvasUnavailableText {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.canvasUnavailableButton {
+  margin-top: 8px;
+  padding: 10px 20px;
+  background: #1a78c2;
+  border: none;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.canvasUnavailableButton:hover {
+  background: #1565a8;
 }

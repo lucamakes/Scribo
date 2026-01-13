@@ -6,7 +6,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import {
     Bold,
     Italic,
@@ -65,6 +65,17 @@ export function TiptapEditor({
 }: TiptapEditorProps) {
     const isInitialMount = useRef(true);
     const previousContent = useRef(content);
+    const editorWrapperRef = useRef<HTMLDivElement>(null);
+    const [isMobile, setIsMobile] = useState(false);
+    const lastContentId = useRef<string>('');
+
+    // Detect mobile
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const editor = useEditor({
         extensions: [
@@ -158,10 +169,20 @@ export function TiptapEditor({
             if (currentContent !== content) {
                 editor.commands.setContent(content, { emitUpdate: false });
                 previousContent.current = content;
+                
+                // On mobile, scroll to bottom when loading a new file with content
+                if (isMobile && content && content.length > 100) {
+                    // Use a small delay to let the content render
+                    setTimeout(() => {
+                        if (editorWrapperRef.current) {
+                            editorWrapperRef.current.scrollTop = editorWrapperRef.current.scrollHeight;
+                        }
+                    }, 100);
+                }
             }
         }
         isInitialMount.current = false;
-    }, [content, editor]);
+    }, [content, editor, isMobile]);
 
     // Keyboard shortcuts for save
     const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -302,6 +323,7 @@ export function TiptapEditor({
 
             {/* Editor Content */}
             <div 
+                ref={editorWrapperRef}
                 className={`${styles.editorWrapper} ${focusMode ? styles.editorWrapperFocusMode : ''}`}
                 style={{ fontSize: `${fontSize}px`, lineHeight, color: textColor }}
             >

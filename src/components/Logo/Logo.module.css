@@ -1,0 +1,37 @@
+/* ============================================
+   LOGO COMPONENT STYLES
+   Reusable Scribo logo with size variants
+   ============================================ */
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.logoText {
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+}
+
+/* Size variants */
+.default .logoText {
+  font-size: 32px;
+}
+
+.small .logoText {
+  font-size: 24px;
+}
+
+/* Link hover state */
+.logo:hover {
+  color: #1a78c2;
+}
+
+.logo:hover .logoText {
+  color: #1a78c2;
+}
+

@@ -153,6 +153,13 @@ export function SidebarSearch() {
               <X size={16} strokeWidth={1.5} />
             </button>
           )}
+          <button
+            onClick={closeSearch}
+            className={styles.closeButton}
+            aria-label="Close search"
+          >
+            <X size={18} strokeWidth={1.5} />
+          </button>
         </div>
         
         <div className={styles.searchResultsContainer}>

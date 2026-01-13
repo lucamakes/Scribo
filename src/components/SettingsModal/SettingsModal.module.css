@@ -294,15 +294,40 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  .overlay {
+    padding: 0;
+  }
+
   .modal {
-    max-height: 100vh;
+    width: 100%;
+    height: 100dvh;
+    max-width: 100%;
+    max-height: 100dvh;
     border-radius: 0;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .header {
+    padding: 20px;
+  }
+
+  .closeButton {
+    width: 40px;
+    height: 40px;
+  }
+
+  .content {
+    flex: 1;
+    padding: 20px;
   }
 
   .footer {
     flex-direction: column;
     gap: 12px;
+    padding: 16px 20px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }
 
   .footerRight {
@@ -312,10 +337,32 @@
   .cancelButton,
   .saveButton {
     flex: 1;
+    padding: 14px 20px;
+    font-size: 15px;
   }
 
   .resetButton {
     width: 100%;
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+
+  .settingLabel {
+    font-size: 15px;
+  }
+
+  .value {
+    font-size: 15px;
+  }
+
+  .colorButton {
+    width: 40px;
+    height: 40px;
+  }
+
+  .colorPicker {
+    width: 40px;
+    height: 40px;
   }
 }
 

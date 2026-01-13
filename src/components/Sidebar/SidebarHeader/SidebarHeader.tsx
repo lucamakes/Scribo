@@ -1,6 +1,6 @@
 'use client';
 
-import { Telescope, MoreHorizontal } from 'lucide-react';
+import { Telescope, MoreHorizontal, X } from 'lucide-react';
 import { useSidebar } from '../SidebarContext';
 import { SidebarMenu } from '../SidebarMenu/SidebarMenu';
 import IconButton from '@/components/IconButton/IconButton';
@@ -29,11 +29,12 @@ export function SidebarHeader({ onToggleBlankView, onBackToProjects, onOpenSetti
           </IconButton>
         )}
         <IconButton
-          onClick={() => setShowMenu(prev => !prev)}
-          title="Menu"
+          onClick={() => setShowMenu(!showMenu)}
+          title={showMenu ? "Close Menu" : "Menu"}
           size="medium"
+          active={showMenu}
         >
-          <MoreHorizontal size={18} strokeWidth={1} />
+          {showMenu ? <X size={18} strokeWidth={1} /> : <MoreHorizontal size={18} strokeWidth={1} />}
         </IconButton>
         
         {showMenu && (

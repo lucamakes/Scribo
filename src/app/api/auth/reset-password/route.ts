@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { Resend } from 'resend';
+import {
+  sendEmail,
+  generatePasswordResetEmailTemplate,
+  generatePasswordResetEmailText,
+} from '@/lib/email';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -85,28 +89,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If Resend is not configured, fall back to Supabase's built-in email
-    if (!process.env.RESEND_API_KEY) {
-      console.log('RESEND_API_KEY not configured, using Supabase built-in email');
-      
-      const { error } = await supabase.auth.resetPasswordForEmail(email.toLowerCase(), {
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/password-reset`,
-      });
-
-      if (error) {
-        console.error('Supabase reset password error:', error.message);
-        return NextResponse.json(
-          { error: 'Failed to send reset email' },
-          { status: 500 }
-        );
-      }
-
-      return NextResponse.json({ success: true });
-    }
-
-    // Use Resend for custom emails
-    const resend = new Resend(process.env.RESEND_API_KEY);
-
     // Generate password reset link using Supabase Admin API
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: 'recovery',
@@ -129,23 +111,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    // Send email via Resend
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Scribo <onboarding@resend.dev>';
-    
-    const { error: emailError } = await resend.emails.send({
-      from: fromEmail,
-      to: email,
-      subject: 'Reset your Scribo password',
-      html: generatePasswordResetEmail(resetLink),
-    });
+    // Send email via Resend service with both HTML and plain text versions
+    const emailResult = await sendEmail(
+      email,
+      'Reset your Scribo password',
+      generatePasswordResetEmailTemplate(resetLink),
+      generatePasswordResetEmailText(resetLink)
+    );
 
-    if (emailError) {
-      console.error('Resend error:', emailError);
-      // Fall back to Supabase email if Resend fails
+    // If Resend fails or is not configured, fall back to Supabase's built-in email
+    if (emailResult.status === 'error') {
+      console.error('Resend error:', emailResult.error);
       console.log('Falling back to Supabase email...');
-      await supabase.auth.resetPasswordForEmail(email.toLowerCase(), {
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password`,
-      });
+      
+      const { error: supabaseError } = await supabase.auth.resetPasswordForEmail(
+        email.toLowerCase(),
+        {
+          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/password-reset`,
+        }
+      );
+
+      if (supabaseError) {
+        console.error('Supabase reset password error:', supabaseError.message);
+        return NextResponse.json(
+          { error: 'Failed to send reset email' },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json({ success: true });
@@ -153,57 +145,4 @@ export async function POST(request: NextRequest) {
     console.error('Password reset error:', error);
     return NextResponse.json({ success: true }); // Don't reveal errors to user
   }
-}
-
-function generatePasswordResetEmail(resetLink: string): string {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb;">
-  <table role="presentation" style="width: 100%; border-collapse: collapse;">
-    <tr>
-      <td align="center" style="padding: 40px 20px;">
-        <table role="presentation" style="width: 100%; max-width: 480px; border-collapse: collapse;">
-          <tr>
-            <td align="center" style="padding-bottom: 32px;">
-              <span style="font-size: 28px; font-weight: 700; color: #1a1a1a;">Scribo</span>
-            </td>
-          </tr>
-          <tr>
-            <td style="background: #ffffff; border-radius: 12px; padding: 40px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
-              <h1 style="margin: 0 0 16px; font-size: 24px; font-weight: 600; color: #1a1a1a; text-align: center;">
-                Reset Your Password
-              </h1>
-              <p style="margin: 0 0 24px; font-size: 15px; line-height: 1.6; color: #666666; text-align: center;">
-                Click the button below to choose a new password.
-              </p>
-              <table role="presentation" style="width: 100%; border-collapse: collapse;">
-                <tr>
-                  <td align="center" style="padding: 8px 0 24px;">
-                    <a href="${resetLink}" style="display: inline-block; padding: 14px 32px; background-color: #1a78c2; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 6px;">
-                      Reset Password
-                    </a>
-                  </td>
-                </tr>
-              </table>
-              <p style="margin: 0; font-size: 13px; line-height: 1.6; color: #888888; text-align: center;">
-                This link expires in 24 hours. If you didn't request this, ignore this email.
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" style="padding-top: 24px;">
-              <p style="margin: 0; font-size: 12px; color: #999999;">© ${new Date().getFullYear()} Scribo</p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`.trim();
 }

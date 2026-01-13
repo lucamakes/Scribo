@@ -487,26 +487,120 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .overlay {
+    padding: 0;
+  }
+
   .panel {
     width: 100%;
+    height: 100dvh;
+    max-width: 100%;
+    max-height: 100dvh;
+    border-radius: 0;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .header {
+    padding: 20px;
+  }
+
+  .closeButton {
+    width: 40px;
+    height: 40px;
+  }
+
+  .title {
+    font-size: 17px;
+  }
+
+  .subtitle {
+    padding: 14px 20px;
+    font-size: 14px;
+  }
+
+  .content {
+    flex: 1;
+    padding: 16px 20px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .versionItem {
+    padding: 18px;
+  }
+
+  .versionNumber {
+    font-size: 15px;
+  }
+
+  .versionTime {
+    font-size: 13px;
+  }
+
+  .wordCount {
+    font-size: 13px;
+  }
+
+  .versionPreview {
+    font-size: 14px;
+  }
+
+  .previewButton,
+  .restoreButton {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .saveVersionButton {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .previewOverlay {
+    padding: 0;
   }
 
   .previewModal {
-    max-height: 90vh;
-    margin: 16px;
+    width: 100%;
+    height: 100dvh;
+    max-width: 100%;
+    max-height: 100dvh;
+    border-radius: 0;
+    margin: 0;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .previewHeader {
+    padding: 20px;
+  }
+
+  .previewHeader h3 {
+    font-size: 17px;
+  }
+
+  .previewContent {
+    flex: 1;
+    padding: 20px;
+    font-size: 16px;
   }
 
   .previewFooter {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
+    padding: 16px 20px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }
 
   .previewMeta {
     text-align: center;
+    font-size: 13px;
   }
 
   .restoreButtonPrimary {
     justify-content: center;
+    padding: 14px 20px;
+    font-size: 15px;
   }
 }

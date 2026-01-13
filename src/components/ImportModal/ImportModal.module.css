@@ -231,13 +231,95 @@
   margin-bottom: 0;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .overlay {
+    padding: 0;
+  }
+
+  .modal {
+    width: 100%;
+    height: 100dvh;
+    max-width: 100%;
+    max-height: 100dvh;
+    border-radius: 0;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    padding: 20px;
+  }
+
+  .closeButton {
+    width: 40px;
+    height: 40px;
+  }
+
+  .sourceSelection {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .uploadSection {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
   .sourceGrid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
-  
-  .modal {
-    width: 95%;
-    max-height: 90vh;
+
+  .sourceCard {
+    padding: 20px 16px;
+    flex-direction: row;
+    gap: 16px;
+    text-align: left;
+  }
+
+  .sourceCard svg {
+    flex-shrink: 0;
+  }
+
+  .sourceName {
+    font-size: 15px;
+  }
+
+  .sourceDesc {
+    font-size: 13px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    text-align: left;
+  }
+
+  .dropZone {
+    padding: 40px 20px;
+  }
+
+  .dropText {
+    font-size: 17px;
+  }
+
+  .dropSubtext {
+    font-size: 15px;
+  }
+
+  .backButton {
+    font-size: 15px;
+    padding: 8px 0;
+  }
+
+  .tips h4 {
+    font-size: 14px;
+  }
+
+  .tips li {
+    font-size: 14px;
   }
 }

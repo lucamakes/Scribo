@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, use, useMemo } from 'react';
+import { useState, useEffect, useCallback, use, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Project } from '@/types/project';
 import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
@@ -37,6 +37,16 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     const [openInFullscreen, setOpenInFullscreen] = useState(false);
     const [showDetailOnMobile, setShowDetailOnMobile] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    const lastSelectedIdRef = useRef<string | null>(null);
+
+    // Detect mobile
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // Load project data
     useEffect(() => {
@@ -94,12 +104,31 @@ export default function ProjectPage({ params }: ProjectPageProps) {
     }, [router]);
 
     const handleSelectItem = useCallback((item: SidebarItemData | null) => {
-        setSelectedItem(item);
-        // On mobile, show detail panel when item is selected
-        if (item) {
-            setShowDetailOnMobile(true);
+        // On mobile with two-tap behavior for files
+        if (isMobile && item && item.type !== 'folder') {
+            if (lastSelectedIdRef.current === item.id) {
+                // Second tap on same item - open detail panel
+                setSelectedItem(item);
+                setShowDetailOnMobile(true);
+            } else {
+                // First tap - just highlight, don't open detail
+                setSelectedItem(item);
+                lastSelectedIdRef.current = item.id;
+                // Don't show detail panel yet
+            }
+        } else if (item && item.type === 'folder') {
+            // Folders on mobile: just select, never show detail panel
+            setSelectedItem(isMobile ? null : item);
+            lastSelectedIdRef.current = null;
+        } else {
+            // Desktop behavior or null selection
+            setSelectedItem(item);
+            if (item) {
+                setShowDetailOnMobile(true);
+            }
+            lastSelectedIdRef.current = item?.id ?? null;
         }
-    }, []);
+    }, [isMobile]);
 
     const handleContentSaved = useCallback((itemId: string, content: string) => {
         // Update selectedItem
@@ -141,6 +170,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
 
     const handleBackToMaster = useCallback(() => {
         setShowDetailOnMobile(false);
+        lastSelectedIdRef.current = null;
     }, []);
 
     if (loading) {
