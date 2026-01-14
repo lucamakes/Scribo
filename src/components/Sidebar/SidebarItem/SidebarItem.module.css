@@ -216,11 +216,12 @@
    ============================================ */
 
 .actions {
-  position: absolute;
-  right: 8px;
+  position: relative;
   display: none;
   align-items: center;
   gap: 2px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 /* Only show actions on hover for devices that support it */
@@ -228,6 +229,102 @@
   .item:hover .actions {
     display: flex;
   }
+}
+
+/* Subtle actions button (like mobile) */
+.actionsButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-btn);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.actionsButton:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+/* ============================================
+   ACTIONS DROPDOWN MENU
+   ============================================ */
+
+.actionsDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: #ffffff;
+  border: 1px solid #c7c7c7;
+  border-radius: 6px;
+  box-shadow: 0 0 15px rgba(199, 199, 199, 0.30);
+  padding: 6px;
+  min-width: 140px;
+  z-index: 1000;
+  animation: menuSlideIn 0.15s ease;
+}
+
+@keyframes menuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #333;
+  font-size: 13px;
+  font-weight: 450;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
+  font-family: inherit;
+}
+
+.dropdownItem:hover {
+  background-color: #f5f5f5;
+}
+
+.dropdownItem svg {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.dropdownItemDanger {
+  color: #dc2626;
+}
+
+.dropdownItemDanger svg {
+  color: #dc2626;
+}
+
+.dropdownItemDanger:hover {
+  background-color: #fef2f2;
+}
+
+.dropdownDivider {
+  height: 1px;
+  background: var(--color-border-light);
+  margin: 6px 0;
 }
 
 /* ============================================

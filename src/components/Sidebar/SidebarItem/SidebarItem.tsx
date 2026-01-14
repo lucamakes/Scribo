@@ -65,7 +65,7 @@ export function SidebarItem({
   }, []);
 
   const handleMouseLeave = useCallback(() => {
-    actionsRef.current?.closeAddMenu();
+    actionsRef.current?.closeMenu();
   }, []);
 
   const isFolder = item.type === 'folder';

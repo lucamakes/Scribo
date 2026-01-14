@@ -1,13 +1,12 @@
 'use client';
 
-import { useCallback, useImperativeHandle, forwardRef, type TouchEvent } from 'react';
-import { Plus, Pencil, X } from 'lucide-react';
+import { useState, useCallback, useImperativeHandle, forwardRef, useRef, useEffect, type TouchEvent } from 'react';
+import { MoreHorizontal, Pencil, Trash2, FileText, FolderPlus, LayoutGrid } from 'lucide-react';
 import { useSidebar } from '../SidebarContext';
-import IconButton from '@/components/IconButton/IconButton';
 import styles from './SidebarItem.module.css';
 
 export interface SidebarItemActionsRef {
-  closeAddMenu: () => void;
+  closeMenu: () => void;
 }
 
 interface SidebarItemActionsProps {
@@ -29,48 +28,115 @@ export const SidebarItemActions = forwardRef<SidebarItemActionsRef, SidebarItemA
     onDelete,
   }, ref) {
   const { setAddModalParentId } = useSidebar();
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useImperativeHandle(ref, () => ({
-    closeAddMenu: () => {}, // No longer needed but kept for compatibility
+    closeMenu: () => setShowMenu(false),
   }), []);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!showMenu) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        menuRef.current && 
+        !menuRef.current.contains(e.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(e.target as Node)
+      ) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMenu]);
 
   // Stop touch events from bubbling to parent item
   const handleTouchStart = useCallback((e: TouchEvent) => {
     e.stopPropagation();
   }, []);
 
+  const handleToggleMenu = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowMenu(prev => !prev);
+  }, []);
+
   const handleEdit = useCallback(() => {
     if (!isRoot) onEdit(itemId);
+    setShowMenu(false);
   }, [onEdit, itemId, isRoot]);
 
   const handleDelete = useCallback(() => {
     if (!isRoot) onDelete(itemId);
+    setShowMenu(false);
   }, [onDelete, itemId, isRoot]);
 
-  const handleOpenAddModal = useCallback(() => {
+  const handleAddFile = useCallback(() => {
     setAddModalParentId(itemId);
+    setShowMenu(false);
   }, [setAddModalParentId, itemId]);
+
+  const handleAddFolder = useCallback(() => {
+    setAddModalParentId(itemId);
+    setShowMenu(false);
+  }, [setAddModalParentId, itemId]);
+
+  const handleAddCanvas = useCallback(() => {
+    setAddModalParentId(itemId);
+    setShowMenu(false);
+  }, [setAddModalParentId, itemId]);
+
+  // Don't show anything if editing or if it's root with no folder actions
+  if (isEditing) return null;
+  if (isRoot && !isFolder) return null;
 
   return (
     <div className={styles.actions} onTouchStart={handleTouchStart}>
-      {!isEditing && isFolder && (
-        <IconButton
-          onClick={handleOpenAddModal}
-          size="small"
-          title="Add item"
-        >
-          <Plus size={14} strokeWidth={1} />
-        </IconButton>
-      )}
-      {!isEditing && !isRoot && (
-        <>
-          <IconButton onClick={handleEdit} size="small" title="Rename">
-            <Pencil size={12} strokeWidth={1} />
-          </IconButton>
-          <IconButton onClick={handleDelete} size="small" title="Delete">
-            <X size={12} strokeWidth={1} />
-          </IconButton>
-        </>
+      <button
+        ref={buttonRef}
+        className={styles.actionsButton}
+        onClick={handleToggleMenu}
+        title="More actions"
+      >
+        <MoreHorizontal size={16} strokeWidth={1.5} />
+      </button>
+
+      {showMenu && (
+        <div className={styles.actionsDropdown} ref={menuRef}>
+          {isFolder && (
+            <>
+              <button className={styles.dropdownItem} onClick={handleAddFile}>
+                <FileText size={14} strokeWidth={1.5} />
+                <span>New File</span>
+              </button>
+              <button className={styles.dropdownItem} onClick={handleAddFolder}>
+                <FolderPlus size={14} strokeWidth={1.5} />
+                <span>New Folder</span>
+              </button>
+              <button className={styles.dropdownItem} onClick={handleAddCanvas}>
+                <LayoutGrid size={14} strokeWidth={1.5} />
+                <span>New Canvas</span>
+              </button>
+              {!isRoot && <div className={styles.dropdownDivider} />}
+            </>
+          )}
+          {!isRoot && (
+            <>
+              <button className={styles.dropdownItem} onClick={handleEdit}>
+                <Pencil size={14} strokeWidth={1.5} />
+                <span>Rename</span>
+              </button>
+              <button className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`} onClick={handleDelete}>
+                <Trash2 size={14} strokeWidth={1.5} />
+                <span>Delete</span>
+              </button>
+            </>
+          )}
+        </div>
       )}
     </div>
   );
