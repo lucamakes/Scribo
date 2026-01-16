@@ -3,6 +3,7 @@
 import { useState, useCallback, useImperativeHandle, forwardRef, useRef, useEffect, useContext, type TouchEvent } from 'react';
 import { MoreHorizontal, Pencil, Trash2, File, Folder, Layout } from 'lucide-react';
 import { SidebarContext } from '../SidebarContext';
+import type { SidebarItemType } from '@/types/sidebar';
 import styles from './SidebarItem.module.css';
 
 export interface SidebarItemActionsRef {
@@ -16,7 +17,7 @@ interface SidebarItemActionsProps {
   isEditing: boolean;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
-  onOpenAddModal?: (parentId: string) => void;
+  onAdd?: (parentId: string, type: SidebarItemType) => void;
 }
 
 export const SidebarItemActions = forwardRef<SidebarItemActionsRef, SidebarItemActionsProps>(
@@ -27,11 +28,11 @@ export const SidebarItemActions = forwardRef<SidebarItemActionsRef, SidebarItemA
     isEditing,
     onEdit,
     onDelete,
-    onOpenAddModal,
+    onAdd,
   }, ref) {
   // Use context if available, otherwise use the prop
   const sidebarContext = useContext(SidebarContext);
-  const setAddModalParentId = onOpenAddModal ?? sidebarContext?.setAddModalParentId;
+  const addItem = onAdd ?? sidebarContext?.actions.onAdd;
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -80,19 +81,19 @@ export const SidebarItemActions = forwardRef<SidebarItemActionsRef, SidebarItemA
   }, [onDelete, itemId, isRoot]);
 
   const handleAddFile = useCallback(() => {
-    if (setAddModalParentId) setAddModalParentId(itemId);
+    if (addItem) addItem(itemId, 'file');
     setShowMenu(false);
-  }, [setAddModalParentId, itemId]);
+  }, [addItem, itemId]);
 
   const handleAddFolder = useCallback(() => {
-    if (setAddModalParentId) setAddModalParentId(itemId);
+    if (addItem) addItem(itemId, 'folder');
     setShowMenu(false);
-  }, [setAddModalParentId, itemId]);
+  }, [addItem, itemId]);
 
   const handleAddCanvas = useCallback(() => {
-    if (setAddModalParentId) setAddModalParentId(itemId);
+    if (addItem) addItem(itemId, 'canvas');
     setShowMenu(false);
-  }, [setAddModalParentId, itemId]);
+  }, [addItem, itemId]);
 
   // Don't show anything if editing or if it's root with no folder actions
   if (isEditing) return null;
