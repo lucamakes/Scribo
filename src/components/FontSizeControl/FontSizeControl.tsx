@@ -20,7 +20,7 @@ const FONT_SIZES = [
 export function FontSizeControl({ fontSize, onFontSizeChange }: FontSizeControlProps) {
   return (
     <div className={styles.container}>
-      <Type size={16} strokeWidth={1} className={styles.icon} />
+      <Type size={16} strokeWidth={1.5} className={styles.icon} />
       <select
         value={fontSize}
         onChange={(e) => onFontSizeChange(Number(e.target.value))}

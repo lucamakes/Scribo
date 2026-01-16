@@ -207,7 +207,7 @@ export function ProjectSetup({ onCreateProject, onClose }: ProjectSetupProps) {
                     }`}
                   >
                     <div className={styles.templateIcon}>
-                      <Icon size={20} strokeWidth={1} />
+                      <Icon size={20} strokeWidth={1.5} />
                     </div>
                     <div className={styles.templateInfo}>
                       <div className={styles.templateName}>{template.name}</div>

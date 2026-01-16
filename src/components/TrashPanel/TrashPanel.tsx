@@ -95,11 +95,11 @@ export function TrashPanel({ projectId, isOpen, onClose, onItemRestored }: Trash
             <div className={styles.panel} onClick={e => e.stopPropagation()}>
                 <header className={styles.header}>
                     <div className={styles.headerLeft}>
-                        <Trash2 size={20} strokeWidth={1} className={styles.icon} />
+                        <Trash2 size={20} strokeWidth={1.5} className={styles.icon} />
                         <h2 className={styles.title}>Trash</h2>
                     </div>
                     <button onClick={onClose} className={styles.closeButton}>
-                        <X size={20} strokeWidth={1} />
+                        <X size={20} strokeWidth={1.5} />
                     </button>
                 </header>
 
@@ -114,7 +114,7 @@ export function TrashPanel({ projectId, isOpen, onClose, onItemRestored }: Trash
                         <div className={styles.loading}>Loading...</div>
                     ) : items.length === 0 ? (
                         <div className={styles.empty}>
-                            <Trash2 size={48} strokeWidth={1} className={styles.emptyIcon} />
+                            <Trash2 size={48} strokeWidth={1.5} className={styles.emptyIcon} />
                             <p>Trash is empty</p>
                         </div>
                     ) : (
@@ -124,10 +124,10 @@ export function TrashPanel({ projectId, isOpen, onClose, onItemRestored }: Trash
                                     <div className={styles.itemInfo}>
                                         <span className={styles.itemIcon}>
                                             {item.type === 'folder'
-                                                ? <Folder size={16} strokeWidth={1} data-type="folder" />
+                                                ? <Folder size={16} strokeWidth={1.5} data-type="folder" />
                                                 : item.type === 'canvas'
-                                                ? <Layout size={16} strokeWidth={1} data-type="canvas" />
-                                                : <File size={16} strokeWidth={1} data-type="file" />
+                                                ? <Layout size={16} strokeWidth={1.5} data-type="canvas" />
+                                                : <File size={16} strokeWidth={1.5} data-type="file" />
                                             }
                                         </span>
                                         <span className={styles.itemName}>{item.name}</span>
@@ -141,14 +141,14 @@ export function TrashPanel({ projectId, isOpen, onClose, onItemRestored }: Trash
                                             className={styles.restoreButton}
                                             title="Restore"
                                         >
-                                            <Undo size={16} strokeWidth={1} />
+                                            <Undo size={16} strokeWidth={1.5} />
                                         </button>
                                         <button
                                             onClick={() => handlePermanentDelete(item.id)}
                                             className={styles.deleteButton}
                                             title="Delete permanently"
                                         >
-                                            <X size={16} strokeWidth={1} />
+                                            <X size={16} strokeWidth={1.5} />
                                         </button>
                                     </div>
                                 </li>

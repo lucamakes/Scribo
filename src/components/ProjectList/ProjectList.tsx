@@ -216,7 +216,7 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
         <div className={styles.projects}>
           {projects.length === 0 ? (
             <div className={styles.empty}>
-              <BookOpen size={48} strokeWidth={1} style={{ color: '#ccc', marginBottom: '16px' }} />
+              <BookOpen size={48} strokeWidth={1.5} style={{ color: '#ccc', marginBottom: '16px' }} />
               <p className={styles.emptyText}>No projects yet</p>
               <p className={styles.emptySubtext}>Create your first project to start writing</p>
             </div>
@@ -258,7 +258,7 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
                       </span>
                     </div>
 
-                    <ChevronRight size={18} strokeWidth={1} className={styles.arrow} />
+                    <ChevronRight size={18} strokeWidth={1.5} className={styles.arrow} />
 
                     <div className={styles.actions}>
                       {editingId === project.id ? null : (
@@ -272,7 +272,7 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
                             {duplicatingId === project.id ? (
                               <span className={styles.spinner} />
                             ) : (
-                              <Copy size={14} strokeWidth={1} />
+                              <Copy size={14} strokeWidth={1.5} />
                             )}
                           </IconButton>
                           <IconButton
@@ -280,7 +280,7 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
                             size="medium"
                             title="Rename"
                           >
-                            <Pencil size={14} strokeWidth={1} />
+                            <Pencil size={14} strokeWidth={1.5} />
                           </IconButton>
                           <IconButton
                             onClick={(e) => handleStartDelete(e as any, project.id)}
@@ -288,7 +288,7 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
                             title="Delete"
                             className={styles.deleteButton}
                           >
-                            <X size={14} strokeWidth={1} />
+                            <X size={14} strokeWidth={1.5} />
                           </IconButton>
                         </>
                       )}
@@ -306,13 +306,13 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
             variant="primary"
             className={styles.createButton}
           >
-            <Plus size={16} strokeWidth={1} /> Create New Project
+            <Plus size={16} strokeWidth={1.5} /> Create New Project
           </Button>
           <Button
             onClick={() => setShowImport(true)}
             variant="secondary"
           >
-            <Upload size={16} strokeWidth={1} /> Import Project
+            <Upload size={16} strokeWidth={1.5} /> Import Project
           </Button>
         </div>
 

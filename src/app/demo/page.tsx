@@ -98,7 +98,7 @@ function DemoPageContent() {
           type="button"
           aria-label="Close constellation view"
         >
-          <X size={18} strokeWidth={1} />
+          <X size={18} strokeWidth={1.5} />
         </button>
         <Constellation
           children={constellationData}

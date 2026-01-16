@@ -346,30 +346,24 @@
   align-items: center;
   gap: 2px;
   background: #ffffff;
-  border: 1px solid #b3b3b3;
+  border: 1px solid var(--color-border-medium, #d1d5db);
   border-radius: 6px;
   padding: 0 4px;
   height: 32px;
   box-shadow: none;
 }
 
-.zoomControls :global(.iconButton) {
-  border: none;
-  background: transparent;
-}
-
-.zoomControls :global(.iconButton):hover {
-  background: #f3f4f6;
-}
-
-.ghostButton {
+/* Remove borders from buttons inside zoom controls wrapper */
+.zoomControls button {
   border: none !important;
   background: transparent !important;
 }
 
-.ghostButton:hover {
-  background: #f3f4f6 !important;
+.zoomControls button:hover {
+  background: transparent !important;
 }
+
+
 
 .zoomLevel {
   font-size: 11px;

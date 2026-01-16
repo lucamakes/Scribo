@@ -25,7 +25,7 @@ export function SidebarHeader({ onToggleBlankView, onBackToProjects, onOpenSetti
             title="Constellation View"
             size="medium"
           >
-            <Telescope size={18} strokeWidth={1} />
+            <Telescope size={18} strokeWidth={1.5} />
           </IconButton>
         )}
         <IconButton
@@ -34,7 +34,7 @@ export function SidebarHeader({ onToggleBlankView, onBackToProjects, onOpenSetti
           size="medium"
           active={showMenu}
         >
-          {showMenu ? <X size={18} strokeWidth={1} /> : <MoreHorizontal size={18} strokeWidth={1} />}
+          {showMenu ? <X size={18} strokeWidth={1.5} /> : <MoreHorizontal size={18} strokeWidth={1.5} />}
         </IconButton>
         
         {showMenu && (

@@ -99,7 +99,7 @@ export function TemplateModal({ isOpen, onClose, onSelectTemplate }: TemplateMod
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <header className={styles.header}>
           <h2 className={styles.title}>Choose a Template</h2>
-          <IconButton onClick={onClose} title="Close">
+          <IconButton onClick={onClose} title="Close" variant="ghost">
             <X size={18} strokeWidth={1.5} />
           </IconButton>
         </header>
@@ -121,7 +121,7 @@ export function TemplateModal({ isOpen, onClose, onSelectTemplate }: TemplateMod
                   }`}
                 >
                   <div className={styles.templateIcon}>
-                    <Icon size={24} strokeWidth={1} />
+                    <Icon size={24} strokeWidth={1.5} />
                   </div>
                   <div className={styles.templateInfo}>
                     <div className={styles.templateName}>{template.name}</div>

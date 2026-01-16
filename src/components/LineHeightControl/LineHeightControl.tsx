@@ -20,7 +20,7 @@ const LINE_HEIGHTS = [
 export function LineHeightControl({ lineHeight, onLineHeightChange }: LineHeightControlProps) {
   return (
     <div className={styles.container}>
-      <AlignJustify size={16} strokeWidth={1} className={styles.icon} />
+      <AlignJustify size={16} strokeWidth={1.5} className={styles.icon} />
       <select
         value={lineHeight}
         onChange={(e) => onLineHeightChange(Number(e.target.value))}

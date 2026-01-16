@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useImperativeHandle, forwardRef, useRef, useEffect, type TouchEvent } from 'react';
-import { MoreHorizontal, Pencil, Trash2, FileText, FolderPlus, LayoutGrid } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, File, Folder, Layout } from 'lucide-react';
 import { useSidebar } from '../SidebarContext';
 import styles from './SidebarItem.module.css';
 
@@ -110,15 +110,15 @@ export const SidebarItemActions = forwardRef<SidebarItemActionsRef, SidebarItemA
           {isFolder && (
             <>
               <button className={styles.dropdownItem} onClick={handleAddFile}>
-                <FileText size={14} strokeWidth={1.5} />
+                <File size={14} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} className={styles.fileIconColor} />
                 <span>New File</span>
               </button>
               <button className={styles.dropdownItem} onClick={handleAddFolder}>
-                <FolderPlus size={14} strokeWidth={1.5} />
+                <Folder size={14} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} className={styles.folderIconColor} />
                 <span>New Folder</span>
               </button>
               <button className={styles.dropdownItem} onClick={handleAddCanvas}>
-                <LayoutGrid size={14} strokeWidth={1.5} />
+                <Layout size={14} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} className={styles.canvasIconColor} />
                 <span>New Canvas</span>
               </button>
               {!isRoot && <div className={styles.dropdownDivider} />}

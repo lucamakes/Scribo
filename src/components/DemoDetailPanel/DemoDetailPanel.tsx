@@ -193,7 +193,7 @@ export function DemoDetailPanel({
             </p>
           </div>
           <div className={styles.tipCard}>
-            <Lightbulb size={24} strokeWidth={1} className={styles.tipIcon} />
+            <Lightbulb size={24} strokeWidth={1.5} className={styles.tipIcon} />
             <p className={styles.tipText}>
               Hover over items in the sidebar to reveal buttons for renaming, deleting, or adding subfolders.
             </p>
@@ -254,7 +254,7 @@ export function DemoDetailPanel({
           </div>
 
           <div className={styles.tipCard}>
-            <Lightbulb size={24} strokeWidth={1} className={styles.tipIcon} />
+            <Lightbulb size={24} strokeWidth={1.5} className={styles.tipIcon} />
             <p className={styles.tipText}>
               Hover over items in the sidebar to reveal buttons for renaming, deleting, or adding subfolders.
             </p>
@@ -307,7 +307,7 @@ export function DemoDetailPanel({
               className={styles.fullscreenButton}
               title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
             >
-              {isFullscreen ? <Minimize2 size={18} strokeWidth={1} /> : <Maximize2 size={18} strokeWidth={1} />}
+              {isFullscreen ? <Minimize2 size={18} strokeWidth={1.5} /> : <Maximize2 size={18} strokeWidth={1.5} />}
             </button>
           </div>
         </div>
@@ -380,7 +380,7 @@ export function DemoDetailPanel({
             className={styles.fullscreenButton}
             title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
           >
-            {isFullscreen ? <Minimize2 size={18} strokeWidth={1} /> : <Maximize2 size={18} strokeWidth={1} />}
+            {isFullscreen ? <Minimize2 size={18} strokeWidth={1.5} /> : <Maximize2 size={18} strokeWidth={1.5} />}
           </button>
         </div>
       </div>
@@ -414,7 +414,7 @@ export function DemoDetailPanel({
           className={`${styles.focusButton} ${isFocusMode ? styles.focusButtonActive : ''}`}
           title={isFocusMode ? 'Exit focus mode' : 'Enter focus mode'}
         >
-          {isFocusMode ? <EyeClosed size={18} strokeWidth={1} /> : <Eye size={18} strokeWidth={1} />}
+          {isFocusMode ? <EyeClosed size={18} strokeWidth={1.5} /> : <Eye size={18} strokeWidth={1.5} />}
         </button>
       )}
     </>

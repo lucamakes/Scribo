@@ -99,7 +99,7 @@ export function UserMenu() {
                     size="medium"
                     title="Account menu"
                 >
-                    <User size={18} strokeWidth={1} />
+                    <User size={18} strokeWidth={1.5} />
                 </IconButton>
 
                 {isOpen && (
@@ -128,7 +128,7 @@ export function UserMenu() {
                                 className={styles.menuButton}
                                 disabled={upgradeLoading}
                             >
-                                <CreditCard size={16} strokeWidth={1} />
+                                <CreditCard size={16} strokeWidth={1.5} />
                                 Manage Subscription
                             </button>
                         ) : (
@@ -136,21 +136,21 @@ export function UserMenu() {
                                 onClick={handleShowPricing} 
                                 className={styles.upgradeButton}
                             >
-                                <Sparkles size={16} strokeWidth={1} />
+                                <Sparkles size={16} strokeWidth={1.5} />
                                 Upgrade to Pro
                             </button>
                         )}
 
                         <button onClick={handleOpenSettings} className={styles.menuButton}>
-                            <Settings size={16} strokeWidth={1} />
+                            <Settings size={16} strokeWidth={1.5} />
                             Settings
                         </button>
                         <button onClick={() => { setIsOpen(false); setShowChangePassword(true); }} className={styles.menuButton}>
-                            <KeyRound size={16} strokeWidth={1} />
+                            <KeyRound size={16} strokeWidth={1.5} />
                             Change Password
                         </button>
                         <button onClick={() => { setIsOpen(false); router.push('/feedback'); }} className={styles.menuButton}>
-                            <MessageSquare size={16} strokeWidth={1} />
+                            <MessageSquare size={16} strokeWidth={1.5} />
                             Feedback
                         </button>
                         <button onClick={handleLogout} className={styles.logoutButton}>
@@ -174,6 +174,7 @@ export function UserMenu() {
                             onClick={() => setShowPricing(false)} 
                             title="Close"
                             className={styles.pricingCloseButton}
+                            variant="ghost"
                         >
                             <X size={18} strokeWidth={1.5} />
                         </IconButton>
@@ -322,6 +323,7 @@ function ChangePasswordModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                     onClick={onClose} 
                     title="Close"
                     className={styles.pricingCloseButton}
+                    variant="ghost"
                 >
                     <X size={18} strokeWidth={1.5} />
                 </IconButton>

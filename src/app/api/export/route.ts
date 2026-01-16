@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import epub from 'epub-gen-memory';
 import type { ItemRow } from '@/types/database';
+import { checkRateLimit, getClientIP } from '@/lib/rateLimit';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -72,6 +73,11 @@ function flattenTreeToContent(
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit check (standard - 60 requests per minute)
+    const ip = getClientIP(request);
+    const rateLimitResponse = await checkRateLimit(`export:${ip}`, 'standard');
+    if (rateLimitResponse) return rateLimitResponse;
+
     const { projectId, projectName, format, includeStructure } = await request.json();
 
     if (!projectId || !projectName || !format) {

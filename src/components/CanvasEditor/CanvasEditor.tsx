@@ -633,20 +633,20 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
     <div className={styles.container}>
       <div className={styles.toolbar}>
         <button onClick={() => addNode()} className={styles.toolButton} title="Add note (Tab)">
-          <PenLine size={18} strokeWidth={1} />
+          <PenLine size={18} strokeWidth={1.5} />
         </button>
         <button onClick={() => addShape('rectangle')} className={styles.toolButton} title="Add rectangle">
-          <Square size={18} strokeWidth={1} />
+          <Square size={18} strokeWidth={1.5} />
         </button>
         <button onClick={() => addShape('circle')} className={styles.toolButton} title="Add circle">
-          <Circle size={18} strokeWidth={1} />
+          <Circle size={18} strokeWidth={1.5} />
         </button>
         <div className={styles.divider} />
         <button onClick={undo} className={styles.toolButton} disabled={history.length === 0} title="Undo (Ctrl+Z)">
-          <Undo2 size={18} strokeWidth={1} />
+          <Undo2 size={18} strokeWidth={1.5} />
         </button>
         <button onClick={redo} className={styles.toolButton} disabled={future.length === 0} title="Redo (Ctrl+Y)">
-          <Redo2 size={18} strokeWidth={1} />
+          <Redo2 size={18} strokeWidth={1.5} />
         </button>
         {selectedNode && (
           <>
@@ -658,7 +658,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
               title="Change color"
             />
             <button onClick={() => deleteNode(selectedNode)} className={styles.toolButton} title="Delete (Del)">
-              <Trash2 size={18} strokeWidth={1} />
+              <Trash2 size={18} strokeWidth={1.5} />
             </button>
           </>
         )}
@@ -672,7 +672,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
               title="Change color"
             />
             <button onClick={() => deleteShape(selectedShape)} className={styles.toolButton} title="Delete shape">
-              <Trash2 size={18} strokeWidth={1} />
+              <Trash2 size={18} strokeWidth={1.5} />
             </button>
           </>
         )}
@@ -689,14 +689,14 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
 
       <div className={styles.zoomControls}>
         <button onClick={() => setViewport(v => ({ ...v, zoom: Math.min(v.zoom * 1.2, 3) }))} className={styles.zoomButton} title="Zoom In">
-          <ZoomIn size={16} strokeWidth={1} />
+          <ZoomIn size={16} strokeWidth={1.5} />
         </button>
         <span className={styles.zoomLevel}>{Math.round(viewport.zoom * 100)}%</span>
         <button onClick={() => setViewport(v => ({ ...v, zoom: Math.max(v.zoom * 0.8, 0.25) }))} className={styles.zoomButton} title="Zoom Out">
-          <ZoomOut size={16} strokeWidth={1} />
+          <ZoomOut size={16} strokeWidth={1.5} />
         </button>
         <button onClick={resetView} className={styles.zoomButton} title="Reset View">
-          <RotateCcw size={16} strokeWidth={1} />
+          <RotateCcw size={16} strokeWidth={1.5} />
         </button>
       </div>
 
@@ -940,7 +940,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
       {/* Info button */}
       <div className={styles.infoButton}>
         <button onClick={() => setShowInfo(!showInfo)} className={styles.zoomButton} title="Keyboard shortcuts">
-          <Info size={16} strokeWidth={1} />
+          <Info size={16} strokeWidth={1.5} />
         </button>
       </div>
 

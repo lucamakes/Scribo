@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { checkRateLimit, getClientIP } from '@/lib/rateLimit';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -10,6 +11,11 @@ const supabase = createClient(
 );
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 10 requests per minute (strict)
+  const ip = getClientIP(request);
+  const rateLimitResponse = await checkRateLimit(ip, 'strict');
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const { userId, priceId, returnUrl } = await request.json();
 

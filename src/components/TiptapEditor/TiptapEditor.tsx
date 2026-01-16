@@ -214,35 +214,35 @@ export function TiptapEditor({
                                 className={`${styles.toolbarButton} ${editor.isActive('bold') ? styles.active : ''}`}
                                 title="Bold (Ctrl+B)"
                             >
-                                <Bold size={16} strokeWidth={1} />
+                                <Bold size={16} strokeWidth={1.5} />
                             </button>
                             <button
                                 onClick={() => editor.chain().focus().toggleItalic().run()}
                                 className={`${styles.toolbarButton} ${editor.isActive('italic') ? styles.active : ''}`}
                                 title="Italic (Ctrl+I)"
                             >
-                                <Italic size={16} strokeWidth={1} />
+                                <Italic size={16} strokeWidth={1.5} />
                             </button>
                             <button
                                 onClick={() => editor.chain().focus().toggleUnderline().run()}
                                 className={`${styles.toolbarButton} ${editor.isActive('underline') ? styles.active : ''}`}
                                 title="Underline (Ctrl+U)"
                             >
-                                <UnderlineIcon size={16} strokeWidth={1} />
+                                <UnderlineIcon size={16} strokeWidth={1.5} />
                             </button>
                             <button
                                 onClick={() => editor.chain().focus().toggleStrike().run()}
                                 className={`${styles.toolbarButton} ${editor.isActive('strike') ? styles.active : ''}`}
                                 title="Strikethrough"
                             >
-                                <Strikethrough size={16} strokeWidth={1} />
+                                <Strikethrough size={16} strokeWidth={1.5} />
                             </button>
                             <button
                                 onClick={() => editor.chain().focus().toggleHighlight().run()}
                                 className={`${styles.toolbarButton} ${editor.isActive('highlight') ? styles.active : ''}`}
                                 title="Highlight"
                             >
-                                <Highlighter size={16} strokeWidth={1} />
+                                <Highlighter size={16} strokeWidth={1.5} />
                             </button>
                         </div>
 
@@ -254,21 +254,21 @@ export function TiptapEditor({
                                 className={`${styles.toolbarButton} ${editor.isActive('heading', { level: 1 }) ? styles.active : ''}`}
                                 title="Heading 1"
                             >
-                                <Heading1 size={16} strokeWidth={1} />
+                                <Heading1 size={16} strokeWidth={1.5} />
                             </button>
                             <button
                                 onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
                                 className={`${styles.toolbarButton} ${editor.isActive('heading', { level: 2 }) ? styles.active : ''}`}
                                 title="Heading 2"
                             >
-                                <Heading2 size={16} strokeWidth={1} />
+                                <Heading2 size={16} strokeWidth={1.5} />
                             </button>
                             <button
                                 onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
                                 className={`${styles.toolbarButton} ${editor.isActive('heading', { level: 3 }) ? styles.active : ''}`}
                                 title="Heading 3"
                             >
-                                <Heading3 size={16} strokeWidth={1} />
+                                <Heading3 size={16} strokeWidth={1.5} />
                             </button>
                         </div>
 
@@ -280,21 +280,21 @@ export function TiptapEditor({
                                 className={`${styles.toolbarButton} ${editor.isActive('bulletList') ? styles.active : ''}`}
                                 title="Bullet List"
                             >
-                                <List size={16} strokeWidth={1} />
+                                <List size={16} strokeWidth={1.5} />
                             </button>
                             <button
                                 onClick={() => editor.chain().focus().toggleOrderedList().run()}
                                 className={`${styles.toolbarButton} ${editor.isActive('orderedList') ? styles.active : ''}`}
                                 title="Numbered List"
                             >
-                                <ListOrdered size={16} strokeWidth={1} />
+                                <ListOrdered size={16} strokeWidth={1.5} />
                             </button>
                             <button
                                 onClick={() => editor.chain().focus().toggleBlockquote().run()}
                                 className={`${styles.toolbarButton} ${editor.isActive('blockquote') ? styles.active : ''}`}
                                 title="Quote"
                             >
-                                <Quote size={16} strokeWidth={1} />
+                                <Quote size={16} strokeWidth={1.5} />
                             </button>
                         </div>
 
@@ -307,7 +307,7 @@ export function TiptapEditor({
                                 className={styles.toolbarButton}
                                 title="Undo (Ctrl+Z)"
                             >
-                                <Undo size={16} strokeWidth={1} />
+                                <Undo size={16} strokeWidth={1.5} />
                             </button>
                             <button
                                 onClick={() => editor.chain().focus().redo().run()}
@@ -315,7 +315,7 @@ export function TiptapEditor({
                                 className={styles.toolbarButton}
                                 title="Redo (Ctrl+Y)"
                             >
-                                <Redo size={16} strokeWidth={1} />
+                                <Redo size={16} strokeWidth={1.5} />
                             </button>
                     </div>
                 </div>

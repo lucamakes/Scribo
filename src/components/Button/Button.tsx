@@ -4,7 +4,7 @@ import styles from './Button.module.css';
 interface ButtonProps {
   onClick?: () => void;
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'ghost';
   className?: string;
   disabled?: boolean;
   title?: string;
@@ -20,7 +20,12 @@ export default function Button({
   title,
   type = 'button',
 }: ButtonProps) {
-  const variantClass = variant === 'secondary' ? styles.secondary : styles.primary;
+  const variantClasses: Record<string, string> = {
+    primary: styles.primary,
+    secondary: styles.secondary,
+    ghost: styles.ghost,
+  };
+  const variantClass = variantClasses[variant] || styles.primary;
   
   return (
     <button

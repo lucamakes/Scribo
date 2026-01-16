@@ -309,6 +309,19 @@
   flex-shrink: 0;
 }
 
+/* Colored icons for item types */
+.dropdownItem .fileIconColor {
+  color: #3b82f6;
+}
+
+.dropdownItem .folderIconColor {
+  color: #f59e0b;
+}
+
+.dropdownItem .canvasIconColor {
+  color: #8b5cf6;
+}
+
 .dropdownItemDanger {
   color: #dc2626;
 }

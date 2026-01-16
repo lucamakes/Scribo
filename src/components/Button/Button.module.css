@@ -19,23 +19,36 @@
 /* Primary variant */
 .primary {
   color: #ffffff;
-  background: #1a78c2;
-  border: 1px solid #1a78c2;
+  background: var(--color-accent, #1a78c2);
+  border: 1px solid var(--color-accent, #1a78c2);
 }
 
 .primary:hover:not(:disabled) {
-  background: #1565a8;
-  border-color: #1565a8;
+  background: var(--color-accent-hover, #1565a8);
+  border-color: var(--color-accent-hover, #1565a8);
 }
 
-/* Secondary variant */
+/* Secondary variant - softer border */
 .secondary {
-  color: #555555;
+  color: var(--color-text-secondary, #666);
   background: #ffffff;
-  border: 1px solid #b3b3b3;
+  border: 1px solid var(--color-border-medium, #d1d5db);
 }
 
 .secondary:hover:not(:disabled) {
-   border-color: #333333;
-  color: #333333;
+  background: var(--color-bg-hover, #f3f4f6);
+  border-color: var(--color-border-medium, #d1d5db);
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+/* Ghost variant - no border */
+.ghost {
+  color: var(--color-text-secondary, #666);
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--color-bg-hover, #f3f4f6);
+  color: var(--color-text-primary, #1a1a1a);
 }

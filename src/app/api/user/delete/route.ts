@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { checkRateLimit, getClientIP } from '@/lib/rateLimit';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -11,6 +12,11 @@ const supabaseAdmin = createClient(
 );
 
 export async function DELETE(request: NextRequest) {
+  // Rate limit: 10 requests per minute (strict)
+  const ip = getClientIP(request);
+  const rateLimitResponse = await checkRateLimit(ip, 'strict');
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Get the authorization header
     const authHeader = request.headers.get('authorization');

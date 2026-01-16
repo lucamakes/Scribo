@@ -76,7 +76,7 @@ export default function Home() {
             </Button>
             <Button onClick={() => router.push('/auth/signup')}>
               Start Free
-              <ArrowRight size={16} strokeWidth={1} />
+              <ArrowRight size={16} strokeWidth={1.5} />
             </Button>
           </nav>
 
@@ -106,7 +106,7 @@ export default function Home() {
             </Button>
             <Button onClick={() => { router.push('/auth/signup'); setMobileMenuOpen(false); }}>
               Start Free
-              <ArrowRight size={16} strokeWidth={1} />
+              <ArrowRight size={16} strokeWidth={1.5} />
             </Button>
           </nav>
         )}
@@ -148,7 +148,7 @@ export default function Home() {
             </Button>
             <Button onClick={() => router.push('/auth/signup')} className={styles.heroButton}>
               Start Writing Free
-              <ArrowRight size={18} strokeWidth={1} />
+              <ArrowRight size={18} strokeWidth={1.5} />
             </Button>
           </div>
           <p className={styles.heroMicrocopy}>
@@ -161,11 +161,14 @@ export default function Home() {
         </div>
 
         {/* Product Showcase */}
-        <img
-          src="/app.png"
-          alt="Scribo app interface"
+        <video
+          src="/hero-video.mp4"
           className={styles.showcaseImage}
           onClick={() => router.push('/demo')}
+          autoPlay
+          loop
+          muted
+          playsInline
         />
       </section>
 
@@ -249,7 +252,7 @@ export default function Home() {
           <div className={styles.finalCtaButtons}>
             <Button onClick={() => router.push('/auth/signup')}>
               Start Writing Free
-              <ArrowRight size={18} strokeWidth={1} />
+              <ArrowRight size={18} strokeWidth={1.5} />
             </Button>
           </div>
           <p className={styles.heroMicrocopy}>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect, type DragEvent, type MouseEvent, type TouchEvent } from 'react';
-import { ChevronRight, MoreHorizontal, Pencil, Trash2, FileText, FolderPlus, LayoutGrid } from 'lucide-react';
+import { ChevronRight, MoreHorizontal, Pencil, Trash2, File, Folder, Layout } from 'lucide-react';
 import type { SidebarItem as SidebarItemData, DropPosition, ItemActions } from '@/types/sidebar';
 import { SidebarItemIcon } from './SidebarItemIcon';
 import { SidebarItemName } from './SidebarItemName';
@@ -249,7 +249,7 @@ export function SidebarItem({
     >
       <div
         className={`${styles.item} ${isRoot ? styles.rootItem : ''} ${isDragging ? styles.dragging : ''} ${isSelected ? styles.selected : ''} ${getDropClass()}`}
-        draggable={!isRoot && !isMobile}
+        draggable={!isRoot}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onDragOver={handleDragOver}
@@ -329,17 +329,17 @@ export function SidebarItem({
         {isFolder && (
           <>
             <BottomSheetItem
-              icon={<FileText size={20} strokeWidth={1.5} />}
+              icon={<File size={20} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} style={{ color: '#3b82f6' }} />}
               label="New File"
               onClick={handleAddFile}
             />
             <BottomSheetItem
-              icon={<FolderPlus size={20} strokeWidth={1.5} />}
+              icon={<Folder size={20} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} style={{ color: '#f59e0b' }} />}
               label="New Folder"
               onClick={handleAddFolder}
             />
             <BottomSheetItem
-              icon={<LayoutGrid size={20} strokeWidth={1.5} />}
+              icon={<Layout size={20} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} style={{ color: '#8b5cf6' }} />}
               label="New Canvas"
               onClick={handleAddCanvas}
             />
@@ -351,6 +351,7 @@ export function SidebarItem({
           label="Rename"
           onClick={handleRename}
         />
+        <BottomSheetDivider />
         <BottomSheetItem
           icon={<Trash2 size={20} strokeWidth={1.5} />}
           label="Delete"

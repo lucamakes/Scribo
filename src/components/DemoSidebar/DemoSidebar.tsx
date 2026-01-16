@@ -325,7 +325,7 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
               aria-label="Constellation View"
               title="Constellation View"
             >
-              <Telescope size={18} strokeWidth={1} />
+              <Telescope size={18} strokeWidth={1.5} />
             </button>
           )}
           <button 
@@ -334,7 +334,7 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
             aria-label="Menu"
             onClick={() => setShowMenu(prev => !prev)}
           >
-            <MoreHorizontal size={18} strokeWidth={1} />
+            <MoreHorizontal size={18} strokeWidth={1.5} />
           </button>
           
           {showMenu && (
@@ -345,7 +345,7 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
                   onClick={() => { setShowSearch(true); setShowMenu(false); }}
                   className={styles.menuItem}
                 >
-                  <Search size={16} strokeWidth={1} />
+                  <Search size={16} strokeWidth={1.5} />
                   <span>Search</span>
                 </button>
                 <button
@@ -354,14 +354,14 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
                   disabled
                   title="Sign up to export"
                 >
-                  <Download size={16} strokeWidth={1} />
+                  <Download size={16} strokeWidth={1.5} />
                   <span>Export</span>
                 </button>
                 <button
                   onClick={() => { setShowTrash(true); setShowMenu(false); }}
                   className={styles.menuItem}
                 >
-                  <Trash2 size={16} strokeWidth={1} />
+                  <Trash2 size={16} strokeWidth={1.5} />
                   <span>Trash</span>
                 </button>
               </div>
@@ -397,11 +397,11 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
           <div className={trashStyles.panel} onClick={e => e.stopPropagation()}>
             <header className={trashStyles.header}>
               <div className={trashStyles.headerLeft}>
-                <Trash2 size={20} strokeWidth={1} className={trashStyles.icon} />
+                <Trash2 size={20} strokeWidth={1.5} className={trashStyles.icon} />
                 <h2 className={trashStyles.title}>Trash</h2>
               </div>
               <button onClick={() => setShowTrash(false)} className={trashStyles.closeButton}>
-                <X size={20} strokeWidth={1} />
+                <X size={20} strokeWidth={1.5} />
               </button>
             </header>
 
@@ -412,7 +412,7 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
             <div className={trashStyles.content}>
               {trashItems.length === 0 ? (
                 <div className={trashStyles.empty}>
-                  <Trash2 size={48} strokeWidth={1} className={trashStyles.emptyIcon} />
+                  <Trash2 size={48} strokeWidth={1.5} className={trashStyles.emptyIcon} />
                   <p>Trash is empty</p>
                 </div>
               ) : (
@@ -422,10 +422,10 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
                       <div className={trashStyles.itemInfo}>
                         <span className={trashStyles.itemIcon}>
                           {item.type === 'folder'
-                            ? <Folder size={16} strokeWidth={1} data-type="folder" />
+                            ? <Folder size={16} strokeWidth={1.5} data-type="folder" />
                             : item.type === 'canvas'
-                            ? <Layout size={16} strokeWidth={1} data-type="canvas" />
-                            : <File size={16} strokeWidth={1} data-type="file" />
+                            ? <Layout size={16} strokeWidth={1.5} data-type="canvas" />
+                            : <File size={16} strokeWidth={1.5} data-type="file" />
                           }
                         </span>
                         <span className={trashStyles.itemName}>{item.name}</span>
@@ -436,14 +436,14 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
                           className={trashStyles.restoreButton}
                           title="Restore"
                         >
-                          <Undo size={16} strokeWidth={1} />
+                          <Undo size={16} strokeWidth={1.5} />
                         </button>
                         <button
                           onClick={() => handlePermanentDelete(item.id)}
                           className={trashStyles.deleteButton}
                           title="Delete permanently"
                         >
-                          <X size={16} strokeWidth={1} />
+                          <X size={16} strokeWidth={1.5} />
                         </button>
                       </div>
                     </li>
@@ -510,11 +510,11 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
                         >
                           <div className={`${styles.resultIcon} ${item.type === 'folder' ? styles.resultFolderIcon : styles.resultFileIcon}`}>
                             {item.type === 'folder' ? (
-                              <Folder size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
+                              <Folder size={18} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} />
                             ) : item.type === 'canvas' ? (
-                              <Layout size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
+                              <Layout size={18} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} />
                             ) : (
-                              <File size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
+                              <File size={18} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} />
                             )}
                           </div>
                           <div className={styles.resultInfo}>
@@ -531,7 +531,7 @@ export function DemoSidebar({ selectedItemId, onSelectItem, onToggleConstellatio
                 </div>
               ) : (
                 <div className={styles.searchPlaceholder}>
-                  <Search size={48} strokeWidth={1} className={styles.placeholderIcon} />
+                  <Search size={48} strokeWidth={1.5} className={styles.placeholderIcon} />
                   <div className={styles.placeholderText}>Start typing to search</div>
                   <div className={styles.placeholderSubtext}>Search through all your files and folders</div>
                 </div>

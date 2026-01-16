@@ -178,11 +178,11 @@ export function SidebarSearch() {
                   >
                     <div className={`${styles.resultIcon} ${item.type === 'folder' ? styles.resultFolderIcon : styles.resultFileIcon}`}>
                       {item.type === 'folder' ? (
-                        <Folder size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
+                        <Folder size={18} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} />
                       ) : item.type === 'canvas' ? (
-                        <Layout size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
+                        <Layout size={18} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} />
                       ) : (
-                        <File size={18} strokeWidth={1} fill="currentColor" fillOpacity={0.15} />
+                        <File size={18} strokeWidth={1.5} fill="currentColor" fillOpacity={0.15} />
                       )}
                     </div>
                     <div className={styles.resultInfo}>
@@ -198,7 +198,7 @@ export function SidebarSearch() {
             </div>
           ) : (
             <div className={styles.searchPlaceholder}>
-              <Search size={48} strokeWidth={1} className={styles.placeholderIcon} />
+              <Search size={48} strokeWidth={1.5} className={styles.placeholderIcon} />
               <div className={styles.placeholderText}>Start typing to search</div>
               <div className={styles.placeholderSubtext}>Search through all your files and folders</div>
             </div>

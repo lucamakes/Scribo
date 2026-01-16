@@ -69,7 +69,7 @@ export function ExportModal({ isOpen, onClose, projectName, projectId }: ExportM
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <header className={styles.header}>
           <h2 className={styles.title}>Export Project</h2>
-          <IconButton onClick={onClose} title="Close">
+          <IconButton onClick={onClose} title="Close" variant="ghost">
             <X size={18} strokeWidth={1.5} />
           </IconButton>
         </header>
@@ -92,7 +92,7 @@ export function ExportModal({ isOpen, onClose, projectName, projectId }: ExportM
                   }`}
                 >
                   <div className={styles.formatIcon}>
-                    <FileText size={20} strokeWidth={1} />
+                    <FileText size={20} strokeWidth={1.5} />
                   </div>
                   <div className={styles.formatInfo}>
                     <div className={styles.formatLabel}>{format.label}</div>

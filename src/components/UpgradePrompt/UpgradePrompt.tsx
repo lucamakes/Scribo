@@ -51,7 +51,7 @@ export function UpgradePrompt({ type, percentage = 100, onClose }: UpgradePrompt
       <div className={styles.modalOverlay}>
         <div className={styles.warningModal}>
           {onClose && (
-            <IconButton onClick={onClose} title="Dismiss" className={styles.closeButton}>
+            <IconButton onClick={onClose} title="Dismiss" className={styles.closeButton} variant="ghost">
               <X size={18} strokeWidth={1.5} />
             </IconButton>
           )}
@@ -78,7 +78,7 @@ export function UpgradePrompt({ type, percentage = 100, onClose }: UpgradePrompt
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         {onClose && (
-          <IconButton onClick={onClose} title="Close" className={styles.closeButton}>
+          <IconButton onClick={onClose} title="Close" className={styles.closeButton} variant="ghost">
             <X size={18} strokeWidth={1.5} />
           </IconButton>
         )}

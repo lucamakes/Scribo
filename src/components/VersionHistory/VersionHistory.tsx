@@ -158,7 +158,7 @@ export function VersionHistory({
               <Save size={16} strokeWidth={1.5} />
               {saving ? 'Saving...' : 'Save Version'}
             </Button>
-            <IconButton onClick={onClose} title="Close">
+            <IconButton onClick={onClose} title="Close" variant="ghost">
               <X size={18} strokeWidth={1.5} />
             </IconButton>
           </div>
@@ -184,7 +184,7 @@ export function VersionHistory({
             </div>
           ) : versions.length === 0 ? (
             <div className={styles.empty}>
-              <Clock size={32} strokeWidth={1} className={styles.emptyIcon} />
+              <Clock size={32} strokeWidth={1.5} className={styles.emptyIcon} />
               <p className={styles.emptyText}>No versions saved yet</p>
               <p className={styles.emptyHint}>
                 Click &quot;Save Version&quot; to create a snapshot
@@ -257,7 +257,7 @@ export function VersionHistory({
             <div className={styles.previewModal} onClick={e => e.stopPropagation()}>
               <div className={styles.previewHeader}>
                 <h3>Version {previewVersion.version_number} Preview</h3>
-                <IconButton onClick={() => setPreviewVersion(null)} title="Close">
+                <IconButton onClick={() => setPreviewVersion(null)} title="Close" variant="ghost">
                   <X size={18} strokeWidth={1.5} />
                 </IconButton>
               </div>

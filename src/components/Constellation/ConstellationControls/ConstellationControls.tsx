@@ -2,6 +2,7 @@
 
 import { Orbit, CircleDot, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { useConstellation } from '../ConstellationContext';
+import IconButton from '@/components/IconButton/IconButton';
 import styles from './ConstellationControls.module.css';
 
 export function ConstellationControls() {
@@ -16,65 +17,57 @@ export function ConstellationControls() {
 
   return (
     <div className={styles.controls}>
-      <button
-        className={styles.controlButton}
+      <IconButton
         onClick={(e) => {
-          e.stopPropagation();
+          e?.stopPropagation();
           toggleShowOnlyTwoCircles();
         }}
-        type="button"
-        aria-label={showOnlyTwoCircles ? 'Show All Orbits' : 'Simplify View (2 Orbits)'}
         title={showOnlyTwoCircles ? 'Show All Orbits' : 'Simplify View (2 Orbits)'}
+        size="medium"
       >
-        {showOnlyTwoCircles ? <Orbit size={16} strokeWidth={1} /> : <CircleDot size={16} strokeWidth={1} />}
-      </button>
+        {showOnlyTwoCircles ? <Orbit size={16} strokeWidth={1.5} /> : <CircleDot size={16} strokeWidth={1.5} />}
+      </IconButton>
 
       <div className={styles.divider} />
 
       <div className={styles.zoomControls}>
-        <button
-          className={styles.controlButton}
+        <IconButton
           onClick={(e) => {
-            e.stopPropagation();
+            e?.stopPropagation();
             zoomOut();
           }}
-          type="button"
-          aria-label="Zoom Out"
           title="Zoom Out"
+          size="medium"
         >
-          <ZoomOut size={16} strokeWidth={1} />
-        </button>
+          <ZoomOut size={16} strokeWidth={1.5} />
+        </IconButton>
 
         <span className={styles.zoomLevel}>{Math.round(zoom * 100)}%</span>
 
-        <button
-          className={styles.controlButton}
+        <IconButton
           onClick={(e) => {
-            e.stopPropagation();
+            e?.stopPropagation();
             zoomIn();
           }}
-          type="button"
-          aria-label="Zoom In"
           title="Zoom In"
+          size="medium"
         >
-          <ZoomIn size={16} strokeWidth={1} />
-        </button>
+          <ZoomIn size={16} strokeWidth={1.5} />
+        </IconButton>
       </div>
 
       <div className={styles.divider} />
 
-      <button
-        className={styles.controlButton}
+      <IconButton
         onClick={(e) => {
-          e.stopPropagation();
+          e?.stopPropagation();
           resetView();
         }}
-        type="button"
-        aria-label="Reset View"
         title="Reset View"
+        size="medium"
       >
-        <RotateCcw size={16} strokeWidth={1} />
-      </button>
+        <RotateCcw size={16} strokeWidth={1.5} />
+      </IconButton>
     </div>
   );
 }

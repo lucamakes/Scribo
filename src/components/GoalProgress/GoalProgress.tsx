@@ -246,7 +246,7 @@ function GoalSettingsModal({
             <Target size={18} strokeWidth={1.5} />
             Word Count Goal
           </h3>
-          <IconButton onClick={onClose} title="Close">
+          <IconButton onClick={onClose} title="Close" variant="ghost">
             <X size={18} strokeWidth={1.5} />
           </IconButton>
         </div>

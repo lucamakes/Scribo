@@ -178,7 +178,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                 <h2>Error loading project</h2>
                 <p>{error || 'Project not found'}</p>
                 <button onClick={handleBackToProjects} className={styles.backButton}>
-                    <ArrowLeft size={16} strokeWidth={1} /> Back to Projects
+                    <ArrowLeft size={16} strokeWidth={1.5} /> Back to Projects
                 </button>
             </div>
         );
@@ -192,7 +192,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                     title="Close constellation view"
                     className={styles.blankToggleButton}
                 >
-                    <X size={18} strokeWidth={1} />
+                    <X size={18} strokeWidth={1.5} />
                 </IconButton>
                 {itemsLoading ? (
                     <div className={styles.loadingContainer}>

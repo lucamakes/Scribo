@@ -37,18 +37,16 @@ All styles should use CSS custom properties from `src/styles/design-tokens.css`.
 
 ## Button Styles
 
-### Icon Button (Small, 20px)
+### Icon Button - Default Variant
+Use for standalone/prominent actions (toolbars, headers).
 ```css
 .iconButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
   padding: 0;
   background: #ffffff;
-  border: 1px solid #b3b3b3;
-  border-radius: var(--radius-btn-sm); /* 8px */
+  border: 1px solid var(--color-border-medium); /* #d1d5db - softer */
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -57,50 +55,64 @@ All styles should use CSS custom properties from `src/styles/design-tokens.css`.
 .iconButton:hover {
   background: var(--color-bg-hover);
   color: var(--color-text-primary);
-  border-color: var(--color-border-medium);
 }
 ```
 
-### Icon Button (Standard, 32px)
+### Icon Button - Ghost Variant
+Use for contextual/inline actions (sidebar, dropdowns).
 ```css
-.iconButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  background: #ffffff;
-  border: 1px solid #b3b3b3;
-  border-radius: var(--radius-btn); /* 6px */
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all 0.15s ease;
+.iconButton.ghost {
+  background: transparent;
+  border-color: transparent;
 }
 
-.iconButton:hover {
+.iconButton.ghost:hover {
   background: var(--color-bg-hover);
-  color: var(--color-text-primary);
-  border-color: var(--color-border-medium);
 }
 ```
+
+### Icon Button Sizes
+- Small: 24px (border-radius: 5px)
+- Medium: 32px (border-radius: 6px)
 
 ### Secondary Button
 ```css
 .secondaryButton {
   padding: 10px 20px;
   background: #ffffff;
-  border: 1px solid #b3b3b3;
+  border: 1px solid var(--color-border-medium); /* #d1d5db - softer */
   border-radius: var(--radius-btn); /* 6px */
   font-size: 14px;
   font-weight: 500;
-  color: #555555;
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .secondaryButton:hover {
-  background: var(--color-bg-tertiary);
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+```
+
+### Ghost Button
+Use for less prominent actions.
+```css
+.ghostButton {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ghostButton:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
 }
 ```
 
@@ -108,19 +120,19 @@ All styles should use CSS custom properties from `src/styles/design-tokens.css`.
 ```css
 .primaryButton {
   padding: 10px 20px;
-  background: var(--btn-primary-bg);
-  border: 1px solid var(--btn-primary-bg);
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
   border-radius: var(--radius-btn); /* 6px */
   font-size: 14px;
   font-weight: 500;
-  color: var(--btn-primary-text);
+  color: #ffffff;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .primaryButton:hover:not(:disabled) {
-  background: var(--btn-primary-bg-hover);
-  border-color: var(--btn-primary-bg-hover);
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
 }
 
 .primaryButton:disabled {

@@ -19,7 +19,9 @@ import {
     Maximize2,
     Minimize2,
     AlertTriangle,
-    History
+    History,
+    Eye,
+    EyeClosed
 } from 'lucide-react';
 import styles from './DetailPanel.module.css';
 
@@ -51,6 +53,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [error, setError] = useState<string | null>(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [isFocusMode, setIsFocusMode] = useState(false);
     const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
     const [showLimitModal, setShowLimitModal] = useState(false);
     const [showVersionHistory, setShowVersionHistory] = useState(false);
@@ -136,7 +139,8 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
     // Handle Escape key to exit fullscreen
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && isFullscreen) {
+            if (e.key === 'Escape' && (isFullscreen || isFocusMode)) {
+                setIsFocusMode(false);
                 setIsFullscreen(false);
                 // On mobile, also go back to master
                 if (window.innerWidth <= 768) {
@@ -145,7 +149,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
             }
         };
 
-        if (isFullscreen) {
+        if (isFullscreen || isFocusMode) {
             document.addEventListener('keydown', handleKeyDown);
             document.body.style.overflow = 'hidden';
         }
@@ -154,7 +158,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
             document.removeEventListener('keydown', handleKeyDown);
             document.body.style.overflow = '';
         };
-    }, [isFullscreen, onBackToMaster]);
+    }, [isFullscreen, isFocusMode, onBackToMaster]);
 
     // Auto-save with debounce
     const saveContent = useCallback(async (newContent: string, skipGoalTracking: boolean = false) => {
@@ -247,6 +251,18 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
         }
     }, [isFullscreen, onBackToMaster]);
 
+    // Toggle focus mode
+    const toggleFocusMode = useCallback(() => {
+        setIsFocusMode(prev => {
+            const newFocusMode = !prev;
+            // If entering focus mode and not in fullscreen, also enter fullscreen
+            if (newFocusMode && !isFullscreen) {
+                setIsFullscreen(true);
+            }
+            return newFocusMode;
+        });
+    }, [isFullscreen]);
+
     // Cleanup timeout on unmount
     useEffect(() => {
         return () => {
@@ -268,7 +284,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                         </p>
                     </div>
                     <div className={styles.tipCard}>
-                        <Lightbulb size={24} strokeWidth={1} className={styles.tipIcon} />
+                        <Lightbulb size={24} strokeWidth={1.5} className={styles.tipIcon} />
                         <p className={styles.tipText}>
                             Hover over items in the sidebar to reveal buttons for renaming, deleting, or adding subfolders.
                         </p>
@@ -333,7 +349,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                     </div>
 
                     <div className={styles.tipCard}>
-                        <Lightbulb size={24} strokeWidth={1} className={styles.tipIcon} />
+                        <Lightbulb size={24} strokeWidth={1.5} className={styles.tipIcon} />
                         <p className={styles.tipText}>
                             Hover over items in the sidebar to reveal buttons for renaming, deleting, or adding subfolders.
                         </p>
@@ -426,14 +442,14 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                                 onClick={toggleFullscreen}
                                 title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
                             >
-                                {isFullscreen ? <Minimize2 size={18} strokeWidth={1} /> : <Maximize2 size={18} strokeWidth={1} />}
+                                {isFullscreen ? <Minimize2 size={18} strokeWidth={1.5} /> : <Maximize2 size={18} strokeWidth={1.5} />}
                             </IconButton>
                         )}
                     </div>
                 </div>
                 {error && (
                     <div className={styles.errorBanner}>
-                        <span><AlertTriangle size={16} strokeWidth={1} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> {error}</span>
+                        <span><AlertTriangle size={16} strokeWidth={1.5} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> {error}</span>
                     </div>
                 )}
                 <div className={styles.canvasContainer}>
@@ -504,7 +520,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
 
     const editorContent = (
         <>
-            <div className={styles.fileHeader}>
+            <div className={`${styles.fileHeader} ${isFocusMode ? styles.fileHeaderHidden : ''}`}>
                 <div className={styles.fileHeaderLeft}>
                     <h2 className={styles.fileName}>
                         {selectedItem.name.length > 25
@@ -556,7 +572,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                             onClick={toggleFullscreen}
                             title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'}
                         >
-                            {isFullscreen ? <Minimize2 size={18} strokeWidth={1} /> : <Maximize2 size={18} strokeWidth={1} />}
+                            {isFullscreen ? <Minimize2 size={18} strokeWidth={1.5} /> : <Maximize2 size={18} strokeWidth={1.5} />}
                         </IconButton>
                     )}
                 </div>
@@ -564,7 +580,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
 
             {error && (
                 <div className={styles.errorBanner}>
-                    <span><AlertTriangle size={16} strokeWidth={1} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> {error}</span>
+                    <span><AlertTriangle size={16} strokeWidth={1.5} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> {error}</span>
                 </div>
             )}
 
@@ -576,11 +592,23 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                     isAtLimit={isDemo ? false : isAtLimit}
                     isPro={isDemo ? true : isPro}
                     onLimitBlocked={handleLimitBlocked}
+                    focusMode={isFocusMode}
                     fontSize={fontSize}
                     lineHeight={lineHeight}
                     textColor={textColor}
                 />
             </div>
+
+            {/* Focus mode button - only show in fullscreen */}
+            {isFullscreen && (
+                <button
+                    onClick={toggleFocusMode}
+                    className={`${styles.focusButton} ${isFocusMode ? styles.focusButtonActive : ''}`}
+                    title={isFocusMode ? 'Exit focus mode' : 'Enter focus mode'}
+                >
+                    {isFocusMode ? <EyeClosed size={18} strokeWidth={1.5} /> : <Eye size={18} strokeWidth={1.5} />}
+                </button>
+            )}
 
             {/* Show upgrade warning at 80%+ usage - rendered via portal */}
             {isMounted && !isDemo && !isPro && percentage >= 80 && percentage < 100 && showUpgradeBanner && createPortal(

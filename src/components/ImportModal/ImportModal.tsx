@@ -218,7 +218,7 @@ export function ImportModal({ isOpen, onClose, onImport, projectId }: ImportModa
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2 className={styles.title}>Import Files</h2>
-          <IconButton onClick={onClose} title="Close">
+          <IconButton onClick={onClose} title="Close" variant="ghost">
             <X size={18} strokeWidth={1.5} />
           </IconButton>
         </div>
@@ -231,7 +231,7 @@ export function ImportModal({ isOpen, onClose, onImport, projectId }: ImportModa
                 className={styles.sourceCard}
                 onClick={() => setSelectedSource('word')}
               >
-                <FileText size={32} strokeWidth={1} />
+                <FileText size={32} strokeWidth={1.5} />
                 <span className={styles.sourceName}>Microsoft Word</span>
                 <span className={styles.sourceDesc}>.doc, .docx, .txt, .rtf</span>
               </button>
@@ -240,7 +240,7 @@ export function ImportModal({ isOpen, onClose, onImport, projectId }: ImportModa
                 className={styles.sourceCard}
                 onClick={() => setSelectedSource('googledocs')}
               >
-                <FileType size={32} strokeWidth={1} />
+                <FileType size={32} strokeWidth={1.5} />
                 <span className={styles.sourceName}>Google Docs</span>
                 <span className={styles.sourceDesc}>.html, .txt, .docx</span>
               </button>
@@ -249,7 +249,7 @@ export function ImportModal({ isOpen, onClose, onImport, projectId }: ImportModa
                 className={styles.sourceCard}
                 onClick={() => setSelectedSource('scrivener')}
               >
-                <BookOpen size={32} strokeWidth={1} />
+                <BookOpen size={32} strokeWidth={1.5} />
                 <span className={styles.sourceName}>Scrivener</span>
                 <span className={styles.sourceDesc}>.rtf, .txt, .md</span>
               </button>
@@ -271,7 +271,7 @@ export function ImportModal({ isOpen, onClose, onImport, projectId }: ImportModa
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
             >
-              <Upload size={48} strokeWidth={1} className={styles.uploadIcon} />
+              <Upload size={48} strokeWidth={1.5} className={styles.uploadIcon} />
               <p className={styles.dropText}>
                 {importing ? 'Importing...' : 'Drag & drop files here'}
               </p>

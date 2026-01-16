@@ -284,7 +284,7 @@ export function ProjectImportModal({ isOpen, onClose, onProjectCreated }: Projec
                 className={styles.sourceCard}
                 onClick={() => { setSelectedSource('word'); setStep('upload'); }}
               >
-                <FileText size={32} strokeWidth={1} />
+                <FileText size={32} strokeWidth={1.5} />
                 <span className={styles.sourceName}>Microsoft Word</span>
                 <span className={styles.sourceDesc}>.doc, .docx, .txt, .rtf</span>
               </button>
@@ -293,7 +293,7 @@ export function ProjectImportModal({ isOpen, onClose, onProjectCreated }: Projec
                 className={styles.sourceCard}
                 onClick={() => { setSelectedSource('googledocs'); setStep('upload'); }}
               >
-                <FileType size={32} strokeWidth={1} />
+                <FileType size={32} strokeWidth={1.5} />
                 <span className={styles.sourceName}>Google Docs</span>
                 <span className={styles.sourceDesc}>.html, .txt, .docx</span>
               </button>
@@ -302,7 +302,7 @@ export function ProjectImportModal({ isOpen, onClose, onProjectCreated }: Projec
                 className={styles.sourceCard}
                 onClick={() => { setSelectedSource('scrivener'); setStep('upload'); }}
               >
-                <BookOpen size={32} strokeWidth={1} />
+                <BookOpen size={32} strokeWidth={1.5} />
                 <span className={styles.sourceName}>Scrivener</span>
                 <span className={styles.sourceDesc}>.rtf, .txt, .md</span>
               </button>
@@ -327,7 +327,7 @@ export function ProjectImportModal({ isOpen, onClose, onProjectCreated }: Projec
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
             >
-              <Upload size={48} strokeWidth={1} className={styles.uploadIcon} />
+              <Upload size={48} strokeWidth={1.5} className={styles.uploadIcon} />
               <p className={styles.dropText}>
                 {importing ? 'Processing...' : 'Drag & drop files here'}
               </p>

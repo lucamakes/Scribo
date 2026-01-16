@@ -114,51 +114,48 @@ export default function Constellation({
         <div className={styles.orbToggle}>
           <IconButton
             onClick={(e) => {
-              e.stopPropagation();
+              e?.stopPropagation();
               toggleShowOnlyTwoCircles();
             }}
             title={showOnlyTwoCircles ? 'Show All Orbits' : 'Simplify View (2 Orbits)'}
           >
-            {showOnlyTwoCircles ? <Orbit size={16} strokeWidth={1} /> : <CircleDot size={16} strokeWidth={1} />}
+            {showOnlyTwoCircles ? <Orbit size={16} strokeWidth={1.5} /> : <CircleDot size={16} strokeWidth={1.5} />}
           </IconButton>
         </div>
 
         <div className={styles.zoomControls}>
           <IconButton
             onClick={(e) => {
-              e.stopPropagation();
+              e?.stopPropagation();
               zoomOut();
             }}
             title="Zoom Out"
-            className={styles.ghostButton}
           >
-            <ZoomOut size={16} strokeWidth={1} />
+            <ZoomOut size={16} strokeWidth={1.5} />
           </IconButton>
 
           <span className={styles.zoomLevel}>{Math.round(zoom * 100)}%</span>
 
           <IconButton
             onClick={(e) => {
-              e.stopPropagation();
+              e?.stopPropagation();
               zoomIn();
             }}
             title="Zoom In"
-            className={styles.ghostButton}
           >
-            <ZoomIn size={16} strokeWidth={1} />
+            <ZoomIn size={16} strokeWidth={1.5} />
           </IconButton>
 
           <div className={styles.divider} />
 
           <IconButton
             onClick={(e) => {
-              e.stopPropagation();
+              e?.stopPropagation();
               resetView();
             }}
             title="Reset View"
-            className={styles.ghostButton}
           >
-            <RotateCcw size={16} strokeWidth={1} />
+            <RotateCcw size={16} strokeWidth={1.5} />
           </IconButton>
         </div>
       </div>
@@ -166,12 +163,13 @@ export default function Constellation({
       <div className={styles.infoButton}>
         <IconButton
           onClick={(e) => {
-            e.stopPropagation();
+            e?.stopPropagation();
             setShowInfo(!showInfo);
           }}
           title="Information"
+          active={showInfo}
         >
-          <Info size={16} strokeWidth={1} />
+          <Info size={16} strokeWidth={1.5} />
         </IconButton>
       </div>
 
@@ -184,6 +182,7 @@ export default function Constellation({
                 onClick={() => setShowInfo(false)}
                 title="Close"
                 size="small"
+                variant="ghost"
               >
                 <X size={14} strokeWidth={1.5} />
               </IconButton>

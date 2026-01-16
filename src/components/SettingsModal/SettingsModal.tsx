@@ -90,7 +90,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
         <div className={styles.header}>
           <h2 className={styles.title}>Settings</h2>
-          <IconButton onClick={onClose} title="Close">
+          <IconButton onClick={onClose} title="Close" variant="ghost">
             <X size={18} strokeWidth={1.5} />
           </IconButton>
         </div>

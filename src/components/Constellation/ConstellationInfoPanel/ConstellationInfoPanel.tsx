@@ -49,7 +49,7 @@ export function ConstellationInfoPanel() {
           size="medium"
           active={showInfo}
         >
-          <Info size={16} strokeWidth={1} />
+          <Info size={16} strokeWidth={1.5} />
         </IconButton>
       </div>
 

@@ -147,7 +147,7 @@ export default function FeedbackBoard({ showBackButton = false }: FeedbackBoardP
     <section id="feedback" className={styles.feedbackBoard}>
       {showBackButton && (
         <IconButton onClick={() => router.push('/')} title="Back to home" className={styles.backButton}>
-          <ArrowLeft size={20} strokeWidth={1} />
+          <ArrowLeft size={20} strokeWidth={1.5} />
         </IconButton>
       )}
 
@@ -161,12 +161,12 @@ export default function FeedbackBoard({ showBackButton = false }: FeedbackBoardP
         <div className={styles.feedbackActions}>
           {!user && (
             <Button onClick={() => router.push('/auth/login')} variant="secondary">
-              <LogIn size={18} strokeWidth={1} />
+              <LogIn size={18} strokeWidth={1.5} />
               Log in
             </Button>
           )}
           <Button onClick={handleNewFeedback}>
-            <Plus size={18} strokeWidth={1} />
+            <Plus size={18} strokeWidth={1.5} />
             New Feedback
           </Button>
         </div>
@@ -206,7 +206,7 @@ export default function FeedbackBoard({ showBackButton = false }: FeedbackBoardP
           <div className={styles.feedbackLoading}>Loading feedback...</div>
         ) : filteredFeedback.length === 0 ? (
           <div className={styles.emptyState}>
-            <Lightbulb size={48} strokeWidth={1} />
+            <Lightbulb size={48} strokeWidth={1.5} />
             <h3>No feedback yet</h3>
             <p>Be the first to share your ideas!</p>
           </div>

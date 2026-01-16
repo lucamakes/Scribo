@@ -104,7 +104,7 @@ export default function FeedbackSection() {
         <div className={styles.feedbackList}>
           {feedback.length === 0 ? (
             <div className={styles.emptyState}>
-              <Lightbulb size={48} strokeWidth={1} />
+              <Lightbulb size={48} strokeWidth={1.5} />
               <p>No feedback yet. Be the first!</p>
             </div>
           ) : (

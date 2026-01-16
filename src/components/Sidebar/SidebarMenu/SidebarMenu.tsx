@@ -23,7 +23,7 @@ export function SidebarMenu({ onBackToProjects, onOpenSettings }: SidebarMenuPro
           size="medium"
           title="Back to Projects"
         >
-          <ArrowLeft size={14} strokeWidth={1} />
+          <ArrowLeft size={14} strokeWidth={1.5} />
         </IconButton>
       )}
       <IconButton
@@ -31,21 +31,21 @@ export function SidebarMenu({ onBackToProjects, onOpenSettings }: SidebarMenuPro
         size="medium"
         title="Search"
       >
-        <Search size={14} strokeWidth={1} />
+        <Search size={14} strokeWidth={1.5} />
       </IconButton>
       <IconButton
         onClick={() => { setShowExport(true); closeMenu(); }}
         size="medium"
         title="Export"
       >
-        <Download size={14} strokeWidth={1} />
+        <Download size={14} strokeWidth={1.5} />
       </IconButton>
       <IconButton
         onClick={() => { setShowTrash(true); closeMenu(); }}
         size="medium"
         title="Trash"
       >
-        <Trash2 size={14} strokeWidth={1} />
+        <Trash2 size={14} strokeWidth={1.5} />
       </IconButton>
       {onOpenSettings && (
         <IconButton
@@ -53,7 +53,7 @@ export function SidebarMenu({ onBackToProjects, onOpenSettings }: SidebarMenuPro
           size="medium"
           title="Settings"
         >
-          <Settings size={14} strokeWidth={1} />
+          <Settings size={14} strokeWidth={1.5} />
         </IconButton>
       )}
     </Dropdown>

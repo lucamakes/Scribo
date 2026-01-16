@@ -9,6 +9,7 @@ interface IconButtonProps {
   title?: string;
   type?: 'button' | 'submit' | 'reset';
   size?: 'small' | 'medium';
+  variant?: 'default' | 'ghost';
   active?: boolean;
 }
 
@@ -20,9 +21,11 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconB
   title,
   type = 'button',
   size = 'medium',
+  variant = 'default',
   active = false,
 }, ref) {
   const sizeClass = size === 'small' ? styles.small : styles.medium;
+  const variantClass = variant === 'ghost' ? styles.ghost : '';
   const activeClass = active ? styles.active : '';
   
   return (
@@ -32,7 +35,7 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconB
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`${styles.iconButton} ${sizeClass} ${activeClass} ${className}`}
+      className={`${styles.iconButton} ${sizeClass} ${variantClass} ${activeClass} ${className}`}
     >
       {children}
     </button>
