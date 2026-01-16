@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useSubscription } from '@/lib/hooks/useSubscription';
 import { SettingsModal } from '@/components/SettingsModal/SettingsModal';
+import { SubscriptionModal } from '@/components/SubscriptionModal/SubscriptionModal';
 import IconButton from '@/components/IconButton/IconButton';
 import { User, Settings, Sparkles, CreditCard, MessageSquare, X, Check, KeyRound, LogOut } from 'lucide-react';
 import styles from './UserMenu.module.css';
@@ -19,6 +20,7 @@ export function UserMenu() {
     const [isOpen, setIsOpen] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [showPricing, setShowPricing] = useState(false);
+    const [showSubscription, setShowSubscription] = useState(false);
     const [showChangePassword, setShowChangePassword] = useState(false);
     const [upgradeLoading, setUpgradeLoading] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -88,28 +90,10 @@ export function UserMenu() {
         setShowPricing(true);
     }, []);
 
-    const handleManageSubscription = useCallback(async () => {
-        if (!user) return;
-        setUpgradeLoading(true);
-        try {
-            const response = await fetch('/api/stripe/portal', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: user.id,
-                    returnUrl: window.location.href,
-                }),
-            });
-            const data = await response.json();
-            if (data.url) {
-                window.location.href = data.url;
-            }
-        } catch (error) {
-            console.error('Failed to open portal:', error);
-        } finally {
-            setUpgradeLoading(false);
-        }
-    }, [user]);
+    const handleManageSubscription = useCallback(() => {
+        setIsOpen(false);
+        setShowSubscription(true);
+    }, []);
 
     if (!user) return null;
 
@@ -154,7 +138,6 @@ export function UserMenu() {
                                 <button 
                                     onClick={handleManageSubscription} 
                                     className={styles.menuItem}
-                                    disabled={upgradeLoading}
                                 >
                                     <CreditCard size={14} strokeWidth={1.5} />
                                     <span>Manage Subscription</span>
@@ -197,6 +180,13 @@ export function UserMenu() {
                 <SettingsModal 
                     isOpen={showSettings} 
                     onClose={() => setShowSettings(false)} 
+                />
+            )}
+
+            {showSubscription && (
+                <SubscriptionModal 
+                    isOpen={showSubscription} 
+                    onClose={() => setShowSubscription(false)} 
                 />
             )}
 
@@ -299,7 +289,6 @@ export function UserMenu() {
 // Change Password Modal Component
 function ChangePasswordModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
     const { updatePassword } = useAuth();
-    const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
