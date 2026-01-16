@@ -92,15 +92,30 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
     loadProjects();
   }, [loadProjects]);
 
-  // Auto-migrate demo data on first load
+  // Auto-migrate demo data on first load (only for new signups)
   useEffect(() => {
     const migrateDemo = async () => {
-      if (!loading && !demoMigrationService.hasAlreadyMigrated() && demoMigrationService.hasDemoData()) {
+      // Only migrate if:
+      // 1. Not currently loading
+      // 2. This is a new signup (not a login)
+      // 3. Haven't already migrated
+      // 4. There's demo data to migrate
+      if (
+        !loading && 
+        demoMigrationService.isNewSignup() && 
+        !demoMigrationService.hasAlreadyMigrated() && 
+        demoMigrationService.hasDemoData()
+      ) {
         const result = await demoMigrationService.migrate();
         if (result.success) {
           // Reload projects to show the migrated one
           loadProjects();
         }
+        // Clear the new signup flag regardless of success
+        demoMigrationService.clearNewSignupFlag();
+      } else if (!loading && demoMigrationService.isNewSignup()) {
+        // Clear the flag even if there's no demo data
+        demoMigrationService.clearNewSignupFlag();
       }
     };
     migrateDemo();

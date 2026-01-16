@@ -94,7 +94,6 @@ export function UpgradePrompt({ type, percentage = 100, onClose }: UpgradePrompt
             <h3 className={styles.planName}>Free</h3>
             <div className={styles.planPrice}>
               <span className={styles.planAmount}>$0</span>
-              <span className={styles.planPeriod}>/forever</span>
             </div>
             <ul className={styles.planFeatures}>
               <li><Check size={16} strokeWidth={2} /> 15,000 words</li>

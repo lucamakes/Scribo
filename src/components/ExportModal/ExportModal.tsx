@@ -5,7 +5,7 @@ import { X, Download, FileText } from 'lucide-react';
 import IconButton from '@/components/IconButton/IconButton';
 import Button from '@/components/Button/Button';
 import styles from './ExportModal.module.css';
-import { itemService } from '@/lib/services/itemService';
+import { useDataService } from '@/lib/services/dataService';
 import { exportProject, type ExportFormat } from '@/lib/services/exportService';
 
 interface ExportModalProps {
@@ -20,6 +20,7 @@ export function ExportModal({ isOpen, onClose, projectName, projectId }: ExportM
   const [includeStructure, setIncludeStructure] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const dataService = useDataService();
 
   if (!isOpen) return null;
 
@@ -37,20 +38,17 @@ export function ExportModal({ isOpen, onClose, projectName, projectId }: ExportM
     setError(null);
     
     try {
-      // Fetch all items in the project
-      const result = await itemService.getByProject(projectId);
+      const result = await dataService.getItems(projectId);
       
       if (!result.success) {
         throw new Error('error' in result ? result.error : 'Failed to fetch project items');
       }
 
-      const items = result.data;
-
       // Export the project
       await exportProject({
         projectId,
         projectName,
-        items,
+        items: result.data,
         format: selectedFormat,
         includeStructure,
       });

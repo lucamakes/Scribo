@@ -19,7 +19,6 @@ interface SidebarProps {
   onToggleBlankView?: () => void;
   onBackToProjects?: () => void;
   onOpenSettings?: () => void;
-  isDemo?: boolean;
 }
 
 function SidebarInner({ onToggleBlankView, onBackToProjects, onOpenSettings }: {
@@ -104,15 +103,13 @@ export function Sidebar({
   onSelectItem, 
   onToggleBlankView, 
   onBackToProjects, 
-  onOpenSettings, 
-  isDemo = false 
+  onOpenSettings
 }: SidebarProps) {
   return (
     <SidebarProvider
       project={project}
       selectedItemId={selectedItemId}
       onSelectItem={onSelectItem}
-      isDemo={isDemo}
     >
       <SidebarInner
         onToggleBlankView={onToggleBlankView}

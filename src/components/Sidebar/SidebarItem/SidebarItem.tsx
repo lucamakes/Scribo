@@ -302,7 +302,7 @@ export function SidebarItem({
         />
 
         {/* Mobile: ⋯ button that opens bottom sheet */}
-        {isMobile && !isRoot && !isEditing && (
+        {isMobile && !isEditing && (
           <button
             className={styles.mobileMenuButton}
             onClick={handleOpenBottomSheet}
@@ -343,21 +343,25 @@ export function SidebarItem({
               label="New Canvas"
               onClick={handleAddCanvas}
             />
-            <BottomSheetDivider />
+            {!isRoot && <BottomSheetDivider />}
           </>
         )}
-        <BottomSheetItem
-          icon={<Pencil size={20} strokeWidth={1.5} />}
-          label="Rename"
-          onClick={handleRename}
-        />
-        <BottomSheetDivider />
-        <BottomSheetItem
-          icon={<Trash2 size={20} strokeWidth={1.5} />}
-          label="Delete"
-          onClick={handleDelete}
-          danger
-        />
+        {!isRoot && (
+          <>
+            <BottomSheetItem
+              icon={<Pencil size={20} strokeWidth={1.5} />}
+              label="Rename"
+              onClick={handleRename}
+            />
+            <BottomSheetDivider />
+            <BottomSheetItem
+              icon={<Trash2 size={20} strokeWidth={1.5} />}
+              label="Delete"
+              onClick={handleDelete}
+              danger
+            />
+          </>
+        )}
       </BottomSheet>
     </div>
   );

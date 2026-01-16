@@ -4,6 +4,7 @@ import { useState, useCallback, type FormEvent, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/context/AuthContext';
+import { demoMigrationService } from '@/lib/services/demoMigrationService';
 import styles from '../auth.module.css';
 
 function SignupForm() {
@@ -98,10 +99,14 @@ function SignupForm() {
 
         // If user selected a paid plan, redirect to Stripe checkout
         if (plan && (plan === 'monthly' || plan === 'yearly') && data?.user?.id) {
+            // Mark as new signup so demo data gets imported
+            demoMigrationService.markAsNewSignup();
             await triggerStripeCheckout(data.user.id, plan);
             return;
         }
 
+        // Mark as new signup so demo data gets imported
+        demoMigrationService.markAsNewSignup();
         router.push('/projects');
     }, [email, password, confirmPassword, signUp, signIn, router, plan, triggerStripeCheckout]);
 

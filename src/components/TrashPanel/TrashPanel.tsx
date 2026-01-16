@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { ItemRow } from '@/types/database';
 import { itemService } from '@/lib/services/itemService';
+import { useDataService } from '@/lib/services/dataService';
 import styles from './TrashPanel.module.css';
 import { Trash2, X, Folder, File, Undo, Layout } from 'lucide-react';
 
@@ -21,22 +22,26 @@ export function TrashPanel({ projectId, isOpen, onClose, onItemRestored }: Trash
     const [items, setItems] = useState<ItemRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const dataService = useDataService();
+    const isDemo = dataService.isDemo;
 
     const loadTrash = useCallback(async () => {
         setLoading(true);
         setError(null);
 
-        // Also trigger cleanup of old items
-        await itemService.cleanupOldTrash();
+        // Also trigger cleanup of old items (only in production)
+        if (!isDemo) {
+            await itemService.cleanupOldTrash();
+        }
 
-        const result = await itemService.getTrash(projectId);
+        const result = await dataService.getTrash(projectId);
         if (result.success) {
             setItems(result.data);
         } else {
-            setError((result as { success: false; error: string }).error);
+            setError('error' in result ? result.error : 'Failed to load trash');
         }
         setLoading(false);
-    }, [projectId]);
+    }, [projectId, isDemo, dataService]);
 
     useEffect(() => {
         if (isOpen) {
@@ -45,21 +50,21 @@ export function TrashPanel({ projectId, isOpen, onClose, onItemRestored }: Trash
     }, [isOpen, loadTrash]);
 
     const handleRestore = async (id: string) => {
-        const result = await itemService.restore(id);
+        const result = await dataService.restore(id);
         if (result.success) {
             setItems(prev => prev.filter(item => item.id !== id));
             onItemRestored?.();
         } else {
-            setError((result as { success: false; error: string }).error);
+            setError('error' in result ? result.error : 'Failed to restore item');
         }
     };
 
     const handlePermanentDelete = async (id: string) => {
-        const result = await itemService.permanentDelete(id);
+        const result = await dataService.permanentDelete(id);
         if (result.success) {
             setItems(prev => prev.filter(item => item.id !== id));
         } else {
-            setError((result as { success: false; error: string }).error);
+            setError('error' in result ? result.error : 'Failed to delete item');
         }
     };
 
@@ -68,15 +73,18 @@ export function TrashPanel({ projectId, isOpen, onClose, onItemRestored }: Trash
             return;
         }
 
-        const result = await itemService.emptyTrash(projectId);
+        const result = await dataService.emptyTrash(projectId);
         if (result.success) {
             setItems([]);
         } else {
-            setError((result as { success: false; error: string }).error);
+            setError('error' in result ? result.error : 'Failed to empty trash');
         }
     };
 
     const formatDeletedDate = (dateString: string) => {
+        if (isDemo) {
+            return 'In browser storage';
+        }
         const date = new Date(dateString);
         const now = new Date();
         const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
@@ -104,7 +112,10 @@ export function TrashPanel({ projectId, isOpen, onClose, onItemRestored }: Trash
                 </header>
 
                 <p className={styles.subtitle}>
-                    Items are automatically deleted after 14 days
+                    {isDemo 
+                        ? 'Items in trash will be permanently deleted when you clear browser data'
+                        : 'Items are automatically deleted after 14 days'
+                    }
                 </p>
 
                 {error && <div className={styles.error}>{error}</div>}

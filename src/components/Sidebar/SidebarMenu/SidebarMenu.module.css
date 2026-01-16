@@ -2,29 +2,15 @@
   position: absolute;
   top: 100%;
   right: 0;
-  z-index: 100;
-}
-
-.menuBackdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-}
-
-.menuContent {
+  margin-top: 4px;
   background: #ffffff;
   border: 1px solid #c7c7c7;
   border-radius: 6px;
   box-shadow: 0 0 15px rgba(199, 199, 199, 0.30);
   padding: 6px;
-  margin-top: 8px;
+  min-width: 160px;
+  z-index: 1000;
   animation: menuSlideIn 0.15s ease;
-  display: flex;
-  flex-direction: row;
-  gap: 4px;
 }
 
 @keyframes menuSlideIn {
@@ -35,5 +21,51 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #333;
+  font-size: 13px;
+  font-weight: 450;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
+  font-family: inherit;
+}
+
+.menuItem:hover {
+  background-color: #f5f5f5;
+}
+
+.menuItem svg {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+/* Mobile: Scale up for touch */
+@media (max-width: 768px) {
+  .menuDropdown {
+    min-width: 200px;
+    padding: 8px;
+  }
+
+  .menuItem {
+    padding: 12px 14px;
+    font-size: 15px;
+    gap: 12px;
+  }
+
+  .menuItem svg {
+    width: 18px;
+    height: 18px;
   }
 }

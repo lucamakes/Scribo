@@ -2,12 +2,11 @@
 
 import { useSidebar } from '../SidebarContext';
 import { GoalProgress } from '@/components/GoalProgress/GoalProgress';
+import { DemoGoalProgress } from '@/components/DemoGoalProgress/DemoGoalProgress';
 import styles from './SidebarGoals.module.css';
 
 export function SidebarGoals() {
   const { project, items, isDemo } = useSidebar();
-
-  if (isDemo) return null;
 
   const currentWordCount = items.reduce((sum, item) => {
     if (item.type === 'file' && item.content) {
@@ -16,6 +15,14 @@ export function SidebarGoals() {
     }
     return sum;
   }, 0);
+
+  if (isDemo) {
+    return (
+      <div className={styles.goalSection}>
+        <DemoGoalProgress currentWordCount={currentWordCount} />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.goalSection}>

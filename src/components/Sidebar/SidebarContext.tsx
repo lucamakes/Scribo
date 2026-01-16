@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from 'react';
 import type { SidebarItem as SidebarItemData, DropPosition, SidebarItemType, ItemActions } from '@/types/sidebar';
 import type { Project } from '@/types/project';
-import { itemService } from '@/lib/services/itemService';
+import { useDataService } from '@/lib/services/dataService';
 
 // ============================================
 // Types
@@ -57,11 +57,11 @@ interface SidebarContextValue {
   // Reload
   reloadItems: () => Promise<void>;
 
-  // Demo mode
+  // Mode
   isDemo: boolean;
 }
 
-const SidebarContext = createContext<SidebarContextValue | null>(null);
+export const SidebarContext = createContext<SidebarContextValue | null>(null);
 
 // ============================================
 // Utility Functions
@@ -120,11 +120,11 @@ interface SidebarProviderProps {
   project: Project;
   selectedItemId: string | null;
   onSelectItem: (item: SidebarItemData | null) => void;
-  isDemo?: boolean;
 }
 
-export function SidebarProvider({ children, project, selectedItemId, onSelectItem, isDemo = false }: SidebarProviderProps) {
+export function SidebarProvider({ children, project, selectedItemId, onSelectItem }: SidebarProviderProps) {
   const ROOT_ID = project.id;
+  const dataService = useDataService();
 
   // Core state
   const [items, setItems] = useState<SidebarItemData[]>([]);
@@ -150,10 +150,11 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
   const loadItems = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const result = await itemService.getByProject(project.id);
+    
+    const result = await dataService.getItems(project.id);
 
     if (!result.success) {
-      setError((result as { success: false; error: string }).error);
+      setError('error' in result ? result.error : 'Failed to load items');
       setLoading(false);
       return;
     }
@@ -161,7 +162,7 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
     const sidebarItems = result.data.map(item => dbItemToSidebarItem(item, ROOT_ID));
     setItems(sidebarItems);
     setLoading(false);
-  }, [project.id, ROOT_ID]);
+  }, [project.id, ROOT_ID, dataService]);
 
   useEffect(() => {
     loadItems();
@@ -193,9 +194,9 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
   const saveEdit = useCallback(async () => {
     if (!editingId || !editName.trim()) return;
 
-    const result = await itemService.rename(editingId, editName.trim());
+    const result = await dataService.renameItem(editingId, editName.trim());
     if (!result.success) {
-      setError((result as { success: false; error: string }).error);
+      setError('error' in result ? result.error : 'Failed to rename item');
       return;
     }
 
@@ -203,7 +204,7 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
     setItems(prev => prev.map(item => item.id === editingId ? updatedItem : item));
     setEditingId(null);
     setEditName('');
-  }, [editingId, editName, ROOT_ID]);
+  }, [editingId, editName, ROOT_ID, dataService]);
 
   const cancelEdit = useCallback(() => {
     setEditingId(null);
@@ -223,25 +224,23 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
 
     setItems(prev => prev.filter(i => !idsToDelete.has(i.id)));
 
-    const result = await itemService.softDelete(id);
+    const result = await dataService.softDelete(id);
     if (!result.success) {
-      setError((result as { success: false; error: string }).error);
-      const reloadResult = await itemService.getByProject(project.id);
-      if (reloadResult.success) {
-        setItems(reloadResult.data.map(item => dbItemToSidebarItem(item, ROOT_ID)));
-      }
+      setError('error' in result ? result.error : 'Failed to delete item');
+      // Reload to restore state
+      loadItems();
     }
-  }, [ROOT_ID, items, project.id]);
+  }, [ROOT_ID, items, dataService, loadItems]);
 
   // Add
   const handleAdd = useCallback(async (parentId: string, type: SidebarItemType) => {
     const dbParentId = uiParentIdToDb(parentId, ROOT_ID);
     const defaultName = type === 'folder' ? 'New Folder' : type === 'canvas' ? 'New Canvas' : 'New File';
 
-    const result = await itemService.create(project.id, dbParentId, defaultName, type);
+    const result = await dataService.createItem(project.id, dbParentId, defaultName, type);
 
     if (!result.success) {
-      setError((result as { success: false; error: string }).error);
+      setError('error' in result ? result.error : 'Failed to create item');
       return;
     }
 
@@ -254,12 +253,12 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
 
     setEditingId(newItem.id);
     setEditName(newItem.name);
-  }, [project.id, ROOT_ID, expandedIds]);
+  }, [project.id, ROOT_ID, expandedIds, dataService]);
 
   // Select
   const handleSelect = useCallback(async (item: SidebarItemData) => {
     if (item.type === 'file' || item.type === 'canvas') {
-      const result = await itemService.getById(item.id);
+      const result = await dataService.getItem(item.id);
       if (result.success) {
         const freshItem = dbItemToSidebarItem(result.data as any, ROOT_ID);
         setItems(prev => prev.map(i => i.id === item.id ? freshItem : i));
@@ -268,7 +267,7 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
       }
     }
     onSelectItem(item);
-  }, [onSelectItem, ROOT_ID]);
+  }, [onSelectItem, ROOT_ID, dataService]);
 
   // Drop
   const handleDrop = useCallback(async (draggedId: string, targetId: string, position: DropPosition) => {
@@ -333,17 +332,12 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
     const finalItem = newItems.find(i => i.id === draggedId);
     const finalOrder = finalItem?.order ?? 0;
 
-    const moveResult = await itemService.move(draggedId, dbParentId, project.id, finalOrder);
+    const moveResult = await dataService.moveItem(draggedId, dbParentId, project.id, finalOrder);
     if (!moveResult.success) {
-      setError((moveResult as { success: false; error: string }).error);
-      const reloadResult = await itemService.getByProject(project.id);
-      if (reloadResult.success) {
-        setItems(reloadResult.data.map(item => dbItemToSidebarItem(item, ROOT_ID)));
-      } else {
-        setItems(items);
-      }
+      setError('error' in moveResult ? moveResult.error : 'Failed to move item');
+      loadItems();
     }
-  }, [items, project.id, ROOT_ID]);
+  }, [items, project.id, ROOT_ID, dataService, loadItems]);
 
   // Actions object
   const actions: ItemActions = useMemo(() => ({
@@ -383,12 +377,12 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
     searchQuery,
     setSearchQuery,
     reloadItems: loadItems,
-    isDemo,
+    isDemo: dataService.isDemo,
   }), [
     project, items, ROOT_ID, loading, error, selectedItemId,
     expandedIds, toggleExpanded, editingId, editName, startEditing,
     saveEdit, cancelEdit, actions, handleDrop, showTrash, showExport,
-    showSearch, showMenu, addModalParentId, searchQuery, loadItems, isDemo
+    showSearch, showMenu, addModalParentId, searchQuery, loadItems, dataService.isDemo
   ]);
 
   return (

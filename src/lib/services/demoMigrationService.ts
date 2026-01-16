@@ -4,6 +4,7 @@ import type { ItemType, GoalPeriod } from '@/types/database';
 const DEMO_STORAGE_KEY = 'scribe_demo_data';
 const DEMO_GOALS_KEY = 'scribe_demo_goals';
 const DEMO_MIGRATION_FLAG = 'scribe_demo_migrated';
+const NEW_SIGNUP_FLAG = 'scribe_new_signup';
 
 interface DemoProject {
   id: string;
@@ -77,6 +78,30 @@ export const demoMigrationService = {
   markAsMigrated(): void {
     if (typeof window === 'undefined') return;
     localStorage.setItem(DEMO_MIGRATION_FLAG, 'true');
+  },
+
+  /**
+   * Check if this is a new signup (should import demo data).
+   */
+  isNewSignup(): boolean {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(NEW_SIGNUP_FLAG) === 'true';
+  },
+
+  /**
+   * Mark as new signup (called during signup flow).
+   */
+  markAsNewSignup(): void {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(NEW_SIGNUP_FLAG, 'true');
+  },
+
+  /**
+   * Clear new signup flag (called after migration or on login).
+   */
+  clearNewSignupFlag(): void {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(NEW_SIGNUP_FLAG);
   },
 
   /**

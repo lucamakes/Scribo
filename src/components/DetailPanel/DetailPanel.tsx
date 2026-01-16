@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
-import { itemService } from '@/lib/services/itemService';
 import { goalService } from '@/lib/services/goalService';
+import { useDataServiceOptional } from '@/lib/services/dataService';
 import { TiptapEditor } from '@/components/TiptapEditor/TiptapEditor';
 import { CanvasEditor } from '@/components/CanvasEditor/CanvasEditor';
 import { UpgradePrompt } from '@/components/UpgradePrompt/UpgradePrompt';
@@ -38,7 +38,7 @@ interface DetailPanelProps {
     onFullscreenOpened?: () => void;
     /** Callback to return to master list on mobile */
     onBackToMaster?: () => void;
-    /** If true, skip subscription checks and use local save callback */
+    /** If true, skip subscription checks and use local save callback (deprecated - use DataServiceProvider instead) */
     isDemo?: boolean;
 }
 
@@ -48,7 +48,10 @@ interface DetailPanelProps {
  * - Rich text editor when a file is selected
  * - Empty state when nothing is selected
  */
-export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFullscreen, onFullscreenOpened, onBackToMaster, isDemo = false }: DetailPanelProps) {
+export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFullscreen, onFullscreenOpened, onBackToMaster, isDemo: isDemoProp = false }: DetailPanelProps) {
+    const dataService = useDataServiceOptional();
+    // Use DataService.isDemo if available, otherwise fall back to prop
+    const isDemo = dataService?.isDemo ?? isDemoProp;
     const [content, setContent] = useState('');
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [error, setError] = useState<string | null>(null);
@@ -178,52 +181,50 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
         const newWordCount = countWords(newContent);
         const wordsAdded = Math.max(0, newWordCount - previousWordCount);
 
-        // In demo mode, just use the callback directly
-        if (isDemo) {
-            lastSavedContent.current = newContent;
-            setSaveStatus('saved');
-            onContentSaved?.(selectedItem.id, newContent);
-            setTimeout(() => {
-                setSaveStatus('idle');
-            }, 2000);
-            return;
-        }
+        // Use DataService if available, otherwise use callback for demo
+        if (dataService) {
+            const result = await dataService.updateContent(selectedItem.id, newContent);
 
-        const result = await itemService.updateContent(selectedItem.id, newContent);
+            if (result.success) {
+                lastSavedContent.current = newContent;
+                setSaveStatus('saved');
+                onContentSaved?.(selectedItem.id, newContent);
 
-        if (result.success) {
-            lastSavedContent.current = newContent;
-            setSaveStatus('saved');
-            onContentSaved?.(selectedItem.id, newContent);
+                // Track goal progress (only for files with positive word additions, skip if restoring, skip in demo)
+                if (!isDemo && !skipGoalTracking && selectedItem.type === 'file' && projectId && wordsAdded > 0) {
+                    goalService.addWords(projectId, wordsAdded)
+                        .then(() => {
+                            window.dispatchEvent(new CustomEvent('goalProgressUpdated', {
+                                detail: { wordsAdded }
+                            }));
+                        })
+                        .catch(err => {
+                            console.error('Failed to track goal progress:', err);
+                        });
+                }
 
-            // Track goal progress (only for files with positive word additions, skip if restoring)
-            if (!skipGoalTracking && selectedItem.type === 'file' && projectId && wordsAdded > 0) {
-                goalService.addWords(projectId, wordsAdded)
-                    .then(() => {
-                        // Dispatch event with words added to update GoalProgress component
-                        window.dispatchEvent(new CustomEvent('goalProgressUpdated', {
-                            detail: { wordsAdded }
-                        }));
-                    })
-                    .catch(err => {
-                        console.error('Failed to track goal progress:', err);
-                    });
+                // Refresh subscription word count after save (only for files, not in demo)
+                if (!isDemo && selectedItem.type === 'file') {
+                    refreshSubscription();
+                }
+
+                setTimeout(() => {
+                    setSaveStatus('idle');
+                }, 2000);
+            } else {
+                setError('error' in result ? result.error : 'Failed to save');
+                setSaveStatus('error');
             }
-
-            // Refresh subscription word count after save (only for files)
-            if (selectedItem.type === 'file') {
-                refreshSubscription();
-            }
-
-            // Reset to idle after 2 seconds
-            setTimeout(() => {
-                setSaveStatus('idle');
-            }, 2000);
         } else {
-            setError((result as { success: false; error: string }).error);
-            setSaveStatus('error');
+            // Fallback for demo without DataService (shouldn't happen with proper setup)
+            lastSavedContent.current = newContent;
+            setSaveStatus('saved');
+            onContentSaved?.(selectedItem.id, newContent);
+            setTimeout(() => {
+                setSaveStatus('idle');
+            }, 2000);
         }
-    }, [selectedItem, projectId, onContentSaved, refreshSubscription, isDemo]);
+    }, [selectedItem, projectId, onContentSaved, refreshSubscription, isDemo, dataService]);
 
     // Debounced content change handler for Tiptap
     const handleContentChange = useCallback((newContent: string) => {

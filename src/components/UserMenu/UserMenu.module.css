@@ -4,58 +4,156 @@
     align-items: center;
 }
 
-.dropdownHeader {
-    padding: 12px 16px;
-    border-bottom: 1px solid #f0f0f0;
+/* ============================================
+   DROPDOWN MENU - Matches sidebar item style
+   ============================================ */
+
+.menuDropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    background: #ffffff;
+    border: 1px solid #c7c7c7;
+    border-radius: 6px;
+    box-shadow: 0 0 15px rgba(199, 199, 199, 0.30);
+    min-width: 200px;
+    z-index: 1000;
+    animation: menuSlideIn 0.15s ease;
+    overflow: hidden;
+}
+
+@keyframes menuSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.menuHeader {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-border-light);
 }
 
 .email {
     font-size: 13px;
-    color: #666;
+    color: var(--color-text-secondary);
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.menuButton {
-    width: 100%;
-    padding: 10px 16px;
-    background: transparent;
-    border: none;
-    color: #000000;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    text-align: left;
-    font-family: var(--font-hanken-grotesk), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+.menuItems {
+    padding: 6px;
+}
+
+.menuItem {
     display: flex;
     align-items: center;
-    gap: 8px;
-}
-
-.menuButton:hover {
-    background: #f9fafb;
-}
-
-.logoutButton {
+    gap: 10px;
     width: 100%;
-    padding: 10px 16px;
+    padding: 8px 10px;
     background: transparent;
     border: none;
-    border-radius: 0 0 8px 8px;
+    border-radius: 6px;
+    color: #333;
+    font-size: 13px;
+    font-weight: 450;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.15s ease;
+    font-family: inherit;
+}
+
+.menuItem:hover {
+    background-color: #f5f5f5;
+}
+
+.menuItem svg {
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+}
+
+.menuItem:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.menuItemDanger {
     color: #dc2626;
+}
+
+.menuItemDanger svg {
+    color: #dc2626;
+}
+
+.menuItemDanger:hover {
+    background-color: #fef2f2;
+}
+
+.menuDivider {
+    height: 1px;
+    background: var(--color-border-light);
+    margin: 6px 0;
+}
+
+/* Upgrade button - special styling */
+.upgradeItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    background: linear-gradient(135deg, #1565a8 0%, #1a78c2 100%);
+    border: none;
+    border-radius: 6px;
+    color: white;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.15s ease;
     text-align: left;
-    font-family: var(--font-hanken-grotesk), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: all 0.15s ease;
+    font-family: inherit;
 }
 
-.logoutButton:hover {
-    background: #fef2f2;
+.upgradeItem:hover {
+    background: linear-gradient(135deg, #1250a0 0%, #1565a8 100%);
+}
+
+.upgradeItem svg {
+    color: white;
+    flex-shrink: 0;
+}
+
+/* Word count section */
+.wordCountSection {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.wordCountBar {
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.wordCountFill {
+    height: 100%;
+    background: linear-gradient(90deg, #1565a8 0%, #1565a8 100%);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.wordCountText {
+    font-size: 11px;
+    color: var(--color-text-tertiary);
 }
 
 /* Settings Modal */
@@ -198,78 +296,17 @@
 
 /* Plan badge */
 .planBadge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 11px;
-    font-weight: 500;
-    padding: 2px 8px;
-    background: transparent;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    color: #666;
-    margin-left: auto;
-}
-
-.planBadgePro {
-    border-color: #1a1a1a;
-    color: #1a1a1a;
-}
-
-/* Word count section */
-.wordCountSection {
-    padding: 12px 16px;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.wordCountBar {
-    height: 4px;
-    background: #e5e7eb;
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: 6px;
-}
-
-.wordCountFill {
-    height: 100%;
-    background: linear-gradient(90deg, #1565a8 0%, #1565a8 100%);
-    border-radius: 2px;
-    transition: width 0.3s ease;
-}
-
-.wordCountText {
-    font-size: 11px;
-    color: #666;
-}
-
-/* Upgrade button */
-.upgradeButton {
-    width: 100%;
-    padding: 10px 16px;
-    background: linear-gradient(135deg, #1565a8 0%, #1a78c2 100%);
-    border: none;
-    color: white;
-    font-size: 13px;
     font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    text-align: left;
-    font-family: var(--font-hanken-grotesk), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.upgradeButton:hover {
-    background: linear-gradient(135deg, #1565a8 0%, #1a78c2 100%);
-}
-
-.upgradeButton:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.dropdownHeader {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    background: #1a78c2;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    white-space: nowrap;
 }
 
 
@@ -474,6 +511,52 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+    .menuDropdown {
+        min-width: 220px;
+    }
+
+    .menuHeader {
+        padding: 12px 14px;
+    }
+
+    .email {
+        font-size: 14px;
+    }
+
+    .menuItems {
+        padding: 8px;
+    }
+
+    .menuItem {
+        padding: 12px 14px;
+        font-size: 15px;
+        gap: 12px;
+    }
+
+    .menuItem svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .upgradeItem {
+        padding: 12px 14px;
+        font-size: 15px;
+        gap: 12px;
+    }
+
+    .upgradeItem svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .wordCountSection {
+        padding: 12px 14px;
+    }
+
+    .wordCountText {
+        font-size: 12px;
+    }
+
     .pricingModal {
         padding: 24px 16px;
         max-width: 100%;
