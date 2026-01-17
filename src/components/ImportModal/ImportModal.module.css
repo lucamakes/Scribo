@@ -193,6 +193,13 @@
   margin: 6px 0;
 }
 
+.infoNote {
+  margin-top: 12px !important;
+  font-size: 13px !important;
+  color: var(--color-text-muted) !important;
+  font-style: italic;
+}
+
 /* Structure Editor */
 .structureHeader {
   margin-bottom: 16px;

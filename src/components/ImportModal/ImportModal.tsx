@@ -11,7 +11,6 @@ import Button from '@/components/Button/Button';
 import { 
   parseProjectImport, 
   parseHtmlImport,
-  parseMarkdownImport,
 } from '@/lib/services/exportService';
 import { projectService } from '@/lib/services/projectService';
 import { itemService } from '@/lib/services/itemService';
@@ -111,7 +110,6 @@ export function ImportModal({ isOpen, onClose, onProjectCreated }: ImportModalPr
     try {
       const content = await readFileContent(file);
       const fileName = file.name.replace(/\.[^/.]+$/, '');
-      const fileExtension = file.name.split('.').pop()?.toLowerCase();
 
       if (importType === 'json') {
         const data = parseProjectImport(content);
@@ -119,10 +117,7 @@ export function ImportModal({ isOpen, onClose, onProjectCreated }: ImportModalPr
         setProjectName(data.project.name);
         setStep('configure');
       } else if (importType === 'html') {
-        // Detect if it's a markdown file or HTML file
-        const items = fileExtension === 'md' 
-          ? parseMarkdownImport(content)
-          : parseHtmlImport(content);
+        const items = parseHtmlImport(content);
         // Convert to structure items
         const structure: StructureItem[] = items.map(item => ({
           id: item.id,
@@ -321,7 +316,32 @@ export function ImportModal({ isOpen, onClose, onProjectCreated }: ImportModalPr
     const project = projectResult.data;
     const idMap = new Map<string, string>();
 
+    // Sort items so parents are created before children
+    // First, create a map of items by their original ID
+    const itemsById = new Map(jsonData.items.map((item: any) => [item.id, item]));
+    
+    // Topological sort: process items level by level
+    const sortedItems: any[] = [];
+    const processed = new Set<string>();
+    
+    const processItem = (item: any) => {
+      if (processed.has(item.id)) return;
+      
+      // If item has a parent, process parent first
+      if (item.parent_id && itemsById.has(item.parent_id) && !processed.has(item.parent_id)) {
+        processItem(itemsById.get(item.parent_id));
+      }
+      
+      sortedItems.push(item);
+      processed.add(item.id);
+    };
+    
+    // Process all items
     for (const item of jsonData.items) {
+      processItem(item);
+    }
+
+    for (const item of sortedItems) {
       const itemResult = await itemService.create(
         project.id,
         item.parent_id ? idMap.get(item.parent_id) || null : null,
@@ -331,6 +351,12 @@ export function ImportModal({ isOpen, onClose, onProjectCreated }: ImportModalPr
 
       if (itemResult.success) {
         idMap.set(item.id, itemResult.data.id);
+        
+        // Update sort_order to match original
+        if (item.sort_order !== undefined) {
+          await itemService.reorder(itemResult.data.id, item.sort_order);
+        }
+        
         if (item.content) {
           await itemService.updateContent(itemResult.data.id, item.content);
         }
@@ -412,8 +438,8 @@ export function ImportModal({ isOpen, onClose, onProjectCreated }: ImportModalPr
 
   const getAcceptedFileTypes = (): string => {
     if (importType === 'json') return '.json,.scribo.json';
-    if (importType === 'html') return '.html,.htm,.md';
-    return '.json,.html,.htm,.md';
+    if (importType === 'html') return '.html,.htm';
+    return '.json,.html,.htm';
   };
 
   // Get plain text from HTML content for preview
@@ -463,8 +489,8 @@ export function ImportModal({ isOpen, onClose, onProjectCreated }: ImportModalPr
                   onClick={() => { setImportType('html'); setStep('upload'); }}
                 >
                   <FileType size={32} strokeWidth={1.5} />
-                  <span className={styles.sourceName}>Markdown / HTML</span>
-                  <span className={styles.sourceDesc}>.md or .html files</span>
+                  <span className={styles.sourceName}>Google Docs</span>
+                  <span className={styles.sourceDesc}>.html files</span>
                 </button>
               </div>
             </div>
@@ -505,6 +531,7 @@ export function ImportModal({ isOpen, onClose, onProjectCreated }: ImportModalPr
                     <li>Go to File → Download → Web Page (.html)</li>
                     <li>Upload the downloaded .html file here</li>
                   </ol>
+                  <p className={styles.infoNote}>Note: Only HTML files are supported. Please upload the .html version, not .md or other formats.</p>
                 </div>
               )}
             </>
