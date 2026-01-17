@@ -155,11 +155,29 @@ export function ImportModal({ isOpen, onClose, onProjectCreated }: ImportModalPr
 
   // Structure editor functions
   const toggleItemType = (id: string) => {
-    setStructureItems(prev => prev.map(item => 
-      item.id === id 
-        ? { ...item, type: item.type === 'folder' ? 'file' : 'folder' }
-        : item
-    ));
+    setStructureItems(prev => {
+      const index = prev.findIndex(i => i.id === id);
+      if (index === -1) return prev;
+      
+      const item = prev[index];
+      const newType = item.type === 'folder' ? 'file' : 'folder';
+      
+      // If changing to file, check if any items are nested inside this one
+      if (newType === 'file') {
+        // Check if there are items nested under this one
+        for (let i = index + 1; i < prev.length; i++) {
+          if (prev[i].indent <= item.indent) break;
+          if (prev[i].indent > item.indent) {
+            // There are nested items - can't convert to file
+            return prev;
+          }
+        }
+      }
+      
+      return prev.map((it, i) => 
+        i === index ? { ...it, type: newType } : it
+      );
+    });
   };
 
   const indentItem = (id: string) => {
@@ -167,16 +185,38 @@ export function ImportModal({ isOpen, onClose, onProjectCreated }: ImportModalPr
       const index = prev.findIndex(i => i.id === id);
       if (index <= 0) return prev;
       
-      const prevItem = prev[index - 1];
       const currentItem = prev[index];
+      const prevItem = prev[index - 1];
       
-      // Can only indent if previous item exists and we're not already more indented
-      if (currentItem.indent <= prevItem.indent + 1) {
-        return prev.map((item, i) => 
-          i === index ? { ...item, indent: Math.min(item.indent + 1, 5) } : item
-        );
+      // Can only indent one level deeper than the item directly above
+      if (currentItem.indent > prevItem.indent) return prev;
+      
+      // Find the parent we'd be nesting into
+      let parentIndex = -1;
+      for (let i = index - 1; i >= 0; i--) {
+        if (prev[i].indent === currentItem.indent) {
+          parentIndex = i;
+          break;
+        }
+        if (prev[i].indent < currentItem.indent) {
+          parentIndex = i;
+          break;
+        }
       }
-      return prev;
+      
+      // If parent is a file, can't indent
+      if (parentIndex >= 0 && prev[parentIndex].type === 'file' && prev[parentIndex].indent === currentItem.indent) {
+        return prev;
+      }
+      
+      // Check if the item above is a file at the same level - can't nest into it
+      if (prevItem.type === 'file' && prevItem.indent === currentItem.indent) {
+        return prev;
+      }
+      
+      return prev.map((item, i) => 
+        i === index ? { ...item, indent: currentItem.indent + 1 } : item
+      );
     });
   };
 

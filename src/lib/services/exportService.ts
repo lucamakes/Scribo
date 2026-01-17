@@ -251,91 +251,150 @@ export interface ParsedHtmlItem {
  * Parse HTML file (from Google Docs) into structured items
  */
 export function parseHtmlImport(htmlString: string): ParsedHtmlItem[] {
-  const items: ParsedHtmlItem[] = [];
-  
-  // Create a DOM parser
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlString, 'text/html');
   
-  // Get the title if available
   const title = doc.querySelector('title')?.textContent?.trim();
-  
-  // Get the body content
   const body = doc.body;
+  
   if (!body) {
     throw new Error('Invalid HTML file: no body content found');
   }
 
-  let currentContent: string[] = [];
-  let itemCounter = 0;
-
-  const generateId = () => `html-item-${++itemCounter}`;
-
-  const flushContent = () => {
-    const content = currentContent.join('').trim();
-    if (content) {
-      // Create a file item from accumulated content
-      const lastHeading = items.filter(i => i.isHeading).pop();
-      items.push({
-        id: generateId(),
-        name: lastHeading ? `${lastHeading.name} - Content` : 'Document',
-        content: content,
-        suggestedType: 'file',
-        level: lastHeading ? lastHeading.level + 1 : 0,
-        isHeading: false,
-      });
-    }
-    currentContent = [];
-  };
-
-  // Process all child nodes
+  // First pass: collect all elements in order (headings and content blocks)
+  interface RawBlock {
+    type: 'heading' | 'content';
+    level?: number;
+    text?: string;
+    html?: string;
+    isTitle?: boolean;
+  }
+  
+  const blocks: RawBlock[] = [];
+  
   const processNode = (node: Node) => {
     if (node.nodeType === Node.ELEMENT_NODE) {
       const element = node as Element;
       const tagName = element.tagName.toLowerCase();
 
-      // Check if it's a heading
       if (/^h[1-6]$/.test(tagName)) {
-        flushContent();
-        const level = parseInt(tagName[1]) - 1;
         const headingText = element.textContent?.trim() || 'Untitled';
-        
-        // Skip if it's the same as the title (first h1)
-        if (!(tagName === 'h1' && items.length === 0 && headingText === title)) {
-          items.push({
-            id: generateId(),
-            name: headingText,
-            content: '',
-            suggestedType: 'folder',
-            level: level,
-            isHeading: true,
+        // Check if element has "title" class
+        const hasTitle = element.classList.contains('title');
+        // Skip if it's the document title (first h1 matching title)
+        if (!(tagName === 'h1' && blocks.length === 0 && headingText === title)) {
+          blocks.push({
+            type: 'heading',
+            level: parseInt(tagName[1]) - 1,
+            text: headingText,
+            isTitle: hasTitle,
           });
         }
-      } else if (['p', 'div', 'span', 'blockquote', 'ul', 'ol', 'li', 'pre', 'code'].includes(tagName)) {
-        // Content elements - preserve HTML
-        const html = element.outerHTML;
-        if (html.trim()) {
-          currentContent.push(html);
+      } else if (['p', 'div', 'blockquote', 'ul', 'ol', 'pre', 'code', 'table'].includes(tagName)) {
+        // Check if this is a title paragraph (Google Docs uses <p class="title">)
+        if (element.classList.contains('title')) {
+          const titleText = element.textContent?.trim() || 'Untitled';
+          blocks.push({
+            type: 'heading',
+            level: 0,
+            text: titleText,
+            isTitle: true,
+          });
+        } else {
+          const html = element.outerHTML;
+          const text = element.textContent?.trim();
+          if (text) {
+            blocks.push({
+              type: 'content',
+              html: html,
+            });
+          }
         }
-      } else if (tagName === 'br') {
-        currentContent.push('<br>');
+      } else if (tagName === 'span') {
+        const text = element.textContent?.trim();
+        if (text) {
+          blocks.push({
+            type: 'content',
+            html: `<p>${text}</p>`,
+          });
+        }
       } else {
-        // Process children for other elements
+        // Process children for wrapper elements
         element.childNodes.forEach(child => processNode(child));
       }
     } else if (node.nodeType === Node.TEXT_NODE) {
       const text = node.textContent?.trim();
       if (text) {
-        currentContent.push(`<p>${text}</p>`);
+        blocks.push({
+          type: 'content',
+          html: `<p>${text}</p>`,
+        });
       }
     }
   };
 
-  // Process body children
   body.childNodes.forEach(child => processNode(child));
-  
-  // Flush any remaining content
-  flushContent();
+
+  // Second pass: determine which headings are folders vs files
+  // A heading is a FILE if it has content before the next heading (or end)
+  // A heading is a FOLDER if it has no content before the next heading
+  const items: ParsedHtmlItem[] = [];
+  let itemCounter = 0;
+  const generateId = () => `html-item-${++itemCounter}`;
+
+  let i = 0;
+  while (i < blocks.length) {
+    const block = blocks[i];
+    
+    if (block.type === 'heading') {
+      // Look ahead to see if there's content before the next heading
+      let contentHtml = '';
+      let j = i + 1;
+      
+      while (j < blocks.length && blocks[j].type === 'content') {
+        contentHtml += blocks[j].html || '';
+        j++;
+      }
+      
+      const hasContent = contentHtml.trim().length > 0;
+      
+      // Skip title elements that have no content beneath them
+      if (block.isTitle && !hasContent) {
+        i = j;
+        continue;
+      }
+      
+      items.push({
+        id: generateId(),
+        name: block.text || 'Untitled',
+        content: hasContent ? contentHtml : '',
+        suggestedType: hasContent ? 'file' : 'folder',
+        level: block.level || 0,
+        isHeading: true,
+      });
+      
+      // Skip past the content we just consumed
+      i = j;
+    } else {
+      // Content at the start (before any heading)
+      let contentHtml = '';
+      while (i < blocks.length && blocks[i].type === 'content') {
+        contentHtml += blocks[i].html || '';
+        i++;
+      }
+      
+      if (contentHtml.trim()) {
+        items.push({
+          id: generateId(),
+          name: title || 'Document',
+          content: contentHtml,
+          suggestedType: 'file',
+          level: 0,
+          isHeading: false,
+        });
+      }
+    }
+  }
 
   // If no items were created, create a single document
   if (items.length === 0) {
@@ -349,24 +408,49 @@ export function parseHtmlImport(htmlString: string): ParsedHtmlItem[] {
     });
   }
 
-  // Clean up: merge consecutive content items at the same level
-  const cleanedItems: ParsedHtmlItem[] = [];
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-    if (item.isHeading) {
-      cleanedItems.push(item);
-    } else {
-      // Check if we can merge with previous non-heading item
-      const lastItem = cleanedItems[cleanedItems.length - 1];
-      if (lastItem && !lastItem.isHeading && lastItem.level === item.level) {
-        lastItem.content += item.content;
-      } else {
-        cleanedItems.push(item);
+  // Post-process to enforce nesting rules:
+  // 1. Files can't have children (items after a file at deeper level get moved up)
+  // 2. Can only nest one level deeper than the previous folder
+  const processedItems: ParsedHtmlItem[] = [];
+  
+  for (const item of items) {
+    let level = item.level;
+    
+    if (processedItems.length > 0) {
+      // Find the effective parent level (last folder at a level less than current)
+      let maxAllowedLevel = 0;
+      for (let i = processedItems.length - 1; i >= 0; i--) {
+        const prev = processedItems[i];
+        if (prev.level < level) {
+          // This could be our parent
+          if (prev.suggestedType === 'folder') {
+            // Can nest one level inside this folder
+            maxAllowedLevel = prev.level + 1;
+          } else {
+            // It's a file - can't nest inside, use its level
+            maxAllowedLevel = prev.level;
+          }
+          break;
+        } else if (prev.level === level - 1 && prev.suggestedType === 'file') {
+          // Direct parent is a file - can't nest
+          maxAllowedLevel = prev.level;
+          break;
+        }
       }
+      
+      level = Math.min(level, maxAllowedLevel);
+    } else {
+      // First item must be at level 0
+      level = 0;
     }
+    
+    processedItems.push({
+      ...item,
+      level,
+    });
   }
 
-  return cleanedItems;
+  return processedItems;
 }
 
 /**
