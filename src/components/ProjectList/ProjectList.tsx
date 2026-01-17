@@ -6,7 +6,7 @@ import { projectService } from '@/lib/services/projectService';
 import { itemService } from '@/lib/services/itemService';
 import { demoMigrationService } from '@/lib/services/demoMigrationService';
 import { ProjectSetup } from '@/components/ProjectSetup/ProjectSetup';
-import { ProjectImportModal } from '@/components/ProjectImportModal';
+import { ImportModal } from '@/components/ImportModal/ImportModal';
 import { UserMenu } from '@/components/UserMenu/UserMenu';
 import IconButton from '@/components/IconButton/IconButton';
 import Button from '@/components/Button/Button';
@@ -331,7 +331,7 @@ export function ProjectList({ onSelectProject }: ProjectListProps) {
           </Button>
         </div>
 
-        <ProjectImportModal
+        <ImportModal
           isOpen={showImport}
           onClose={() => setShowImport(false)}
           onProjectCreated={handleImportProject}

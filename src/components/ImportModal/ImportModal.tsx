@@ -1,33 +1,41 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { X, Upload, FileText, FileType, BookOpen } from 'lucide-react';
+import { X, Upload, FileJson } from 'lucide-react';
 import IconButton from '@/components/IconButton/IconButton';
+import Button from '@/components/Button/Button';
+import { parseProjectImport } from '@/lib/services/exportService';
+import { projectService } from '@/lib/services/projectService';
+import { itemService } from '@/lib/services/itemService';
+import { supabase } from '@/lib/supabase';
 import styles from './ImportModal.module.css';
 
 interface ImportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onImport: (files: ImportedFile[]) => void;
-  projectId: string;
+  onProjectCreated: (project: { id: string; name: string; createdAt: string }) => void;
 }
 
-export interface ImportedFile {
-  name: string;
-  content: string;
-  type: 'file' | 'folder';
-  parentId: string | null;
-  children?: ImportedFile[];
-}
-
-type ImportSource = 'word' | 'googledocs' | 'scrivener' | null;
-
-export function ImportModal({ isOpen, onClose, onImport, projectId }: ImportModalProps) {
-  const [selectedSource, setSelectedSource] = useState<ImportSource>(null);
+export function ImportModal({ isOpen, onClose, onProjectCreated }: ImportModalProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [projectData, setProjectData] = useState<any>(null);
+  const [projectName, setProjectName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const resetState = useCallback(() => {
+    setIsDragging(false);
+    setImporting(false);
+    setError(null);
+    setProjectData(null);
+    setProjectName('');
+  }, []);
+
+  const handleClose = useCallback(() => {
+    resetState();
+    onClose();
+  }, [onClose, resetState]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -42,39 +50,36 @@ export function ImportModal({ isOpen, onClose, onImport, projectId }: ImportModa
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
     const files = Array.from(e.dataTransfer.files);
-    await processFiles(files);
-  }, [selectedSource]);
+    if (files.length > 0) {
+      await processFile(files[0]);
+    }
+  }, []);
 
   const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
-    await processFiles(files);
-  }, [selectedSource]);
+    if (files.length > 0) {
+      await processFile(files[0]);
+    }
+  }, []);
 
-  const processFiles = async (files: File[]) => {
-    if (files.length === 0) return;
-    
+  const processFile = async (file: File) => {
+    if (!file.name.endsWith('.json') && !file.name.endsWith('.scribo.json')) {
+      setError('Please select a valid Scribo project file (.scribo.json)');
+      return;
+    }
+
     setImporting(true);
     setError(null);
 
     try {
-      const importedFiles: ImportedFile[] = [];
-
-      for (const file of files) {
-        const content = await readFileContent(file);
-        const parsed = parseFileContent(file, content, selectedSource);
-        importedFiles.push(...parsed);
-      }
-
-      if (importedFiles.length > 0) {
-        onImport(importedFiles);
-        onClose();
-      } else {
-        setError('No content could be extracted from the files.');
-      }
+      const content = await readFileContent(file);
+      const data = parseProjectImport(content);
+      
+      setProjectData(data);
+      setProjectName(data.project.name);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to import files');
+      setError(err instanceof Error ? err.message : 'Failed to read project file');
     } finally {
       setImporting(false);
     }
@@ -83,239 +88,186 @@ export function ImportModal({ isOpen, onClose, onImport, projectId }: ImportModa
   const readFileContent = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      
       reader.onload = (e) => {
         const result = e.target?.result;
         if (typeof result === 'string') {
           resolve(result);
-        } else if (result instanceof ArrayBuffer) {
-          // For binary files like .docx, we'll handle them differently
-          resolve(new TextDecoder().decode(result));
         } else {
           reject(new Error('Failed to read file'));
         }
       };
-      
       reader.onerror = () => reject(new Error('Failed to read file'));
-      
-      // Read as text for most files
-      if (file.name.endsWith('.txt') || file.name.endsWith('.md') || file.name.endsWith('.html')) {
-        reader.readAsText(file);
-      } else {
-        reader.readAsText(file);
-      }
+      reader.readAsText(file);
     });
   };
 
-  const parseFileContent = (file: File, content: string, source: ImportSource): ImportedFile[] => {
-    const fileName = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
-    
-    // Handle different file types
-    if (file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
-      // For Word files, extract text (simplified - real implementation would use mammoth.js)
-      return [{
-        name: fileName,
-        content: extractTextFromDocx(content),
-        type: 'file',
-        parentId: null,
-      }];
-    }
-    
-    if (file.name.endsWith('.html')) {
-      // For Google Docs HTML export
-      return [{
-        name: fileName,
-        content: extractTextFromHtml(content),
-        type: 'file',
-        parentId: null,
-      }];
-    }
-    
-    if (file.name.endsWith('.rtf')) {
-      // For Scrivener RTF exports
-      return [{
-        name: fileName,
-        content: extractTextFromRtf(content),
-        type: 'file',
-        parentId: null,
-      }];
-    }
-    
-    if (file.name.endsWith('.txt') || file.name.endsWith('.md')) {
-      return [{
-        name: fileName,
-        content: content,
-        type: 'file',
-        parentId: null,
-      }];
-    }
+  const handleImport = async () => {
+    if (!projectData || !projectName.trim()) return;
 
-    // Default: treat as plain text
-    return [{
-      name: fileName,
-      content: content,
-      type: 'file',
-      parentId: null,
-    }];
-  };
+    setImporting(true);
+    setError(null);
 
-  const extractTextFromDocx = (content: string): string => {
-    // Simplified extraction - in production, use mammoth.js
-    // This extracts readable text from the XML content
-    const textContent = content
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    return textContent || 'Content could not be extracted. Please export as .txt or .html from Word.';
-  };
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setError('You must be logged in to import a project');
+        return;
+      }
 
-  const extractTextFromHtml = (content: string): string => {
-    // Remove HTML tags and decode entities
-    const div = typeof document !== 'undefined' ? document.createElement('div') : null;
-    if (div) {
-      div.innerHTML = content;
-      return div.textContent || div.innerText || '';
-    }
-    // Fallback for SSR
-    return content
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-      .replace(/<[^>]+>/g, '\n')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/\n\s*\n/g, '\n\n')
-      .trim();
-  };
+      // Create the project
+      const projectResult = await projectService.create({
+        user_id: user.id,
+        name: projectName.trim(),
+        word_count_goal: projectData.project.word_count_goal,
+        time_goal_minutes: projectData.project.time_goal_minutes,
+        goal_period: projectData.project.goal_period,
+      });
 
-  const extractTextFromRtf = (content: string): string => {
-    // Simplified RTF extraction
-    return content
-      .replace(/\\[a-z]+\d* ?/gi, '')
-      .replace(/[{}]/g, '')
-      .replace(/\\'[0-9a-f]{2}/gi, '')
-      .trim();
-  };
+      if (!projectResult.success) {
+        setError((projectResult as { success: false; error: string }).error);
+        return;
+      }
 
-  const getAcceptedFileTypes = (): string => {
-    switch (selectedSource) {
-      case 'word':
-        return '.doc,.docx,.txt,.rtf';
-      case 'googledocs':
-        return '.html,.txt,.docx';
-      case 'scrivener':
-        return '.rtf,.txt,.md';
-      default:
-        return '.doc,.docx,.txt,.rtf,.html,.md';
+      const project = projectResult.data;
+
+      // Create a mapping of old IDs to new IDs
+      const idMap = new Map<string, string>();
+
+      // Create all items
+      for (const item of projectData.items) {
+        const itemResult = await itemService.create(
+          project.id,
+          item.parent_id ? idMap.get(item.parent_id) || null : null,
+          item.name,
+          item.type
+        );
+
+        if (itemResult.success) {
+          idMap.set(item.id, itemResult.data.id);
+          
+          // Update content if exists
+          if (item.content) {
+            await itemService.updateContent(itemResult.data.id, item.content);
+          }
+        }
+      }
+
+      // Import goal progress if exists
+      if (projectData.goalProgress && projectData.goalProgress.length > 0) {
+        for (const gp of projectData.goalProgress) {
+          await (supabase as any).from('project_goal_progress').insert({
+            project_id: project.id,
+            date: gp.date,
+            words_written: gp.words_written,
+            time_spent_minutes: gp.time_spent_minutes,
+          });
+        }
+      }
+
+      onProjectCreated({
+        id: project.id,
+        name: project.name,
+        createdAt: project.created_at,
+      });
+      handleClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to import project');
+    } finally {
+      setImporting(false);
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={handleClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
-          <h2 className={styles.title}>Import Files</h2>
-          <IconButton onClick={onClose} title="Close" variant="ghost">
+        <header className={styles.header}>
+          <h2 className={styles.title}>Import Project</h2>
+          <IconButton onClick={handleClose} title="Close" variant="ghost">
             <X size={18} strokeWidth={1.5} />
           </IconButton>
+        </header>
+
+        <div className={styles.content}>
+          {!projectData ? (
+            <>
+              <div
+                className={`${styles.dropZone} ${isDragging ? styles.dragging : ''}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <FileJson size={48} strokeWidth={1.5} className={styles.uploadIcon} />
+                <p className={styles.dropText}>
+                  {importing ? 'Reading file...' : 'Drag & drop your project file here'}
+                </p>
+                <p className={styles.dropSubtext}>or click to browse</p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json,.scribo.json"
+                  onChange={handleFileSelect}
+                  className={styles.fileInput}
+                />
+              </div>
+
+              <div className={styles.infoBox}>
+                <p>Import a previously exported Scribo project (.scribo.json file)</p>
+                <ul>
+                  <li>All files, folders, and canvas items will be restored</li>
+                  <li>Complete folder structure preserved</li>
+                  <li>Project goals and progress included</li>
+                </ul>
+              </div>
+            </>
+          ) : (
+            <div className={styles.configureSection}>
+              <div className={styles.successBox}>
+                <FileJson size={24} strokeWidth={1.5} />
+                <div>
+                  <div className={styles.successTitle}>Project file loaded</div>
+                  <div className={styles.successDesc}>
+                    {projectData.items.length} items • Exported {new Date(projectData.exportedAt).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Project Name</label>
+                <input
+                  type="text"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  placeholder="Enter project name"
+                  className={styles.input}
+                  autoFocus
+                />
+              </div>
+
+              <button
+                onClick={() => setProjectData(null)}
+                className={styles.changeFileButton}
+              >
+                Choose a different file
+              </button>
+            </div>
+          )}
+
+          {error && <div className={styles.error}>{error}</div>}
         </div>
 
-        {!selectedSource ? (
-          <div className={styles.sourceSelection}>
-            <p className={styles.subtitle}>Choose your import source</p>
-            <div className={styles.sourceGrid}>
-              <button
-                className={styles.sourceCard}
-                onClick={() => setSelectedSource('word')}
-              >
-                <FileText size={32} strokeWidth={1.5} />
-                <span className={styles.sourceName}>Microsoft Word</span>
-                <span className={styles.sourceDesc}>.doc, .docx, .txt, .rtf</span>
-              </button>
-              
-              <button
-                className={styles.sourceCard}
-                onClick={() => setSelectedSource('googledocs')}
-              >
-                <FileType size={32} strokeWidth={1.5} />
-                <span className={styles.sourceName}>Google Docs</span>
-                <span className={styles.sourceDesc}>.html, .txt, .docx</span>
-              </button>
-              
-              <button
-                className={styles.sourceCard}
-                onClick={() => setSelectedSource('scrivener')}
-              >
-                <BookOpen size={32} strokeWidth={1.5} />
-                <span className={styles.sourceName}>Scrivener</span>
-                <span className={styles.sourceDesc}>.rtf, .txt, .md</span>
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className={styles.uploadSection}>
-            <button
-              className={styles.backButton}
-              onClick={() => setSelectedSource(null)}
-            >
-              ← Back to sources
-            </button>
-
-            <div
-              className={`${styles.dropZone} ${isDragging ? styles.dragging : ''}`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload size={48} strokeWidth={1.5} className={styles.uploadIcon} />
-              <p className={styles.dropText}>
-                {importing ? 'Importing...' : 'Drag & drop files here'}
-              </p>
-              <p className={styles.dropSubtext}>or click to browse</p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept={getAcceptedFileTypes()}
-                onChange={handleFileSelect}
-                className={styles.fileInput}
-              />
-            </div>
-
-            {error && (
-              <div className={styles.error}>{error}</div>
-            )}
-
-            <div className={styles.tips}>
-              <h4>Tips for importing from {selectedSource === 'word' ? 'Word' : selectedSource === 'googledocs' ? 'Google Docs' : 'Scrivener'}:</h4>
-              {selectedSource === 'word' && (
-                <ul>
-                  <li>For best results, save as .txt or .docx</li>
-                  <li>Complex formatting may not be preserved</li>
-                  <li>Images will not be imported</li>
-                </ul>
-              )}
-              {selectedSource === 'googledocs' && (
-                <ul>
-                  <li>Go to File → Download → Web Page (.html)</li>
-                  <li>Or download as Plain Text (.txt)</li>
-                  <li>Comments and suggestions won't be imported</li>
-                </ul>
-              )}
-              {selectedSource === 'scrivener' && (
-                <ul>
-                  <li>Use File → Export → Files to export chapters</li>
-                  <li>Export as RTF or Plain Text for best results</li>
-                  <li>Each file will become a separate document</li>
-                </ul>
-              )}
-            </div>
-          </div>
-        )}
+        <footer className={styles.footer}>
+          <Button onClick={handleClose} variant="secondary" disabled={importing}>
+            Cancel
+          </Button>
+          {projectData && (
+            <Button onClick={handleImport} disabled={!projectName.trim() || importing}>
+              {importing ? 'Importing...' : 'Import Project'}
+            </Button>
+          )}
+        </footer>
       </div>
     </div>
   );

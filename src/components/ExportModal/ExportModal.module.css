@@ -113,6 +113,36 @@
   border-radius: 6px;
 }
 
+.infoBox {
+  padding: 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.infoBox p {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.infoBox ul {
+  margin: 0 0 12px 0;
+  padding-left: 24px;
+  font-size: 14px;
+  color: #666;
+}
+
+.infoBox li {
+  margin: 6px 0;
+}
+
+.infoBox .hint {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}
+
 .formatList {
   display: flex;
   flex-direction: column;

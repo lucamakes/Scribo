@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Download, FileText } from 'lucide-react';
+import { X, Download } from 'lucide-react';
 import IconButton from '@/components/IconButton/IconButton';
 import Button from '@/components/Button/Button';
 import styles from './ExportModal.module.css';
 import { useDataService } from '@/lib/services/dataService';
-import { exportProject, type ExportFormat } from '@/lib/services/exportService';
+import { exportProject } from '@/lib/services/exportService';
+import { supabase } from '@/lib/supabase';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -16,41 +17,47 @@ interface ExportModalProps {
 }
 
 export function ExportModal({ isOpen, onClose, projectName, projectId }: ExportModalProps) {
-  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('docx');
-  const [includeStructure, setIncludeStructure] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const dataService = useDataService();
 
   if (!isOpen) return null;
 
-  const formats: { value: ExportFormat; label: string; description: string }[] = [
-    { value: 'docx', label: 'Word Document (.docx)', description: 'Compatible with Microsoft Word' },
-    { value: 'pdf', label: 'PDF Document (.pdf)', description: 'Universal format for sharing' },
-    { value: 'epub', label: 'EPUB (.epub)', description: 'E-book format for readers' },
-    { value: 'txt', label: 'Plain Text (.txt)', description: 'Simple text file' },
-    { value: 'md', label: 'Markdown (.md)', description: 'Formatted text with markdown syntax' },
-    { value: 'html', label: 'HTML (.html)', description: 'Web page format' },
-  ];
-
   const handleExport = async () => {
     setExporting(true);
     setError(null);
     
     try {
-      const result = await dataService.getItems(projectId);
-      
-      if (!result.success) {
-        throw new Error('error' in result ? result.error : 'Failed to fetch project items');
+      // Fetch project details
+      const { data: project, error: projectError } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', projectId)
+        .single();
+
+      if (projectError || !project) {
+        throw new Error('Failed to fetch project details');
       }
 
+      // Fetch all items
+      const itemsResult = await dataService.getItems(projectId);
+      
+      if (!itemsResult.success) {
+        throw new Error('error' in itemsResult ? itemsResult.error : 'Failed to fetch project items');
+      }
+
+      // Fetch goal progress (optional)
+      const { data: goalProgress } = await (supabase as any)
+        .from('project_goal_progress')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('date', { ascending: true });
+
       // Export the project
-      await exportProject({
-        projectId,
-        projectName,
-        items: result.data,
-        format: selectedFormat,
-        includeStructure,
+      exportProject({
+        project,
+        items: itemsResult.data,
+        goalProgress: goalProgress || undefined,
       });
       
       onClose();
@@ -78,44 +85,16 @@ export function ExportModal({ isOpen, onClose, projectName, projectId }: ExportM
             <div className={styles.projectName}>{projectName}</div>
           </div>
 
-          <div className={styles.section}>
-            <label className={styles.label}>Export Format</label>
-            <div className={styles.formatList}>
-              {formats.map((format) => (
-                <button
-                  key={format.value}
-                  onClick={() => setSelectedFormat(format.value)}
-                  className={`${styles.formatOption} ${
-                    selectedFormat === format.value ? styles.formatOptionSelected : ''
-                  }`}
-                >
-                  <div className={styles.formatIcon}>
-                    <FileText size={20} strokeWidth={1.5} />
-                  </div>
-                  <div className={styles.formatInfo}>
-                    <div className={styles.formatLabel}>{format.label}</div>
-                    <div className={styles.formatDescription}>{format.description}</div>
-                  </div>
-                  <div className={styles.radioButton}>
-                    {selectedFormat === format.value && <div className={styles.radioButtonInner} />}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.section}>
-            <label className={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                checked={includeStructure}
-                onChange={(e) => setIncludeStructure(e.target.checked)}
-                className={styles.checkbox}
-              />
-              <span>Include folder structure as headings</span>
-            </label>
+          <div className={styles.infoBox}>
+            <p>Your project will be exported as a JSON file that includes:</p>
+            <ul>
+              <li>All files, folders, and canvas items</li>
+              <li>Complete folder structure and organization</li>
+              <li>All content and formatting</li>
+              <li>Project goals and progress (if any)</li>
+            </ul>
             <p className={styles.hint}>
-              When enabled, folder names will be added as section headings in the exported document
+              You can import this file later to restore your project exactly as it is now.
             </p>
           </div>
 
@@ -132,7 +111,7 @@ export function ExportModal({ isOpen, onClose, projectName, projectId }: ExportM
           </Button>
           <Button onClick={handleExport} disabled={exporting}>
             <Download size={16} strokeWidth={1.5} />
-            {exporting ? 'Exporting...' : 'Export'}
+            {exporting ? 'Exporting...' : 'Export Project'}
           </Button>
         </footer>
       </div>
