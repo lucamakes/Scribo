@@ -1,3 +1,7 @@
+/* ============================================
+   SETTINGS MODAL STYLES
+   ============================================ */
+
 .overlay {
   position: fixed;
   top: 0;
@@ -22,7 +26,7 @@
   width: 480px;
   max-width: 100%;
   max-height: 90vh;
-  background: #ffffff;
+  background: var(--color-bg-primary, #ffffff);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -42,57 +46,39 @@
   }
 }
 
+/* Header */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border-light, #e5e7eb);
 }
 
 .title {
   font-size: 18px;
   font-weight: 600;
   margin: 0;
-  color: #1a1a1a;
+  color: var(--color-text-primary, #1a1a1a);
 }
 
-.closeButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  background: transparent;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.closeButton:hover {
-  background: #f3f4f6;
-  color: #1a1a1a;
-  border-color: #d1d5db;
-}
-
+/* Content */
 .content {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 .loading {
   text-align: center;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   padding: 40px;
 }
 
+/* Settings Section */
 .setting {
   display: flex;
   flex-direction: column;
@@ -103,7 +89,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #1a1a1a;
+  color: var(--color-text-primary, #1a1a1a);
 }
 
 .settingLabel {
@@ -117,48 +103,72 @@
   gap: 16px;
 }
 
+/* Slider */
 .slider {
   flex: 1;
-  height: 6px;
+  height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  background: #e5e7eb;
-  border-radius: 3px;
+  background: var(--color-border-light, #e5e7eb);
+  border-radius: 2px;
   outline: none;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
 }
 
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
-  background: #1565a8;
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+  border: 2px solid var(--color-accent, #1a78c2);
   border-radius: 50%;
   cursor: pointer;
-  transition: transform 0.15s ease;
+  margin-top: -6px;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .slider::-webkit-slider-thumb:hover {
+  background: var(--color-accent, #1a78c2);
   transform: scale(1.1);
 }
 
+.slider::-moz-range-track {
+  height: 4px;
+  background: var(--color-border-light, #e5e7eb);
+  border-radius: 2px;
+}
+
 .slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  background: #1565a8;
-  border: none;
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+  border: 2px solid var(--color-accent, #1a78c2);
   border-radius: 50%;
   cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.slider::-moz-range-thumb:hover {
+  background: var(--color-accent, #1a78c2);
 }
 
 .value {
   font-size: 14px;
   font-weight: 500;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   min-width: 50px;
   text-align: right;
 }
 
+/* Color Presets */
 .colorPresets {
   display: flex;
   align-items: center;
@@ -180,40 +190,22 @@
 }
 
 .colorButtonActive {
-  border-color: #1a78c2;
+  border-color: var(--color-accent, #1a78c2);
   box-shadow: 0 0 0 2px rgba(26, 120, 194, 0.3);
 }
 
-.colorPicker {
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  cursor: pointer;
-  overflow: hidden;
-}
-
-.colorPicker::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-.colorPicker::-webkit-color-swatch {
-  border: none;
-  border-radius: 6px;
-}
-
+/* Preview */
 .preview {
   padding: 16px;
-  background: #fafafa;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
+  background: var(--color-bg-secondary, #fafafa);
+  border: 1px solid var(--color-border-light, #e5e7eb);
+  border-radius: 12px;
 }
 
 .previewLabel {
   font-size: 12px;
   font-weight: 500;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 12px;
@@ -221,15 +213,17 @@
 
 .previewText {
   margin: 0;
-  font-family: 'Georgia', serif;
+  font-family: inherit;
 }
 
+/* Footer */
 .footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--color-border-light, #e5e7eb);
+  background: var(--color-bg-secondary, #fafafa);
 }
 
 .footerRight {
@@ -237,66 +231,145 @@
   gap: 12px;
 }
 
-.resetButton {
-  padding: 10px 16px;
+/* Danger Zone */
+.dangerZone {
+  margin-top: 8px;
+  padding: 16px;
+  background: var(--color-bg-secondary, #fafafa);
+  border: 1px solid var(--color-border-light, #e5e7eb);
+  border-radius: 12px;
+}
+
+.dangerHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-secondary, #666);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.deleteButton {
+  padding: 8px 14px;
   background: transparent;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 14px;
+  border: 1px solid var(--color-border-medium, #d1d5db);
+  border-radius: 6px;
+  font-size: 13px;
   font-weight: 500;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.deleteButton:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: white;
+}
+
+.deleteConfirm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.deleteWarning {
+  font-size: 13px;
+  color: var(--color-text-secondary, #666);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.deleteError {
+  font-size: 13px;
+  color: #dc2626;
+  margin: 0;
+  padding: 8px 12px;
+  background: #fef2f2;
+  border-radius: 6px;
+}
+
+.deleteInput {
+  padding: 10px 12px;
+  background: var(--color-bg-primary, #ffffff);
+  border: 1px solid var(--color-border-light, #e5e7eb);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--color-text-primary, #1a1a1a);
+  font-family: inherit;
   transition: all 0.15s ease;
 }
 
-.resetButton:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
-  color: #1a1a1a;
+.deleteInput:focus {
+  outline: none;
+  border-color: var(--color-accent, #1a78c2);
+  box-shadow: 0 0 0 3px var(--color-accent-light, rgba(26, 120, 194, 0.1));
 }
 
-.cancelButton {
-  padding: 10px 20px;
-  background: transparent;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 14px;
+.deleteInput::placeholder {
+  color: var(--color-text-muted, #999);
+}
+
+.deleteActions {
+  display: flex;
+  gap: 8px;
+}
+
+.cancelDeleteButton {
+  flex: 1;
+  padding: 8px 14px;
+  background: var(--color-bg-primary, #ffffff);
+  border: 1px solid var(--color-border-medium, #d1d5db);
+  border-radius: 6px;
+  font-size: 13px;
   font-weight: 500;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   cursor: pointer;
   transition: all 0.15s ease;
+  font-family: inherit;
 }
 
-.cancelButton:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
-  color: #1a1a1a;
+.cancelDeleteButton:hover:not(:disabled) {
+  background: var(--color-bg-hover, #f3f4f6);
+  color: var(--color-text-primary, #1a1a1a);
 }
 
-.saveButton {
-  padding: 10px 20px;
-  background: #1565a8;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #ffffff;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.saveButton:hover:not(:disabled) {
-  background: #1565a8;
-}
-
-.saveButton:disabled {
-  opacity: 0.6;
+.cancelDeleteButton:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
+.confirmDeleteButton {
+  flex: 1;
+  padding: 8px 14px;
+  background: #dc2626;
+  border: 1px solid #dc2626;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.confirmDeleteButton:hover:not(:disabled) {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.confirmDeleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Mobile Responsive */
 @media (max-width: 768px) {
   .overlay {
     padding: 0;
+    align-items: flex-end;
   }
 
   .modal {
@@ -313,14 +386,10 @@
     padding: 20px;
   }
 
-  .closeButton {
-    width: 40px;
-    height: 40px;
-  }
-
   .content {
     flex: 1;
     padding: 20px;
+    gap: 24px;
   }
 
   .footer {
@@ -334,17 +403,8 @@
     width: 100%;
   }
 
-  .cancelButton,
-  .saveButton {
+  .footerRight button {
     flex: 1;
-    padding: 14px 20px;
-    font-size: 15px;
-  }
-
-  .resetButton {
-    width: 100%;
-    padding: 14px 20px;
-    font-size: 15px;
   }
 
   .settingLabel {
@@ -360,130 +420,32 @@
     height: 40px;
   }
 
-  .colorPicker {
-    width: 40px;
-    height: 40px;
+  .slider::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+    margin-top: -8px;
   }
-}
 
+  .slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+  }
 
-/* Danger Zone - Delete Account */
-.dangerZone {
-  margin-top: 16px;
-  padding: 20px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 10px;
-}
+  .dangerZone {
+    padding: 16px;
+  }
 
-.dangerHeader {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #dc2626;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
+  .deleteButton {
+    width: 100%;
+    padding: 12px 16px;
+  }
 
-.deleteButton {
-  padding: 10px 16px;
-  background: transparent;
-  border: 1px solid #dc2626;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #dc2626;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
+  .deleteActions {
+    flex-direction: column;
+  }
 
-.deleteButton:hover {
-  background: #dc2626;
-  color: white;
-}
-
-.deleteConfirm {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.deleteWarning {
-  font-size: 13px;
-  color: #991b1b;
-  margin: 0;
-  line-height: 1.5;
-}
-
-.deleteError {
-  font-size: 13px;
-  color: #dc2626;
-  margin: 0;
-  padding: 8px 12px;
-  background: white;
-  border-radius: 6px;
-}
-
-.deleteInput {
-  padding: 10px 12px;
-  background: white;
-  border: 1px solid #fca5a5;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #1a1a1a;
-}
-
-.deleteInput:focus {
-  outline: none;
-  border-color: #dc2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-}
-
-.deleteInput::placeholder {
-  color: #999;
-}
-
-.deleteActions {
-  display: flex;
-  gap: 8px;
-}
-
-.cancelDeleteButton {
-  flex: 1;
-  padding: 10px 16px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.cancelDeleteButton:hover:not(:disabled) {
-  background: #f3f4f6;
-}
-
-.confirmDeleteButton {
-  flex: 1;
-  padding: 10px 16px;
-  background: #dc2626;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: white;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.confirmDeleteButton:hover:not(:disabled) {
-  background: #b91c1c;
-}
-
-.confirmDeleteButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  .cancelDeleteButton,
+  .confirmDeleteButton {
+    padding: 12px 16px;
+  }
 }

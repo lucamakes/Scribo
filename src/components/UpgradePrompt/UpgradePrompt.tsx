@@ -20,17 +20,17 @@ export function UpgradePrompt({ type, percentage = 100, onClose }: UpgradePrompt
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleUpgrade = async (priceId: string) => {
+  const handleUpgrade = async (productId: string) => {
     if (!user) return;
     
     setIsLoading(true);
     try {
-      const response = await fetch('/api/stripe/checkout', {
+      const response = await fetch('/api/polar/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
-          priceId,
+          productId,
           returnUrl: window.location.origin,
         }),
       });
@@ -65,7 +65,7 @@ export function UpgradePrompt({ type, percentage = 100, onClose }: UpgradePrompt
             <Button onClick={onClose} variant="secondary">
               Continue writing
             </Button>
-            <Button onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY!)} disabled={isLoading}>
+            <Button onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_POLAR_PRODUCT_MONTHLY!)} disabled={isLoading}>
               Upgrade to Pro
             </Button>
           </div>
@@ -119,7 +119,7 @@ export function UpgradePrompt({ type, percentage = 100, onClose }: UpgradePrompt
               <li><Check size={16} strokeWidth={2} /> Priority support</li>
             </ul>
             <button
-              onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY!)}
+              onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_POLAR_PRODUCT_MONTHLY!)}
               className={styles.planButton}
               disabled={isLoading}
             >
@@ -143,7 +143,7 @@ export function UpgradePrompt({ type, percentage = 100, onClose }: UpgradePrompt
               <li><Check size={16} strokeWidth={2} /> Priority support</li>
             </ul>
             <button
-              onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY!)}
+              onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_POLAR_PRODUCT_YEARLY!)}
               className={styles.planButtonPrimary}
               disabled={isLoading}
             >

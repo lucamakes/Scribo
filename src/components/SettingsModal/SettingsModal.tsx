@@ -80,9 +80,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     { color: '#1a1a1a', name: 'Dark' },
     { color: '#4a4a4a', name: 'Default' },
     { color: '#666666', name: 'Gray' },
-    { color: '#1565a8', name: 'Purple' },
-    { color: '#0ea5e9', name: 'Blue' },
-    { color: '#10b981', name: 'Green' },
   ];
 
   return (
@@ -155,13 +152,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                       title={preset.name}
                     />
                   ))}
-                  <input
-                    type="color"
-                    value={localTextColor}
-                    onChange={(e) => setLocalTextColor(e.target.value)}
-                    className={styles.colorPicker}
-                    title="Custom color"
-                  />
                 </div>
               </div>
 

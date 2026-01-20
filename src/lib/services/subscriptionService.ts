@@ -6,7 +6,7 @@ export type SubscriptionStatus = 'free' | 'pro' | 'cancelled';
 
 export interface SubscriptionInfo {
   status: SubscriptionStatus;
-  stripeCustomerId: string | null;
+  polarCustomerId: string | null;
   subscriptionEndDate: string | null;
 }
 
@@ -24,7 +24,7 @@ type ServiceResult<T> =
 
 interface UserSubscriptionData {
   subscription_status: string | null;
-  stripe_customer_id: string | null;
+  polar_customer_id: string | null;
   subscription_end_date: string | null;
 }
 
@@ -43,7 +43,7 @@ export const subscriptionService = {
     // @ts-ignore - users table may not be in generated types yet
     const { data, error } = await supabase
       .from('users')
-      .select('subscription_status, stripe_customer_id, subscription_end_date')
+      .select('subscription_status, polar_customer_id, subscription_end_date')
       .eq('id', userId)
       .single();
 
@@ -54,7 +54,7 @@ export const subscriptionService = {
           success: true,
           data: {
             status: 'free',
-            stripeCustomerId: null,
+            polarCustomerId: null,
             subscriptionEndDate: null,
           },
         };
@@ -67,7 +67,7 @@ export const subscriptionService = {
         success: true,
         data: {
           status: 'free',
-          stripeCustomerId: null,
+          polarCustomerId: null,
           subscriptionEndDate: null,
         },
       };
@@ -79,7 +79,7 @@ export const subscriptionService = {
       success: true,
       data: {
         status: (userData.subscription_status as SubscriptionStatus) || 'free',
-        stripeCustomerId: userData.stripe_customer_id,
+        polarCustomerId: userData.polar_customer_id,
         subscriptionEndDate: userData.subscription_end_date,
       },
     };

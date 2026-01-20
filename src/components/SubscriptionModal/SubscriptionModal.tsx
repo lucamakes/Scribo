@@ -33,25 +33,27 @@ const PRO_FEATURES = [
 
 export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
   const { user } = useAuth();
-  const { status, isPro, refresh } = useSubscription();
+  const { status, isPro, isLoading: isSubLoading } = useSubscription();
   
   const [subscription, setSubscription] = useState<SubscriptionDetails | null>(null);
   const [currentPlan, setCurrentPlan] = useState<BillingInterval | null>(null);
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('yearly');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [isOpeningPortal, setIsOpeningPortal] = useState(false);
+  
+  // Combined loading state - wait for both subscription hook and API fetch
+  const isLoading = isSubLoading || isFetching;
 
   const fetchSubscription = useCallback(async () => {
     if (!user) return;
     
-    setIsLoading(true);
+    setIsFetching(true);
     setError(null);
     
     try {
-      const response = await fetch(`/api/stripe/subscription?userId=${user.id}`);
+      const response = await fetch(`/api/polar/subscription?userId=${user.id}`);
       const data = await response.json();
       
       if (data.subscription) {
@@ -66,7 +68,7 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
       console.error('Failed to fetch subscription:', err);
       setError('Failed to load subscription details');
     } finally {
-      setIsLoading(false);
+      setIsFetching(false);
     }
   }, [user]);
 
@@ -81,20 +83,20 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
   const handleUpgrade = async () => {
     if (!user) return;
     
-    const priceId = billingInterval === 'yearly' 
-      ? process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY!
-      : process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY!;
+    const productId = billingInterval === 'yearly' 
+      ? process.env.NEXT_PUBLIC_POLAR_PRODUCT_YEARLY!
+      : process.env.NEXT_PUBLIC_POLAR_PRODUCT_MONTHLY!;
     
     setIsUpdating(true);
     setError(null);
     
     try {
-      const response = await fetch('/api/stripe/checkout', {
+      const response = await fetch('/api/polar/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
-          priceId,
+          productId,
           returnUrl: window.location.origin,
         }),
       });
@@ -105,103 +107,8 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
       } else {
         setError(data.error || 'Failed to start checkout');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to start checkout');
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  const handleChangePlan = async () => {
-    if (!user || billingInterval === currentPlan) return;
-    
-    if (!showConfirm) {
-      setShowConfirm(true);
-      return;
-    }
-    
-    setIsUpdating(true);
-    setError(null);
-    setShowConfirm(false);
-    
-    const newPriceId = billingInterval === 'yearly' 
-      ? process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY!
-      : process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY!;
-    
-    try {
-      const response = await fetch('/api/stripe/upgrade', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, newPriceId }),
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        await fetchSubscription();
-        await refresh();
-        setShowConfirm(false);
-      } else {
-        setError(data.error || 'Failed to change plan');
-      }
-    } catch (err) {
-      setError('Failed to change plan');
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  const handleCancel = async () => {
-    if (!user) return;
-    
-    setIsUpdating(true);
-    setError(null);
-    
-    try {
-      const response = await fetch('/api/stripe/subscription', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id }),
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        await fetchSubscription();
-        await refresh();
-      } else {
-        setError(data.error || 'Failed to cancel subscription');
-      }
-    } catch (err) {
-      setError('Failed to cancel subscription');
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  const handleReactivate = async () => {
-    if (!user) return;
-    
-    setIsUpdating(true);
-    setError(null);
-    
-    try {
-      const response = await fetch('/api/stripe/subscription', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id }),
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        await fetchSubscription();
-        await refresh();
-      } else {
-        setError(data.error || 'Failed to reactivate subscription');
-      }
-    } catch (err) {
-      setError('Failed to reactivate subscription');
     } finally {
       setIsUpdating(false);
     }
@@ -214,7 +121,7 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
     setError(null);
     
     try {
-      const response = await fetch('/api/stripe/portal', {
+      const response = await fetch('/api/polar/portal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -230,7 +137,7 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
       } else {
         setError(data.error || 'Failed to open billing portal');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to open billing portal');
     } finally {
       setIsOpeningPortal(false);
@@ -296,89 +203,25 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
                   {isCancelled && (
                     <div className={styles.warning}>
                       <p>Your subscription ends on {formatDate(subscription.currentPeriodEnd)}. You&apos;ll lose Pro features after this date.</p>
-                      <button 
-                        className={styles.reactivateButton}
-                        onClick={handleReactivate}
-                        disabled={isUpdating}
-                      >
-                        {isUpdating ? 'Reactivating...' : 'Reactivate Subscription'}
-                      </button>
+                      <p className={styles.warningHint}>To reactivate, visit the billing portal below.</p>
                     </div>
                   )}
 
-                  {/* Change Billing */}
-                  {!isCancelled && (
-                    <div className={styles.section}>
-                      <div className={styles.label}>Billing Cycle</div>
-                      <div className={styles.billingOptions}>
-                        <button
-                          className={`${styles.billingOption} ${billingInterval === 'monthly' ? styles.billingOptionSelected : ''}`}
-                          onClick={() => setBillingInterval('monthly')}
-                        >
-                          <div className={styles.billingOptionContent}>
-                            <span className={styles.billingOptionName}>Monthly</span>
-                            <span className={styles.billingOptionPrice}>${monthlyPrice}/mo</span>
-                          </div>
-                          {currentPlan === 'monthly' && <span className={styles.currentLabel}>Current</span>}
-                          <div className={styles.radioButton}>
-                            {billingInterval === 'monthly' && <div className={styles.radioButtonInner} />}
-                          </div>
-                        </button>
-                        <button
-                          className={`${styles.billingOption} ${billingInterval === 'yearly' ? styles.billingOptionSelected : ''}`}
-                          onClick={() => setBillingInterval('yearly')}
-                        >
-                          <div className={styles.billingOptionContent}>
-                            <div className={styles.billingOptionNameRow}>
-                              <span className={styles.billingOptionName}>Yearly</span>
-                              <span className={styles.saveBadge}>Save 35%</span>
-                            </div>
-                            <span className={styles.billingOptionPrice}>${yearlyPrice}/yr</span>
-                          </div>
-                          {currentPlan === 'yearly' && <span className={styles.currentLabel}>Current</span>}
-                          <div className={styles.radioButton}>
-                            {billingInterval === 'yearly' && <div className={styles.radioButtonInner} />}
-                          </div>
-                        </button>
-                      </div>
-
-                      {billingInterval !== currentPlan && (
-                        showConfirm ? (
-                          <div className={styles.confirmBox}>
-                            <p>
-                              Your current plan continues until {formatDate(subscription.currentPeriodEnd)}, then you&apos;ll be charged ${billingInterval === 'yearly' ? yearlyPrice : monthlyPrice}/{billingInterval === 'yearly' ? 'year' : 'month'}.
-                            </p>
-                            <div className={styles.confirmActions}>
-                              <Button onClick={() => setShowConfirm(false)} variant="secondary">
-                                Cancel
-                              </Button>
-                              <Button onClick={handleChangePlan} disabled={isUpdating}>
-                                {isUpdating ? 'Switching...' : 'Confirm'}
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div style={{ marginTop: 12 }}>
-                            <Button onClick={handleChangePlan} disabled={isUpdating}>
-                              Switch to {billingInterval === 'yearly' ? 'Yearly' : 'Monthly'}
-                            </Button>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  )}
-
-                  {/* Billing Link */}
-                  <div className={styles.billingLink}>
-                    <button 
-                      className={styles.linkButton}
+                  {/* Billing Portal Link */}
+                  <div className={styles.section}>
+                    <div className={styles.label}>Billing & Invoices</div>
+                    <p className={styles.portalDescription}>
+                      Manage your subscription, update payment method, change plans, or cancel in the Stripe billing portal.
+                    </p>
+                    <Button 
                       onClick={handleOpenBillingPortal}
                       disabled={isOpeningPortal}
+                      variant="secondary"
                     >
                       <CreditCard size={16} strokeWidth={1.5} />
-                      {isOpeningPortal ? 'Opening...' : 'View billing & invoices'}
+                      {isOpeningPortal ? 'Opening...' : 'Open Billing Portal'}
                       <ExternalLink size={14} strokeWidth={1.5} />
-                    </button>
+                    </Button>
                   </div>
                 </>
               ) : isPro ? (
@@ -393,6 +236,17 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
                       <span className={styles.planDate}>Unable to load details</span>
                     </div>
                     <span className={styles.badge}>Active</span>
+                  </div>
+                  <div style={{ marginTop: 16 }}>
+                    <Button 
+                      onClick={handleOpenBillingPortal}
+                      disabled={isOpeningPortal}
+                      variant="secondary"
+                    >
+                      <CreditCard size={16} strokeWidth={1.5} />
+                      {isOpeningPortal ? 'Opening...' : 'Open Billing Portal'}
+                      <ExternalLink size={14} strokeWidth={1.5} />
+                    </Button>
                   </div>
                 </div>
               ) : (
@@ -451,20 +305,15 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
         </div>
 
         <div className={styles.footer}>
-          {isPro && subscription && !isCancelled ? (
-            <>
-              <button 
-                className={styles.cancelLink}
-                onClick={handleCancel}
-                disabled={isUpdating}
-              >
-                {isUpdating ? 'Cancelling...' : 'Cancel subscription'}
-              </button>
-              <Button onClick={onClose} variant="secondary">
-                Done
-              </Button>
-            </>
-          ) : !isPro ? (
+          {isLoading ? (
+            <Button onClick={onClose} variant="secondary">
+              Close
+            </Button>
+          ) : isPro ? (
+            <Button onClick={onClose} variant="secondary">
+              Done
+            </Button>
+          ) : (
             <>
               <Button onClick={onClose} variant="secondary">
                 Cancel
@@ -473,10 +322,6 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
                 {isUpdating ? 'Loading...' : `Upgrade — $${billingInterval === 'yearly' ? yearlyPrice : monthlyPrice}/${billingInterval === 'yearly' ? 'yr' : 'mo'}`}
               </Button>
             </>
-          ) : (
-            <Button onClick={onClose} variant="secondary">
-              Close
-            </Button>
           )}
         </div>
       </div>

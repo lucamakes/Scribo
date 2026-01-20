@@ -31,14 +31,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border-light, #e5e7eb);
 }
 
 .title {
   font-size: 18px;
   font-weight: 600;
   margin: 0;
-  color: #1a1a1a;
+  color: var(--color-text-primary, #1a1a1a);
 }
 
 .content {
@@ -77,7 +77,14 @@
 .label {
   font-size: 14px;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.portalDescription {
+  font-size: 13px;
+  color: var(--color-text-secondary, #666);
+  margin: 0 0 12px 0;
+  line-height: 1.5;
 }
 
 /* Current Plan Card */
@@ -146,8 +153,17 @@
 .warning p {
   font-size: 13px;
   color: #92400e;
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
   line-height: 1.5;
+}
+
+.warning p:last-child {
+  margin-bottom: 0;
+}
+
+.warningHint {
+  font-size: 12px;
+  color: #b45309;
 }
 
 .reactivateButton {
@@ -350,9 +366,10 @@
 .footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 16px 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--color-border-light, #e5e7eb);
+  background: var(--color-bg-secondary, #fafafa);
   gap: 12px;
 }
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
-import { ArrowRight, Check, Clock, Users, Menu, X } from 'lucide-react';
+import { ArrowRight, Check, Clock, Users, Menu, X, LogOut } from 'lucide-react';
 import FeedbackBoard from '@/components/FeedbackBoard/FeedbackBoard';
 import FAQSection from '@/components/FAQSection/FAQSection';
 import BentoFeatures from '@/components/BentoFeatures/BentoFeatures';
@@ -19,7 +19,7 @@ interface Stats {
 }
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -41,19 +41,16 @@ export default function Home() {
       .catch(err => console.error('Failed to fetch stats:', err));
   }, []);
 
-  useEffect(() => {
-    if (!loading && user && mounted) {
-      router.replace('/projects');
-    }
-  }, [user, loading, router, mounted]);
-
-  if (loading || (user && mounted)) {
+  // Show loading only while checking auth, don't redirect
+  if (loading) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.spinner}></div>
       </div>
     );
   }
+
+  const isSignedIn = !!user && mounted;
 
   return (
     <div className={styles.landing}>
@@ -68,16 +65,31 @@ export default function Home() {
             <a href="#pricing" className={styles.navLink}>Pricing</a>
             <a href="#faq" className={styles.navLink}>FAQ</a>
             <a href="#feedback" className={styles.navLink}>Feedback</a>
-            <button onClick={() => router.push('/auth/login')} className={styles.navLink}>
-              Log in
-            </button>
-            <Button onClick={() => router.push('/demo')} variant="secondary">
-              Try Demo
-            </Button>
-            <Button onClick={() => router.push('/auth/signup')}>
-              Start Free
-              <ArrowRight size={16} strokeWidth={1.5} />
-            </Button>
+            {isSignedIn ? (
+              <>
+                <Button onClick={() => router.push('/projects')}>
+                  Go to Projects
+                  <ArrowRight size={16} strokeWidth={1.5} />
+                </Button>
+                <button onClick={() => signOut()} className={styles.navLink}>
+                  <LogOut size={16} strokeWidth={1.5} />
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => router.push('/auth/login')} className={styles.navLink}>
+                  Log in
+                </button>
+                <Button onClick={() => router.push('/demo')} variant="secondary">
+                  Try Demo
+                </Button>
+                <Button onClick={() => router.push('/auth/signup')}>
+                  Start Free
+                  <ArrowRight size={16} strokeWidth={1.5} />
+                </Button>
+              </>
+            )}
           </nav>
 
           {/* Mobile Menu Button */}
@@ -98,16 +110,31 @@ export default function Home() {
             <a href="#faq" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>FAQ</a>
             <a href="#feedback" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Feedback</a>
             <div className={styles.mobileNavDivider} />
-            <button onClick={() => { router.push('/auth/login'); setMobileMenuOpen(false); }} className={styles.mobileNavLink}>
-              Log in
-            </button>
-            <Button onClick={() => { router.push('/demo'); setMobileMenuOpen(false); }} variant="secondary">
-              Try Demo
-            </Button>
-            <Button onClick={() => { router.push('/auth/signup'); setMobileMenuOpen(false); }}>
-              Start Free
-              <ArrowRight size={16} strokeWidth={1.5} />
-            </Button>
+            {isSignedIn ? (
+              <>
+                <Button onClick={() => { router.push('/projects'); setMobileMenuOpen(false); }}>
+                  Go to Projects
+                  <ArrowRight size={16} strokeWidth={1.5} />
+                </Button>
+                <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className={styles.mobileNavLink}>
+                  <LogOut size={16} strokeWidth={1.5} />
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => { router.push('/auth/login'); setMobileMenuOpen(false); }} className={styles.mobileNavLink}>
+                  Log in
+                </button>
+                <Button onClick={() => { router.push('/demo'); setMobileMenuOpen(false); }} variant="secondary">
+                  Try Demo
+                </Button>
+                <Button onClick={() => { router.push('/auth/signup'); setMobileMenuOpen(false); }}>
+                  Start Free
+                  <ArrowRight size={16} strokeWidth={1.5} />
+                </Button>
+              </>
+            )}
           </nav>
         )}
       </header>
@@ -143,21 +170,32 @@ export default function Home() {
 
           {/* CTA with Risk Reversal */}
           <div className={styles.heroCta}>
-            <Button onClick={() => router.push('/demo')} variant="secondary" className={styles.heroButton}>
-              Try Demo — No signup
-            </Button>
-            <Button onClick={() => router.push('/auth/signup')} className={styles.heroButton}>
-              Start Writing Free
-              <ArrowRight size={18} strokeWidth={1.5} />
-            </Button>
+            {isSignedIn ? (
+              <Button onClick={() => router.push('/projects')} className={styles.heroButton}>
+                Go to Projects
+                <ArrowRight size={18} strokeWidth={1.5} />
+              </Button>
+            ) : (
+              <>
+                <Button onClick={() => router.push('/demo')} variant="secondary" className={styles.heroButton}>
+                  Try Demo — No signup
+                </Button>
+                <Button onClick={() => router.push('/auth/signup')} className={styles.heroButton}>
+                  Start Writing Free
+                  <ArrowRight size={18} strokeWidth={1.5} />
+                </Button>
+              </>
+            )}
           </div>
-          <p className={styles.heroMicrocopy}>
-            <Check size={14} strokeWidth={2} /> No credit card required
-            <span className={styles.microDot}>•</span>
-            <Clock size={14} strokeWidth={2} /> 30-second setup
-            <span className={styles.microDot}>•</span>
-            15,000 words free
-          </p>
+          {!isSignedIn && (
+            <p className={styles.heroMicrocopy}>
+              <Check size={14} strokeWidth={2} /> No credit card required
+              <span className={styles.microDot}>•</span>
+              <Clock size={14} strokeWidth={2} /> 30-second setup
+              <span className={styles.microDot}>•</span>
+              15,000 words free
+            </p>
+          )}
         </div>
 
         {/* Product Showcase */}
@@ -193,8 +231,8 @@ export default function Home() {
                 <li><Check size={16} strokeWidth={2} /> Unlimited projects</li>
                 <li><Check size={16} strokeWidth={2} /> All core features</li>
               </ul>
-              <Button onClick={() => router.push('/auth/signup')} variant="secondary">
-                Get started
+              <Button onClick={() => router.push(isSignedIn ? '/projects' : '/auth/signup')} variant="secondary">
+                {isSignedIn ? 'Go to Projects' : 'Get started'}
               </Button>
             </div>
 
@@ -210,8 +248,8 @@ export default function Home() {
                 <li><Check size={16} strokeWidth={2} /> All core features</li>
                 <li><Check size={16} strokeWidth={2} /> Priority support</li>
               </ul>
-              <Button onClick={() => router.push('/auth/signup?plan=monthly')} variant="secondary">
-                Get Pro Monthly
+              <Button onClick={() => router.push(isSignedIn ? '/projects' : '/auth/signup?plan=monthly')} variant="secondary">
+                {isSignedIn ? 'Go to Projects' : 'Get Pro Monthly'}
               </Button>
             </div>
 
@@ -229,8 +267,8 @@ export default function Home() {
                 <li><Check size={16} strokeWidth={2} /> All core features</li>
                 <li><Check size={16} strokeWidth={2} /> Priority support</li>
               </ul>
-              <Button onClick={() => router.push('/auth/signup?plan=yearly')}>
-                Get Pro Yearly
+              <Button onClick={() => router.push(isSignedIn ? '/projects' : '/auth/signup?plan=yearly')}>
+                {isSignedIn ? 'Go to Projects' : 'Get Pro Yearly'}
               </Button>
             </div>
           </div>
@@ -249,14 +287,16 @@ export default function Home() {
           <h2 className={styles.finalCtaTitle}>Ready to finish your story?</h2>
           <p className={styles.finalCtaSubtitle}>Join thousands of writers who&apos;ve found their flow.</p>
           <div className={styles.finalCtaButtons}>
-            <Button onClick={() => router.push('/auth/signup')}>
-              Start Writing Free
+            <Button onClick={() => router.push(isSignedIn ? '/projects' : '/auth/signup')}>
+              {isSignedIn ? 'Go to Projects' : 'Start Writing Free'}
               <ArrowRight size={18} strokeWidth={1.5} />
             </Button>
           </div>
-          <p className={styles.heroMicrocopy}>
-            <Check size={14} strokeWidth={2} /> No credit card required
-          </p>
+          {!isSignedIn && (
+            <p className={styles.heroMicrocopy}>
+              <Check size={14} strokeWidth={2} /> No credit card required
+            </p>
+          )}
         </div>
       </section>
 
@@ -282,8 +322,14 @@ export default function Home() {
 
               <div className={styles.footerColumn}>
                 <h4>Company</h4>
-                <a href="/auth/login">Log in</a>
-                <a href="/auth/signup">Sign up</a>
+                {isSignedIn ? (
+                  <a href="/projects">My Projects</a>
+                ) : (
+                  <>
+                    <a href="/auth/login">Log in</a>
+                    <a href="/auth/signup">Sign up</a>
+                  </>
+                )}
               </div>
 
               <div className={styles.footerColumn}>

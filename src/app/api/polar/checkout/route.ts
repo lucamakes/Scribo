@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import Stripe from 'stripe';
+import { polar } from '@/lib/polar';
 import { checkRateLimit, getClientIP } from '@/lib/rateLimit';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,25 +9,24 @@ const supabase = createClient(
 );
 
 export async function POST(request: NextRequest) {
-  // Rate limit: 10 requests per minute (strict)
   const ip = getClientIP(request);
   const rateLimitResponse = await checkRateLimit(ip, 'strict');
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
-    const { userId, priceId, returnUrl } = await request.json();
+    const { userId, productId, returnUrl } = await request.json();
 
-    if (!userId || !priceId) {
+    if (!userId || !productId) {
       return NextResponse.json(
-        { error: 'Missing userId or priceId' },
+        { error: 'Missing userId or productId' },
         { status: 400 }
       );
     }
 
-    // Try to get user from database first
+    // Get user from database
     let { data: user } = await supabase
       .from('users')
-      .select('id, email, stripe_customer_id')
+      .select('id, email, polar_customer_id')
       .eq('id', userId)
       .single();
 
@@ -44,21 +41,19 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Create user record in users table
       const { data: newUser, error: createError } = await supabase
         .from('users')
         .insert({
           id: userId,
           email: authUser.user.email,
         })
-        .select('id, email, stripe_customer_id')
+        .select('id, email, polar_customer_id')
         .single();
 
       if (createError) {
-        // User might have been created by a trigger, try fetching again
         const { data: retryUser } = await supabase
           .from('users')
-          .select('id, email, stripe_customer_id')
+          .select('id, email, polar_customer_id')
           .eq('id', userId)
           .single();
         
@@ -74,46 +69,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Get or create Stripe customer
-    let customerId = user.stripe_customer_id;
-
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: user.email,
-        metadata: {
-          supabase_user_id: userId,
-        },
-      });
-      customerId = customer.id;
-
-      // Save customer ID to database
-      await supabase
-        .from('users')
-        .update({ stripe_customer_id: customerId })
-        .eq('id', userId);
-    }
-
-    // Create checkout session
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      mode: 'subscription',
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      success_url: `${returnUrl || process.env.NEXT_PUBLIC_APP_URL}/projects?success=true`,
-      cancel_url: `${returnUrl || process.env.NEXT_PUBLIC_APP_URL}/projects?cancelled=true`,
+    // Create Polar checkout session
+    const checkout = await polar.checkouts.create({
+      products: [productId],
+      successUrl: `${returnUrl || process.env.NEXT_PUBLIC_APP_URL}/projects?success=true&checkout_id={CHECKOUT_ID}`,
+      customerEmail: user.email,
       metadata: {
         supabase_user_id: userId,
       },
     });
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: checkout.url });
   } catch (error) {
-    console.error('Stripe checkout error:', error);
+    console.error('Polar checkout error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
       { error: 'Failed to create checkout session', details: errorMessage },

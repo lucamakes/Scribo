@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
-import { Orbit, CircleDot, ZoomIn, ZoomOut, RotateCcw, ChevronRight, Info, X } from 'lucide-react';
+import { useRef, useState, useEffect, useMemo } from 'react';
+import { Orbit, CircleDot, ZoomIn, ZoomOut, RotateCcw, ChevronRight, Info, X, MoreHorizontal } from 'lucide-react';
 import IconButton from '@/components/IconButton/IconButton';
 import styles from './Constellation.module.css';
 import { DEFAULT_CHILDREN, ROOT_SIZE } from './constants';
@@ -56,6 +56,8 @@ export default function Constellation({
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
+  const MOBILE_MAX_BREADCRUMBS = 3;
+
   // Detect mobile
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -63,6 +65,10 @@ export default function Constellation({
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Calculate which breadcrumbs to show on mobile (last 3)
+  const showEllipsis = isMobile && navigationStack.length > MOBILE_MAX_BREADCRUMBS;
+  const mobileStartIndex = showEllipsis ? navigationStack.length - MOBILE_MAX_BREADCRUMBS : 0;
 
   const isAnyHovered = hoveredIndex !== null || isRootHovered;
   
@@ -89,25 +95,48 @@ export default function Constellation({
       onClick={handleBackgroundClick}
     >
       <div className={styles.breadcrumb}>
-        {navigationStack.map((level, index) => (
-          <div key={index} className={styles.breadcrumbItem}>
+        {/* Ellipsis for truncated items on mobile */}
+        {showEllipsis && (
+          <div className={`${styles.breadcrumbItem} ${styles.ellipsisItem}`}>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                if (index < navigationStack.length - 1) {
-                  navigateToLevel(index);
-                }
+                navigateToLevel(0);
               }}
-              className={`${styles.breadcrumbButton} ${index === navigationStack.length - 1 ? styles.breadcrumbCurrent : ''}`}
+              className={styles.ellipsisButton}
               type="button"
+              title="Go to root"
             >
-              {level.name}
+              <MoreHorizontal size={14} strokeWidth={1.5} />
             </button>
-            {index < navigationStack.length - 1 && (
-              <ChevronRight size={14} strokeWidth={1.5} className={styles.breadcrumbSeparator} />
-            )}
+            <ChevronRight size={14} strokeWidth={1.5} className={styles.breadcrumbSeparator} />
           </div>
-        ))}
+        )}
+        {navigationStack.map((level, index) => {
+          // On mobile, hide items before mobileStartIndex
+          if (showEllipsis && index < mobileStartIndex) {
+            return null;
+          }
+          return (
+            <div key={index} className={styles.breadcrumbItem}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (index < navigationStack.length - 1) {
+                    navigateToLevel(index);
+                  }
+                }}
+                className={`${styles.breadcrumbButton} ${index === navigationStack.length - 1 ? styles.breadcrumbCurrent : ''}`}
+                type="button"
+              >
+                {level.name}
+              </button>
+              {index < navigationStack.length - 1 && (
+                <ChevronRight size={14} strokeWidth={1.5} className={styles.breadcrumbSeparator} />
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div className={styles.controls}>

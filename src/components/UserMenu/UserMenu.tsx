@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useSubscription } from '@/lib/hooks/useSubscription';
 import { SettingsModal } from '@/components/SettingsModal/SettingsModal';
@@ -15,8 +15,9 @@ import styles from './UserMenu.module.css';
  */
 export function UserMenu() {
     const { user, signOut } = useAuth();
-    const { isPro, wordCount, wordLimit, percentage, isLoading: subLoading } = useSubscription();
+    const { isPro, wordCount, wordLimit, percentage, isLoading: subLoading, refresh } = useSubscription();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [isOpen, setIsOpen] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [showPricing, setShowPricing] = useState(false);
@@ -25,6 +26,36 @@ export function UserMenu() {
     const [upgradeLoading, setUpgradeLoading] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
+
+    // Auto-refresh subscription status after successful checkout
+    useEffect(() => {
+        const success = searchParams.get('success');
+        if (success === 'true') {
+            // Poll for subscription update (webhook may take a moment)
+            let attempts = 0;
+            const maxAttempts = 10;
+            
+            const pollSubscription = async () => {
+                await refresh();
+                attempts++;
+                
+                // Keep polling until we're pro or max attempts reached
+                if (!isPro && attempts < maxAttempts) {
+                    setTimeout(pollSubscription, 1500);
+                } else {
+                    // Clean up URL params after polling
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('success');
+                    url.searchParams.delete('checkout_id');
+                    url.searchParams.delete('customer_session_token');
+                    window.history.replaceState({}, '', url.pathname);
+                }
+            };
+            
+            // Start polling after a short delay to let webhook process
+            setTimeout(pollSubscription, 1000);
+        }
+    }, [searchParams, refresh, isPro]);
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -61,16 +92,16 @@ export function UserMenu() {
         setShowSettings(true);
     }, []);
 
-    const handleUpgrade = useCallback(async (priceId: string) => {
+    const handleUpgrade = useCallback(async (productId: string) => {
         if (!user) return;
         setUpgradeLoading(true);
         try {
-            const response = await fetch('/api/stripe/checkout', {
+            const response = await fetch('/api/polar/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     userId: user.id,
-                    priceId,
+                    productId,
                     returnUrl: window.location.origin,
                 }),
             });
@@ -238,7 +269,7 @@ export function UserMenu() {
                                     <li><Check size={16} strokeWidth={2} /> Priority support</li>
                                 </ul>
                                 <button
-                                    onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY!)}
+                                    onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_POLAR_PRODUCT_MONTHLY!)}
                                     className={styles.planButton}
                                     disabled={upgradeLoading}
                                 >
@@ -262,7 +293,7 @@ export function UserMenu() {
                                     <li><Check size={16} strokeWidth={2} /> Priority support</li>
                                 </ul>
                                 <button
-                                    onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY!)}
+                                    onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_POLAR_PRODUCT_YEARLY!)}
                                     className={styles.planButtonPrimary}
                                     disabled={upgradeLoading}
                                 >

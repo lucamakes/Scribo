@@ -19,15 +19,20 @@
   --safe-area-inset-right: env(safe-area-inset-right, 0px);
 }
 
-html,
+html {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 html {
-  /* Use dvh for dynamic viewport height that accounts for browser chrome */
-  height: 100dvh;
+  /* Remove fixed height to allow natural scrolling */
+  min-height: 100%;
 }
 
 body {
@@ -38,8 +43,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100dvh;
-  /* Prevent pull-to-refresh and overscroll */
-  overscroll-behavior: none;
 }
 
 * {

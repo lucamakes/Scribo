@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import Stripe from 'stripe';
+import { polar } from '@/lib/polar';
 import { checkRateLimit, getClientIP } from '@/lib/rateLimit';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 // Service role client for admin operations
 const supabaseAdmin = createClient(
@@ -63,22 +61,23 @@ export async function DELETE(request: NextRequest) {
 }
 
 async function deleteUserData(userId: string) {
-  // First, cancel any active Stripe subscription
+  // First, cancel any active Polar subscription
   const { data: userData } = await supabaseAdmin
     .from('users')
-    .select('stripe_subscription_id, stripe_customer_id')
+    .select('polar_subscription_id, polar_customer_id')
     .eq('id', userId)
     .single();
 
-  if (userData?.stripe_subscription_id) {
+  if (userData?.polar_subscription_id) {
     try {
-      // Cancel the subscription immediately
-      await stripe.subscriptions.cancel(userData.stripe_subscription_id);
-      console.log(`Cancelled subscription ${userData.stripe_subscription_id} for user ${userId}`);
+      // Cancel the subscription
+      await polar.subscriptions.cancel({
+        id: userData.polar_subscription_id,
+      });
+      console.log(`Cancelled subscription ${userData.polar_subscription_id} for user ${userId}`);
     } catch (error) {
-      console.error('Failed to cancel Stripe subscription:', error);
+      console.error('Failed to cancel Polar subscription:', error);
       // Continue with deletion even if subscription cancel fails
-      // The subscription will eventually fail due to missing customer
     }
   }
 

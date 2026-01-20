@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# kiro settings (contains tokens)
+.kiro/settings/mcp.json

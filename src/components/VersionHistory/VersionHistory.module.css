@@ -176,17 +176,17 @@
 .retryButton {
   padding: 8px 16px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border-medium, #d1d5db);
   border-radius: 6px;
-  color: #1a1a1a;
+  color: var(--color-text-primary, #1a1a1a);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .retryButton:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
+  background: var(--color-bg-hover, #f3f4f6);
+  border-color: var(--color-border-medium, #d1d5db);
 }
 
 /* Empty State */
@@ -330,29 +330,29 @@
   gap: 6px;
   padding: 6px 12px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border-medium, #d1d5db);
   border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--color-text-primary, #1a1a1a);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .previewButton:hover,
 .restoreButton:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
+  background: var(--color-bg-hover, #f3f4f6);
+  border-color: var(--color-border-medium, #d1d5db);
 }
 
 .restoreButton {
-  color: #1565a8;
-  border-color: #1565a8;
+  color: var(--color-accent, #1a78c2);
+  border-color: var(--color-accent, #1a78c2);
 }
 
 .restoreButton:hover {
-  background: rgba(26, 120, 194, 0.08);
-  border-color: #1a78c2;
+  background: var(--color-accent-light, rgba(26, 120, 194, 0.08));
+  border-color: var(--color-accent, #1a78c2);
 }
 
 .restoreButton:disabled {
