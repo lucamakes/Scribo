@@ -1,1 +1,0 @@
-export { DemoGoalProgress } from './DemoGoalProgress';

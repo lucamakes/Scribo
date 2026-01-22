@@ -87,7 +87,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
         <div className={styles.header}>
           <h2 className={styles.title}>Settings</h2>
-          <IconButton onClick={onClose} title="Close" variant="ghost">
+          <IconButton onClick={onClose} title="Close">
             <X size={18} strokeWidth={1.5} />
           </IconButton>
         </div>
@@ -233,14 +233,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           <Button onClick={handleReset} variant="secondary">
             Reset to Defaults
           </Button>
-          <div className={styles.footerRight}>
-            <Button onClick={onClose} variant="secondary">
-              Cancel
-            </Button>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving...' : 'Save Changes'}
+          </Button>
         </div>
       </div>
     </div>

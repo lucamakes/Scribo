@@ -20,8 +20,8 @@ export interface UserRow {
   id: string;
   email: string | null;
   subscription_status: SubscriptionStatus;
-  stripe_customer_id: string | null;
-  stripe_subscription_id: string | null;
+  polar_customer_id: string | null;
+  polar_subscription_id: string | null;
   subscription_end_date: string | null;
   preferences: UserPreferences | null;
   created_at: string;

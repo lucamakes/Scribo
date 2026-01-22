@@ -6,10 +6,11 @@ import type { Project } from '@/types/project';
 import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
 import type { ItemRow } from '@/types/database';
 import { SupabaseDataProvider } from '@/lib/context/DataServiceProvider';
+import { SupabaseGoalProvider } from '@/lib/context/GoalServiceProvider';
 import { Sidebar } from '@/components/Sidebar/Sidebar';
 import { DetailPanel } from '@/components/DetailPanel/DetailPanel';
 import { SettingsModal } from '@/components/SettingsModal/SettingsModal';
-import Constellation from '@/example-files/Constellation';
+import Constellation from '@/components/Constellation/Constellation';
 import { projectService } from '@/lib/services/projectService';
 import { itemService } from '@/lib/services/itemService';
 import { itemsToChildData } from '@/lib/utils/sidebarToConstellation';
@@ -255,16 +256,18 @@ export default function ProjectPage({ params }: ProjectPageProps) {
 
     return (
         <SupabaseDataProvider>
-            <ProjectWorkspace
-                project={project}
-                items={items}
-                setItems={setItems}
-                itemsLoading={itemsLoading}
-                loadItems={loadItems}
-                showBlankView={showBlankView}
-                setShowBlankView={setShowBlankView}
-                onBackToProjects={handleBackToProjects}
-            />
+            <SupabaseGoalProvider>
+                <ProjectWorkspace
+                    project={project}
+                    items={items}
+                    setItems={setItems}
+                    itemsLoading={itemsLoading}
+                    loadItems={loadItems}
+                    showBlankView={showBlankView}
+                    setShowBlankView={setShowBlankView}
+                    onBackToProjects={handleBackToProjects}
+                />
+            </SupabaseGoalProvider>
         </SupabaseDataProvider>
     );
 }

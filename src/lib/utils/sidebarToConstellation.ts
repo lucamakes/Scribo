@@ -1,5 +1,5 @@
 import type { ItemRow } from '@/types/database';
-import type { ChildData } from '@/example-files/types';
+import type { ChildData } from '@/components/Constellation/types';
 
 /**
  * Strips HTML tags from content string.

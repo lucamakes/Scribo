@@ -82,11 +82,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (userError || !user) {
-      // User not found - return error
-      return NextResponse.json(
-        { error: 'No account found with this email address' },
-        { status: 404 }
-      );
+      // Don't reveal if user doesn't exist - return success anyway
+      return NextResponse.json({ success: true });
     }
 
     // Generate password reset link using Supabase Admin API

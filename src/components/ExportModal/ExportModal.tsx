@@ -82,7 +82,7 @@ export function ExportModal({ isOpen, onClose, projectName, projectId }: ExportM
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <header className={styles.header}>
           <h2 className={styles.title}>Export Project</h2>
-          <IconButton onClick={onClose} title="Close" variant="ghost">
+          <IconButton onClick={onClose} title="Close">
             <X size={18} strokeWidth={1.5} />
           </IconButton>
         </header>
@@ -95,27 +95,20 @@ export function ExportModal({ isOpen, onClose, projectName, projectId }: ExportM
 
           <div className={styles.section}>
             <label className={styles.label}>Export Format</label>
-            <div className={styles.formatList}>
+            <div className={styles.sourceGrid}>
               {formats.map((format) => {
                 const Icon = format.icon;
                 return (
                   <button
                     key={format.value}
                     onClick={() => setSelectedFormat(format.value)}
-                    className={`${styles.formatOption} ${
-                      selectedFormat === format.value ? styles.formatOptionSelected : ''
+                    className={`${styles.sourceCard} ${
+                      selectedFormat === format.value ? styles.sourceCardSelected : ''
                     }`}
                   >
-                    <div className={styles.formatIcon}>
-                      <Icon size={20} strokeWidth={1.5} />
-                    </div>
-                    <div className={styles.formatInfo}>
-                      <div className={styles.formatLabel}>{format.label}</div>
-                      <div className={styles.formatDescription}>{format.description}</div>
-                    </div>
-                    <div className={styles.radioButton}>
-                      {selectedFormat === format.value && <div className={styles.radioButtonInner} />}
-                    </div>
+                    <Icon size={32} strokeWidth={1.5} />
+                    <span className={styles.sourceName}>{format.label}</span>
+                    <span className={styles.sourceDesc}>{format.description}</span>
                   </button>
                 );
               })}

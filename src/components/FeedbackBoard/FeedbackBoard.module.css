@@ -530,23 +530,30 @@
   }
 
   .feedbackFilters {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 20px;
   }
 
   .filterGroup {
-    width: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .filterGroup label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #999;
   }
 
   .filterGroup select {
-    flex: none;
-    width: auto;
-    padding: 8px 12px;
-    padding-right: 36px;
+    width: 100%;
+    padding: 10px 12px;
+    padding-right: 32px;
+    font-size: 13px;
   }
 
   .feedbackList {

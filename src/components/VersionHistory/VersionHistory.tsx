@@ -158,7 +158,7 @@ export function VersionHistory({
               <Save size={16} strokeWidth={1.5} />
               {saving ? 'Saving...' : 'Save Version'}
             </Button>
-            <IconButton onClick={onClose} title="Close" variant="ghost">
+            <IconButton onClick={onClose} title="Close">
               <X size={18} strokeWidth={1.5} />
             </IconButton>
           </div>

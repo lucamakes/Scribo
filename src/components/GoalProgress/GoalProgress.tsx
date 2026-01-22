@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Target, Settings, X, Check } from 'lucide-react';
-import { goalService, type ProjectGoals } from '@/lib/services/goalService';
-import { projectService } from '@/lib/services/projectService';
+import { useGoalService, type ProjectGoals } from '@/lib/services/goalService';
 import type { GoalPeriod } from '@/types/database';
 import IconButton from '@/components/IconButton/IconButton';
 import Button from '@/components/Button/Button';
@@ -15,6 +14,8 @@ interface GoalProgressProps {
 }
 
 export function GoalProgress({ projectId, currentWordCount }: GoalProgressProps) {
+  const goalService = useGoalService();
+  
   const [goals, setGoals] = useState<ProjectGoals | null>(null);
   const [todayWords, setTodayWords] = useState(0);
   const [weekWords, setWeekWords] = useState(0);
@@ -31,39 +32,30 @@ export function GoalProgress({ projectId, currentWordCount }: GoalProgressProps)
     
     try {
       // Load project goals
-      const projectResult = await projectService.getById(projectId);
-      if (projectResult.success) {
-        const project = projectResult.data;
-        // Check if goal fields exist (migration may not have run)
-        if ('word_count_goal' in project) {
-          setGoals({
-            wordCountGoal: project.word_count_goal,
-            timeGoalMinutes: project.time_goal_minutes,
-            goalPeriod: project.goal_period || 'daily',
-          });
-          setWordGoal(project.word_count_goal?.toString() || '');
-          setPeriod(project.goal_period || 'daily');
-        }
+      const goalsResult = await goalService.getGoals(projectId);
+      if (goalsResult.success && goalsResult.data) {
+        setGoals(goalsResult.data);
+        setWordGoal(goalsResult.data.wordCountGoal?.toString() || '');
+        setPeriod(goalsResult.data.goalPeriod || 'daily');
       }
 
       // Load today's progress
       const todayResult = await goalService.getTodayProgress(projectId);
-      if (todayResult.success && todayResult.data) {
-        setTodayWords(todayResult.data.words_written);
+      if (todayResult.success) {
+        setTodayWords(todayResult.data);
       }
 
       // Load week's progress
       const weekResult = await goalService.getWeekProgress(projectId);
       if (weekResult.success) {
-        const total = weekResult.data.reduce((sum, day) => sum + day.words_written, 0);
-        setWeekWords(total);
+        setWeekWords(weekResult.data);
       }
     } catch (error) {
       console.error('Failed to load goals:', error);
     }
 
     setLoading(false);
-  }, [projectId]);
+  }, [projectId, goalService]);
 
   useEffect(() => {
     loadGoals();
@@ -73,7 +65,6 @@ export function GoalProgress({ projectId, currentWordCount }: GoalProgressProps)
   useEffect(() => {
     const handleGoalUpdate = (e: CustomEvent<{ wordsAdded: number }>) => {
       const { wordsAdded } = e.detail;
-      // Update local state directly without refetching
       setTodayWords(prev => prev + wordsAdded);
       setWeekWords(prev => prev + wordsAdded);
     };
@@ -101,7 +92,7 @@ export function GoalProgress({ projectId, currentWordCount }: GoalProgressProps)
         setShowSettings(false);
       } else {
         console.error('Failed to save goals:', (result as { success: false; error: string }).error);
-        alert('Failed to save goal. Please make sure the database migration has been run.');
+        alert('Failed to save goal. Please try again.');
       }
     } catch (error) {
       console.error('Failed to save goals:', error);
@@ -246,7 +237,7 @@ function GoalSettingsModal({
             <Target size={18} strokeWidth={1.5} />
             Word Count Goal
           </h3>
-          <IconButton onClick={onClose} title="Close" variant="ghost">
+          <IconButton onClick={onClose} title="Close">
             <X size={18} strokeWidth={1.5} />
           </IconButton>
         </div>

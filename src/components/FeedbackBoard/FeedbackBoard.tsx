@@ -16,7 +16,6 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
-  LogIn,
   ArrowLeft
 } from 'lucide-react';
 import IconButton from '@/components/IconButton/IconButton';
@@ -146,7 +145,7 @@ export default function FeedbackBoard({ showBackButton = false }: FeedbackBoardP
   return (
     <section id="feedback" className={styles.feedbackBoard}>
       {showBackButton && (
-        <IconButton onClick={() => router.push('/')} title="Back to home" className={styles.backButton}>
+        <IconButton onClick={() => router.back()} title="Back" className={styles.backButton}>
           <ArrowLeft size={20} strokeWidth={1.5} />
         </IconButton>
       )}
@@ -159,12 +158,6 @@ export default function FeedbackBoard({ showBackButton = false }: FeedbackBoardP
           </div>
         </div>
         <div className={styles.feedbackActions}>
-          {!user && (
-            <Button onClick={() => router.push('/auth/login')} variant="secondary">
-              <LogIn size={18} strokeWidth={1.5} />
-              Log in
-            </Button>
-          )}
           <Button onClick={handleNewFeedback}>
             <Plus size={18} strokeWidth={1.5} />
             New Feedback

@@ -4,10 +4,11 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { DemoProvider, useDemo } from '@/lib/context/DemoContext';
 import { DemoDataProvider } from '@/lib/context/DataServiceProvider';
+import { DemoGoalProvider } from '@/lib/context/GoalServiceProvider';
 import type { SidebarItem as SidebarItemData } from '@/types/sidebar';
 import { Sidebar } from '@/components/Sidebar/Sidebar';
 import { DetailPanel } from '@/components/DetailPanel/DetailPanel';
-import Constellation from '@/example-files/Constellation';
+import Constellation from '@/components/Constellation/Constellation';
 import { itemsToChildData } from '@/lib/utils/sidebarToConstellation';
 import IconButton from '@/components/IconButton/IconButton';
 import { X } from 'lucide-react';
@@ -173,7 +174,9 @@ export default function DemoPage() {
   return (
     <DemoProvider>
       <DemoDataProvider>
-        <DemoPageContent />
+        <DemoGoalProvider>
+          <DemoPageContent />
+        </DemoGoalProvider>
       </DemoDataProvider>
     </DemoProvider>
   );

@@ -67,7 +67,6 @@ export function TiptapEditor({
     const previousContent = useRef(content);
     const editorWrapperRef = useRef<HTMLDivElement>(null);
     const [isMobile, setIsMobile] = useState(false);
-    const lastContentId = useRef<string>('');
 
     // Detect mobile
     useEffect(() => {
@@ -110,7 +109,7 @@ export function TiptapEditor({
                 return false;
             },
             // Block typing when at limit
-            handleKeyDown: (view, event) => {
+            handleKeyDown: (_view, event) => {
                 if (isAtLimit && !isPro) {
                     // Allow navigation, selection, deletion keys
                     const allowedKeys = [

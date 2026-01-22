@@ -4,27 +4,26 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.15s ease-out;
+  z-index: 1100;
+  padding: 24px;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .modal {
-  background-color: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  width: 90%;
-  max-width: 540px;
+  width: 540px;
+  max-width: 100%;
   max-height: 90vh;
+  background: var(--color-bg-primary);
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  animation: slideUp 0.15s ease-out;
-  font-family: var(--font-hanken-grotesk), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  animation: scaleIn 0.2s ease-out;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 }
 
 .header {
@@ -32,16 +31,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
-  flex-shrink: 0;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .title {
   font-size: 18px;
   font-weight: 600;
-  color: #1a1a1a;
   margin: 0;
-  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
 }
 
 .closeButton {
@@ -51,9 +48,9 @@
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  color: #000000;
+  border: 1px solid var(--color-border-light);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
@@ -61,31 +58,14 @@
 }
 
 .closeButton:hover {
-  background-color: #f3f4f6;
-  border-color: #d1d5db;
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-medium);
 }
 
 .content {
   padding: 24px;
   overflow-y: auto;
   flex: 1;
-}
-
-.content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.content::-webkit-scrollbar-thumb {
-  background: #e5e7eb;
-  border-radius: 4px;
-}
-
-.content::-webkit-scrollbar-thumb:hover {
-  background: #d1d5db;
 }
 
 .section {
@@ -100,37 +80,88 @@
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin-bottom: 8px;
 }
 
 .projectName {
   font-size: 15px;
-  color: #666;
+  color: var(--color-text-secondary);
   padding: 10px 12px;
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-light);
   border-radius: 6px;
+}
+
+/* Source Grid (matching ImportModal) */
+.sourceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.sourceCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.sourceCard:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-medium);
+}
+
+.sourceCard svg {
+  color: var(--color-accent);
+}
+
+.sourceCardSelected {
+  background: var(--color-accent-light);
+  border-color: var(--color-accent);
+}
+
+.sourceCardSelected:hover {
+  background: var(--color-accent-light);
+  border-color: var(--color-accent);
+}
+
+.sourceName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.sourceDesc {
+  font-size: 12px;
+  color: var(--color-text-secondary);
 }
 
 .infoBox {
   padding: 16px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-light);
   border-radius: 8px;
 }
 
 .infoBox p {
   margin: 0 0 12px 0;
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .infoBox ul {
   margin: 0 0 12px 0;
   padding-left: 24px;
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .infoBox li {
@@ -139,127 +170,13 @@
 
 .infoBox .hint {
   font-size: 13px;
-  color: #888;
+  color: var(--color-text-muted);
   margin: 0;
-}
-
-.formatList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.formatOption {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  text-align: left;
-  width: 100%;
-}
-
-.formatOption:hover {
-  background-color: #f9fafb;
-  border-color: #d1d5db;
-}
-
-.formatOptionSelected {
-  background-color: #1565a826;
-  border-color: #1565a8;
-}
-
-.formatOptionSelected:hover {
-  background-color: #1565a826;
-}
-
-.formatIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background-color: #f3f4f6;
-  border-radius: 6px;
-  color: #666;
-  flex-shrink: 0;
-}
-
-.formatOptionSelected .formatIcon {
-  background-color: #1565a826;
-  color: #1565a8;
-}
-
-.formatInfo {
-  flex: 1;
-}
-
-.formatLabel {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1a1a1a;
-  margin-bottom: 2px;
-}
-
-.formatDescription {
-  font-size: 13px;
-  color: #666;
-}
-
-.radioButton {
-  width: 18px;
-  height: 18px;
-  border: 2px solid #d1d5db;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.15s ease;
-}
-
-.formatOptionSelected .radioButton {
-  border-color: #1565a8;
-}
-
-.radioButtonInner {
-  width: 10px;
-  height: 10px;
-  background-color: #1565a8;
-  border-radius: 50%;
-}
-
-.checkboxLabel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #1a1a1a;
-  cursor: pointer;
-  user-select: none;
-}
-
-.checkbox {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: #1565a8;
-}
-
-.hint {
-  font-size: 13px;
-  color: #666;
-  margin: 8px 0 0 24px;
-  line-height: 1.5;
 }
 
 .error {
   padding: 12px;
-  background-color: #fef2f2;
+  background: #fef2f2;
   border: 1px solid #fecaca;
   border-radius: 6px;
   color: #dc2626;
@@ -271,18 +188,18 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
   padding: 16px 24px;
-  border-top: 1px solid #e5e7eb;
-  flex-shrink: 0;
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-bg-secondary);
+  gap: 12px;
 }
 
 .cancelButton {
   padding: 10px 18px;
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
   border-radius: 6px;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -291,8 +208,8 @@
 }
 
 .cancelButton:hover:not(:disabled) {
-  background-color: #f9fafb;
-  border-color: #d1d5db;
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-medium);
 }
 
 .cancelButton:disabled {
@@ -302,8 +219,8 @@
 
 .exportButton {
   padding: 10px 18px;
-  background-color: #1565a8;
-  border: 1px solid #1565a8;
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
   border-radius: 6px;
   color: #ffffff;
   font-size: 14px;
@@ -317,8 +234,8 @@
 }
 
 .exportButton:hover:not(:disabled) {
-  background-color: #1565a8;
-  border-color: #1565a8;
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
 }
 
 .exportButton:disabled {
@@ -327,22 +244,18 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-@keyframes slideUp {
+@keyframes scaleIn {
   from {
-    transform: translateY(20px);
     opacity: 0;
+    transform: scale(0.95);
   }
   to {
-    transform: translateY(0);
     opacity: 1;
+    transform: scale(1);
   }
 }
 
@@ -357,12 +270,11 @@
     max-width: 100%;
     max-height: 100dvh;
     border-radius: 0;
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .header {
     padding: 20px;
+    padding-top: calc(20px + env(safe-area-inset-top, 0px));
   }
 
   .closeButton {
@@ -386,16 +298,12 @@
     font-size: 15px;
   }
 
-  .formatOption {
-    padding: 16px;
+  .sourceGrid {
+    grid-template-columns: 1fr;
   }
 
-  .formatLabel {
-    font-size: 15px;
-  }
-
-  .formatDescription {
-    font-size: 14px;
+  .sourceCard {
+    padding: 20px 16px;
   }
 
   .label {

@@ -1,5 +1,12 @@
+'use client';
+
+import { createContext, useContext } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { GoalProgressRow, GoalPeriod } from '@/types/database';
+
+// ============================================
+// Types
+// ============================================
 
 type ServiceResult<T> =
   | { success: true; data: T }
@@ -11,14 +18,71 @@ export interface ProjectGoals {
   goalPeriod: GoalPeriod;
 }
 
-export const goalService = {
-  /**
-   * Update project goals
-   */
-  async updateGoals(
-    projectId: string,
-    goals: Partial<ProjectGoals>
-  ): Promise<ServiceResult<null>> {
+// ============================================
+// Goal Service Interface
+// ============================================
+
+export interface GoalService {
+  isDemo: boolean;
+  
+  getGoals(projectId: string): Promise<ServiceResult<ProjectGoals | null>>;
+  updateGoals(projectId: string, goals: Partial<ProjectGoals>): Promise<ServiceResult<null>>;
+  getTodayProgress(projectId: string): Promise<ServiceResult<number>>;
+  getWeekProgress(projectId: string): Promise<ServiceResult<number>>;
+  addWords(projectId: string, words: number): Promise<ServiceResult<void>>;
+}
+
+// ============================================
+// Context
+// ============================================
+
+export const GoalServiceContext = createContext<GoalService | null>(null);
+
+export function useGoalService(): GoalService {
+  const context = useContext(GoalServiceContext);
+  if (!context) {
+    throw new Error('useGoalService must be used within a GoalServiceProvider');
+  }
+  return context;
+}
+
+export function useGoalServiceOptional(): GoalService | null {
+  return useContext(GoalServiceContext);
+}
+
+// ============================================
+// Supabase Implementation
+// ============================================
+
+export const supabaseGoalService: GoalService = {
+  isDemo: false,
+
+  async getGoals(projectId: string): Promise<ServiceResult<ProjectGoals | null>> {
+    const { data, error } = await (supabase as any)
+      .from('projects')
+      .select('word_count_goal, time_goal_minutes, goal_period')
+      .eq('id', projectId)
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    if (!data || !('word_count_goal' in data)) {
+      return { success: true, data: null };
+    }
+
+    return {
+      success: true,
+      data: {
+        wordCountGoal: data.word_count_goal,
+        timeGoalMinutes: data.time_goal_minutes,
+        goalPeriod: data.goal_period || 'daily',
+      },
+    };
+  },
+
+  async updateGoals(projectId: string, goals: Partial<ProjectGoals>): Promise<ServiceResult<null>> {
     const updateData: Record<string, unknown> = {};
     if (goals.wordCountGoal !== undefined) updateData.word_count_goal = goals.wordCountGoal;
     if (goals.timeGoalMinutes !== undefined) updateData.time_goal_minutes = goals.timeGoalMinutes;
@@ -35,15 +99,12 @@ export const goalService = {
     return { success: true, data: null };
   },
 
-  /**
-   * Get today's progress for a project
-   */
-  async getTodayProgress(projectId: string): Promise<ServiceResult<GoalProgressRow | null>> {
+  async getTodayProgress(projectId: string): Promise<ServiceResult<number>> {
     const today = new Date().toISOString().split('T')[0];
-    
+
     const { data, error } = await (supabase as any)
       .from('project_goal_progress')
-      .select('*')
+      .select('words_written')
       .eq('project_id', projectId)
       .eq('date', today)
       .single();
@@ -51,127 +112,78 @@ export const goalService = {
     if (error && error.code !== 'PGRST116') {
       return { success: false, error: error.message };
     }
-    return { success: true, data: data || null };
+    return { success: true, data: data?.words_written || 0 };
   },
 
-  /**
-   * Get progress for a date range
-   */
-  async getProgressRange(
-    projectId: string,
-    startDate: string,
-    endDate: string
-  ): Promise<ServiceResult<GoalProgressRow[]>> {
+  async getWeekProgress(projectId: string): Promise<ServiceResult<number>> {
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+
     const { data, error } = await (supabase as any)
       .from('project_goal_progress')
-      .select('*')
+      .select('words_written')
       .eq('project_id', projectId)
-      .gte('date', startDate)
-      .lte('date', endDate)
-      .order('date', { ascending: true });
+      .gte('date', startOfWeek.toISOString().split('T')[0])
+      .lte('date', today.toISOString().split('T')[0]);
 
     if (error) {
       return { success: false, error: error.message };
     }
-    return { success: true, data: data || [] };
+
+    const total = (data || []).reduce((sum: number, row: GoalProgressRow) => sum + row.words_written, 0);
+    return { success: true, data: total };
   },
 
-  /**
-   * Get this week's progress
-   */
-  async getWeekProgress(projectId: string): Promise<ServiceResult<GoalProgressRow[]>> {
-    const today = new Date();
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
-    
-    return this.getProgressRange(
-      projectId,
-      startOfWeek.toISOString().split('T')[0],
-      today.toISOString().split('T')[0]
-    );
-  },
-
-  /**
-   * Add words to today's progress
-   */
-  async addWords(projectId: string, words: number): Promise<ServiceResult<GoalProgressRow>> {
+  async addWords(projectId: string, words: number): Promise<ServiceResult<void>> {
     const today = new Date().toISOString().split('T')[0];
-    
-    // First, get current progress for today
-    const current = await this.getTodayProgress(projectId);
-    const currentWords = current.success && current.data ? current.data.words_written : 0;
-    
-    const { data, error } = await (supabase as any)
+
+    // Get current progress
+    const { data: current } = await (supabase as any)
+      .from('project_goal_progress')
+      .select('words_written, time_spent_minutes')
+      .eq('project_id', projectId)
+      .eq('date', today)
+      .single();
+
+    const currentWords = current?.words_written || 0;
+    const currentMinutes = current?.time_spent_minutes || 0;
+
+    const { error } = await (supabase as any)
       .from('project_goal_progress')
       .upsert(
         {
           project_id: projectId,
           date: today,
           words_written: currentWords + words,
-          time_spent_minutes: current.success && current.data ? current.data.time_spent_minutes : 0,
+          time_spent_minutes: currentMinutes,
         },
         { onConflict: 'project_id,date' }
-      )
-      .select()
-      .single();
+      );
 
     if (error) {
       return { success: false, error: error.message };
     }
-    return { success: true, data };
+    return { success: true, data: undefined };
   },
+};
 
-  /**
-   * Update today's word count (set absolute value)
-   */
-  async setTodayWords(projectId: string, words: number): Promise<ServiceResult<GoalProgressRow>> {
-    const today = new Date().toISOString().split('T')[0];
-    
-    const { data, error } = await (supabase as any)
-      .from('project_goal_progress')
-      .upsert(
-        {
-          project_id: projectId,
-          date: today,
-          words_written: words,
-        },
-        { onConflict: 'project_id,date' }
-      )
-      .select()
-      .single();
-
-    if (error) {
-      return { success: false, error: error.message };
+// Legacy export for backward compatibility with DetailPanel
+export const goalService = {
+  updateGoals: supabaseGoalService.updateGoals,
+  addWords: supabaseGoalService.addWords,
+  getTodayProgress: async (projectId: string) => {
+    const result = await supabaseGoalService.getTodayProgress(projectId);
+    if (result.success) {
+      return { success: true, data: { words_written: result.data } as GoalProgressRow };
     }
-    return { success: true, data };
+    return result;
   },
-
-  /**
-   * Add time to today's progress
-   */
-  async addTime(projectId: string, minutes: number): Promise<ServiceResult<GoalProgressRow>> {
-    const today = new Date().toISOString().split('T')[0];
-    
-    const current = await this.getTodayProgress(projectId);
-    const currentMinutes = current.success && current.data ? current.data.time_spent_minutes : 0;
-    
-    const { data, error } = await (supabase as any)
-      .from('project_goal_progress')
-      .upsert(
-        {
-          project_id: projectId,
-          date: today,
-          words_written: current.success && current.data ? current.data.words_written : 0,
-          time_spent_minutes: currentMinutes + minutes,
-        },
-        { onConflict: 'project_id,date' }
-      )
-      .select()
-      .single();
-
-    if (error) {
-      return { success: false, error: error.message };
+  getWeekProgress: async (projectId: string) => {
+    const result = await supabaseGoalService.getWeekProgress(projectId);
+    if (result.success) {
+      return { success: true, data: [{ words_written: result.data }] as GoalProgressRow[] };
     }
-    return { success: true, data };
+    return result;
   },
 };

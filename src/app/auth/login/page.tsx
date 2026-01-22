@@ -18,25 +18,25 @@ function LoginForm() {
     // Get plan from URL params (monthly or yearly)
     const plan = searchParams.get('plan');
 
-    // Helper to trigger Stripe checkout
-    const triggerStripeCheckout = useCallback(async (userId: string, planType: string) => {
-        const priceId = planType === 'yearly' 
-            ? process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY 
-            : process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY;
+    // Helper to trigger Polar checkout
+    const triggerPolarCheckout = useCallback(async (userId: string, planType: string) => {
+        const productId = planType === 'yearly' 
+            ? process.env.NEXT_PUBLIC_POLAR_PRODUCT_YEARLY 
+            : process.env.NEXT_PUBLIC_POLAR_PRODUCT_MONTHLY;
 
-        if (!priceId) {
-            console.error('Stripe price ID not configured');
+        if (!productId) {
+            console.error('Polar product ID not configured');
             router.push('/projects');
             return;
         }
 
         try {
-            const response = await fetch('/api/stripe/checkout', {
+            const response = await fetch('/api/polar/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     userId,
-                    priceId,
+                    productId,
                     returnUrl: window.location.origin,
                 }),
             });
@@ -74,14 +74,14 @@ function LoginForm() {
             return;
         }
 
-        // If user selected a paid plan, redirect to Stripe checkout
+        // If user selected a paid plan, redirect to Polar checkout
         if (plan && (plan === 'monthly' || plan === 'yearly') && data?.user?.id) {
-            await triggerStripeCheckout(data.user.id, plan);
+            await triggerPolarCheckout(data.user.id, plan);
             return;
         }
 
         router.push('/projects');
-    }, [email, password, signIn, router, plan, triggerStripeCheckout]);
+    }, [email, password, signIn, router, plan, triggerPolarCheckout]);
 
     if (authLoading) {
         return (

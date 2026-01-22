@@ -505,7 +505,7 @@ export function ImportModal({ isOpen, onClose, onProjectCreated }: ImportModalPr
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <header className={styles.header}>
           <h2 className={styles.title}>Import Project</h2>
-          <IconButton onClick={handleClose} title="Close" variant="ghost">
+          <IconButton onClick={handleClose} title="Close">
             <X size={18} strokeWidth={1.5} />
           </IconButton>
         </header>

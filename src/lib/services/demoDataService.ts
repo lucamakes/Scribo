@@ -19,7 +19,7 @@ interface DemoData {
 }
 
 function generateId(): string {
-  return `demo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `demo-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 }
 
 function getDefaultDemoData(): DemoData {
@@ -84,7 +84,7 @@ export function createDemoDataService(): DataService {
   return {
     isDemo: true,
 
-    async getItems(projectId: string): Promise<ServiceResult<ItemRow[]>> {
+    async getItems(_projectId: string): Promise<ServiceResult<ItemRow[]>> {
       const data = loadDemoData();
       const items = data.items.filter(item => !item.deleted_at);
       return { success: true, data: items };
@@ -99,7 +99,7 @@ export function createDemoDataService(): DataService {
       return { success: true, data: item };
     },
 
-    async createItem(projectId: string, parentId: string | null, name: string, type: SidebarItemType): Promise<ServiceResult<ItemRow>> {
+    async createItem(_projectId: string, parentId: string | null, name: string, type: SidebarItemType): Promise<ServiceResult<ItemRow>> {
       const data = loadDemoData();
       const now = new Date().toISOString();
       
@@ -144,10 +144,24 @@ export function createDemoDataService(): DataService {
     },
 
     async renameItem(itemId: string, name: string): Promise<ServiceResult<ItemRow>> {
-      return this.updateItem(itemId, { name });
+      const data = loadDemoData();
+      const index = data.items.findIndex(i => i.id === itemId);
+      
+      if (index === -1) {
+        return { success: false, error: 'Item not found' };
+      }
+
+      data.items[index] = {
+        ...data.items[index],
+        name,
+        updated_at: new Date().toISOString(),
+      };
+      
+      saveDemoData(data);
+      return { success: true, data: data.items[index] };
     },
 
-    async moveItem(itemId: string, parentId: string | null, projectId: string, sortOrder: number): Promise<ServiceResult<ItemRow>> {
+    async moveItem(itemId: string, parentId: string | null, _projectId: string, sortOrder: number): Promise<ServiceResult<ItemRow>> {
       const data = loadDemoData();
       const index = data.items.findIndex(i => i.id === itemId);
       
@@ -167,7 +181,21 @@ export function createDemoDataService(): DataService {
     },
 
     async updateContent(itemId: string, content: string): Promise<ServiceResult<ItemRow>> {
-      return this.updateItem(itemId, { content });
+      const data = loadDemoData();
+      const index = data.items.findIndex(i => i.id === itemId);
+      
+      if (index === -1) {
+        return { success: false, error: 'Item not found' };
+      }
+
+      data.items[index] = {
+        ...data.items[index],
+        content,
+        updated_at: new Date().toISOString(),
+      };
+      
+      saveDemoData(data);
+      return { success: true, data: data.items[index] };
     },
 
     async softDelete(itemId: string): Promise<ServiceResult<void>> {
@@ -190,7 +218,7 @@ export function createDemoDataService(): DataService {
       return { success: true, data: undefined };
     },
 
-    async getTrash(projectId: string): Promise<ServiceResult<ItemRow[]>> {
+    async getTrash(_projectId: string): Promise<ServiceResult<ItemRow[]>> {
       const data = loadDemoData();
       const items = data.items.filter(item => item.deleted_at !== null);
       return { success: true, data: items };
@@ -220,7 +248,7 @@ export function createDemoDataService(): DataService {
       return { success: true, data: undefined };
     },
 
-    async emptyTrash(projectId: string): Promise<ServiceResult<void>> {
+    async emptyTrash(_projectId: string): Promise<ServiceResult<void>> {
       const data = loadDemoData();
       data.items = data.items.filter(item => item.deleted_at === null);
       saveDemoData(data);

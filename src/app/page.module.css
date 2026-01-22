@@ -104,6 +104,9 @@
 }
 
 .navLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 16px;
   background: transparent;
   border: none;
@@ -113,6 +116,7 @@
   cursor: pointer;
   transition: color 0.15s ease;
   font-family: inherit;
+  text-decoration: none;
 }
 
 .navLink:hover {
@@ -193,7 +197,9 @@
 }
 
 .mobileNavLink {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 12px 0;
   background: transparent;
   border: none;
@@ -204,6 +210,7 @@
   cursor: pointer;
   font-family: inherit;
   transition: color 0.15s ease;
+  text-decoration: none;
 }
 
 .mobileNavLink:hover {
@@ -214,6 +221,13 @@
   height: 1px;
   background: rgb(209, 213, 219);
   margin: 8px 0;
+}
+
+.mobileNavButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
 }
 
 .mobileNavButton {

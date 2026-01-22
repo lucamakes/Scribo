@@ -10,6 +10,9 @@ import {
 } from './constants';
 import { type ChildData, type NodeState } from './types';
 
+/**
+ * Calculates node size based on word count
+ */
 export function calculateNodeSize(
   words: number,
   minWords: number,
@@ -20,15 +23,24 @@ export function calculateNodeSize(
   return MIN_NODE_SIZE + ratio * (MAX_NODE_SIZE - MIN_NODE_SIZE);
 }
 
+/**
+ * Calculates text size based on node size
+ */
 export function calculateTextSize(nodeSize: number): number {
   const ratio = (nodeSize - MIN_NODE_SIZE) / (MAX_NODE_SIZE - MIN_NODE_SIZE);
   return 10 + ratio * 8;
 }
 
+/**
+ * Calculates reading time in minutes based on word count
+ */
 export function calculateReadingTime(words: number): number {
   return Math.ceil(words / WORDS_PER_MINUTE);
 }
 
+/**
+ * Calculates total words from all children recursively
+ */
 export function calculateTotalWords(children: readonly ChildData[]): number {
   return children.reduce((total, child) => {
     let childTotal = child.words;
@@ -39,6 +51,10 @@ export function calculateTotalWords(children: readonly ChildData[]): number {
   }, 0);
 }
 
+/**
+ * Generates dynamic circle radii and limits based on total node count.
+ * Each new circle increases capacity by LIMIT_STEP.
+ */
 export function generateDynamicOrbits(
   totalNodes: number,
   limitToTwoCircles: boolean
@@ -59,6 +75,7 @@ export function generateDynamicOrbits(
     remainingNodes -= limit;
     circleIndex++;
     
+    // If limited to two circles, stop after second and put all remaining on it
     if (limitToTwoCircles && circleIndex >= 2) {
       break;
     }
@@ -67,6 +84,10 @@ export function generateDynamicOrbits(
   return { radii, limits };
 }
 
+/**
+ * Distributes nodes across dynamically generated orbits.
+ * Smaller nodes go on inner orbits, larger on outer.
+ */
 export function distributeNodesAcrossOrbits(
   nodes: Array<{ size: number; originalIndex: number }>,
   radii: number[],
@@ -86,6 +107,7 @@ export function distributeNodesAcrossOrbits(
         break;
       }
     }
+    // Fallback to outermost circle if all are "full"
     if (!assigned) {
       orbitAssignments.set(node.originalIndex, radii[radii.length - 1]);
     }
@@ -93,6 +115,9 @@ export function distributeNodesAcrossOrbits(
   return orbitAssignments;
 }
 
+/**
+ * Calculates initial angles for nodes on each orbit to space them evenly
+ */
 export function calculateInitialAngles(
   nodes: NodeState[],
   orbitAssignments: Map<number, number>,
@@ -114,17 +139,21 @@ export function calculateInitialAngles(
   }
 }
 
+/**
+ * Initializes node states with dynamic orbit distribution.
+ * Returns both the nodes and the generated radii for canvas drawing.
+ * When limitToTwoCircles is true, only shows the smallest nodes that fit.
+ */
 export function initializeNodes(
   childrenData: readonly ChildData[],
   limitToTwoCircles: boolean = false
 ): { nodes: NodeState[]; radii: number[] } {
-  if (childrenData.length === 0) {
-    return { nodes: [], radii: [] };
-  }
-
+  // If limiting to two circles, calculate max capacity and filter to smallest nodes
   let dataToProcess: readonly ChildData[];
   if (limitToTwoCircles) {
-    const maxCapacity = INITIAL_NODE_LIMIT + (INITIAL_NODE_LIMIT + LIMIT_STEP);
+    const maxCapacity = INITIAL_NODE_LIMIT + (INITIAL_NODE_LIMIT + LIMIT_STEP); // 6 + 8 = 14
+    
+    // Sort by word count (smallest first) and take only what fits
     const sortedByWords = [...childrenData].sort((a, b) => a.words - b.words);
     dataToProcess = sortedByWords.slice(0, maxCapacity);
   } else {
@@ -140,14 +169,22 @@ export function initializeNodes(
     originalIndex: index,
   }));
 
-  const { radii, limits } = generateDynamicOrbits(dataToProcess.length, limitToTwoCircles);
+  // Generate dynamic orbits
+  const { radii, limits } = generateDynamicOrbits(
+    dataToProcess.length,
+    limitToTwoCircles
+  );
+
   const orbitAssignments = distributeNodesAcrossOrbits(nodesWithSize, radii, limits);
   
+  // Calculate speed based on radius (Kepler's law: outer orbits move slower)
   const innerRadius = radii[0];
 
   const nodes: NodeState[] = dataToProcess.map((child, index) => {
     const size = calculateNodeSize(child.words, minWords, maxWords);
     const radius = orbitAssignments.get(index) ?? radii[0];
+    
+    // Speed decreases with square root of radius ratio (like real orbital mechanics)
     const speedMultiplier = Math.sqrt(innerRadius / radius);
     const baseSpeed = BASE_SPEED * speedMultiplier;
 

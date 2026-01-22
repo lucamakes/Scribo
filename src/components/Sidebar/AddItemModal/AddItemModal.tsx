@@ -39,7 +39,7 @@ export function AddItemModal({ parentId, onAdd, onClose }: AddItemModalProps) {
       <div className={styles.modal}>
         <div className={styles.header}>
           <span className={styles.title}>Add New</span>
-          <IconButton onClick={onClose} size="small" title="Close" variant="ghost">
+          <IconButton onClick={onClose} size="small" title="Close">
             <X size={14} strokeWidth={1.5} />
           </IconButton>
         </div>

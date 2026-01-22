@@ -163,7 +163,7 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
           <h2 className={styles.title}>
             {isPro ? 'Manage Subscription' : 'Upgrade to Pro'}
           </h2>
-          <IconButton onClick={onClose} title="Close" variant="ghost">
+          <IconButton onClick={onClose} title="Close">
             <X size={18} strokeWidth={1.5} />
           </IconButton>
         </div>
@@ -211,7 +211,7 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
                   <div className={styles.section}>
                     <div className={styles.label}>Billing & Invoices</div>
                     <p className={styles.portalDescription}>
-                      Manage your subscription, update payment method, change plans, or cancel in the Stripe billing portal.
+                      Manage your subscription, update payment method, change plans, or cancel in the billing portal.
                     </p>
                     <Button 
                       onClick={handleOpenBillingPortal}

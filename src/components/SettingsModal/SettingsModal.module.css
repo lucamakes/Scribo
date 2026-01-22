@@ -224,10 +224,6 @@
   padding: 16px 24px;
   border-top: 1px solid var(--color-border-light, #e5e7eb);
   background: var(--color-bg-secondary, #fafafa);
-}
-
-.footerRight {
-  display: flex;
   gap: 12px;
 }
 
@@ -393,17 +389,11 @@
   }
 
   .footer {
-    flex-direction: column;
-    gap: 12px;
     padding: 16px 20px;
     padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }
 
-  .footerRight {
-    width: 100%;
-  }
-
-  .footerRight button {
+  .footer button {
     flex: 1;
   }
 

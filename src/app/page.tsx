@@ -67,14 +67,14 @@ export default function Home() {
             <a href="#feedback" className={styles.navLink}>Feedback</a>
             {isSignedIn ? (
               <>
+                <button onClick={() => signOut()} className={styles.navLink}>
+                  Sign out
+                  <LogOut size={16} strokeWidth={1.5} />
+                </button>
                 <Button onClick={() => router.push('/projects')}>
                   Go to Projects
                   <ArrowRight size={16} strokeWidth={1.5} />
                 </Button>
-                <button onClick={() => signOut()} className={styles.navLink}>
-                  <LogOut size={16} strokeWidth={1.5} />
-                  Sign out
-                </button>
               </>
             ) : (
               <>
@@ -111,18 +111,18 @@ export default function Home() {
             <a href="#feedback" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Feedback</a>
             <div className={styles.mobileNavDivider} />
             {isSignedIn ? (
-              <>
+              <div className={styles.mobileNavButtons}>
+                <Button onClick={() => { signOut(); setMobileMenuOpen(false); }} variant="secondary">
+                  Sign out
+                  <LogOut size={16} strokeWidth={1.5} />
+                </Button>
                 <Button onClick={() => { router.push('/projects'); setMobileMenuOpen(false); }}>
                   Go to Projects
                   <ArrowRight size={16} strokeWidth={1.5} />
                 </Button>
-                <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className={styles.mobileNavLink}>
-                  <LogOut size={16} strokeWidth={1.5} />
-                  Sign out
-                </button>
-              </>
+              </div>
             ) : (
-              <>
+              <div className={styles.mobileNavButtons}>
                 <button onClick={() => { router.push('/auth/login'); setMobileMenuOpen(false); }} className={styles.mobileNavLink}>
                   Log in
                 </button>
@@ -133,7 +133,7 @@ export default function Home() {
                   Start Free
                   <ArrowRight size={16} strokeWidth={1.5} />
                 </Button>
-              </>
+              </div>
             )}
           </nav>
         )}
