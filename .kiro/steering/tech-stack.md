@@ -4,7 +4,7 @@ This document defines the technology stack and patterns for this project. Follow
 
 ## Core Stack
 
-- **Framework**: Next.js latest (App Router)
+- **Framework**: Next.js latestadd (App Router)
 - **Language**: TypeScript (strict mode)
 - **Styling**: CSS Modules (`.module.css` files)
 - **Database**: Supabase (PostgreSQL)

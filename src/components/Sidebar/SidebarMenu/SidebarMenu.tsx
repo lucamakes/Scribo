@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, Download, Search, Trash2, Settings } from 'lucide-react';
 import { useSidebar } from '../SidebarContext';
 import styles from './SidebarMenu.module.css';
@@ -11,6 +12,7 @@ interface SidebarMenuProps {
 }
 
 export function SidebarMenu({ onBackToProjects, onOpenSettings }: SidebarMenuProps) {
+  const router = useRouter();
   const { setShowMenu, setShowSearch, setShowExport, setShowTrash, isDemo } = useSidebar();
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -34,15 +36,24 @@ export function SidebarMenu({ onBackToProjects, onOpenSettings }: SidebarMenuPro
     };
   }, []);
 
+  const handleBack = () => {
+    if (isDemo) {
+      router.push('/');
+    } else if (onBackToProjects) {
+      onBackToProjects();
+    }
+    closeMenu();
+  };
+
   return (
     <div className={styles.menuDropdown} ref={menuRef}>
-      {onBackToProjects && !isDemo && (
+      {(onBackToProjects || isDemo) && (
         <button 
           className={styles.menuItem}
-          onClick={() => { onBackToProjects(); closeMenu(); }}
+          onClick={handleBack}
         >
           <ArrowLeft size={14} strokeWidth={1.5} />
-          <span>Back to Projects</span>
+          <span>{isDemo ? 'Back to Home' : 'Back to Projects'}</span>
         </button>
       )}
       <button 

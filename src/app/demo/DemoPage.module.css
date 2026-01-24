@@ -35,6 +35,7 @@
   border: none;
   border-radius: 6px;
   color: var(--color-accent);
+  font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
