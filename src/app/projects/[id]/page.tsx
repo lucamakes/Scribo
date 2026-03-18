@@ -14,6 +14,7 @@ import Constellation from '@/components/Constellation/Constellation';
 import { projectService } from '@/lib/services/projectService';
 import { itemService } from '@/lib/services/itemService';
 import { itemsToChildData } from '@/lib/utils/sidebarToConstellation';
+import { useAutoExport } from '@/lib/hooks/useAutoExport';
 import IconButton from '@/components/IconButton/IconButton';
 import { X, ArrowLeft } from 'lucide-react';
 import styles from './ProjectPage.module.css';
@@ -48,6 +49,7 @@ function ProjectWorkspace({
     const [showSettings, setShowSettings] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const lastSelectedIdRef = useRef<string | null>(null);
+    const autoExport = useAutoExport(project.id, project.name);
 
     // Detect mobile
     useEffect(() => {
@@ -171,6 +173,7 @@ function ProjectWorkspace({
             <SettingsModal
                 isOpen={showSettings}
                 onClose={() => setShowSettings(false)}
+                autoExport={autoExport}
             />
         </main>
     );

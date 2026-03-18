@@ -4,6 +4,8 @@ export interface UserPreferences {
   fontSize?: number;
   lineHeight?: number;
   textColor?: string;
+  autoExportEnabled?: boolean;
+  autoExportIntervalMinutes?: number;
 }
 
 const DEFAULT_PREFERENCES: UserPreferences = {

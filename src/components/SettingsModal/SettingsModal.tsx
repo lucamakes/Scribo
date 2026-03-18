@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Type, AlignLeft, Palette, Trash2 } from 'lucide-react';
+import { X, Type, AlignLeft, Palette, Trash2, Download } from 'lucide-react';
 import { usePreferences } from '@/lib/hooks/usePreferences';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useSubscription } from '@/lib/hooks/useSubscription';
@@ -13,13 +13,20 @@ import styles from './SettingsModal.module.css';
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  autoExport?: {
+    enabled: boolean;
+    intervalMinutes: number;
+    setEnabled: (enabled: boolean) => void;
+    setIntervalMinutes: (minutes: number) => void;
+    exportNow: () => void;
+  };
 }
 
 /**
  * Settings modal for user preferences.
  * Includes font size, line height, and text color settings.
  */
-export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+export function SettingsModal({ isOpen, onClose, autoExport }: SettingsModalProps) {
   const router = useRouter();
   const { deleteAccount } = useAuth();
   const { isPro } = useSubscription();
@@ -169,6 +176,53 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   The quick brown fox jumps over the lazy dog. This is how your text will appear in the editor.
                 </p>
               </div>
+
+              {/* Auto Export */}
+              {autoExport && (
+                <div className={styles.setting}>
+                  <div className={styles.settingHeader}>
+                    <Download size={18} strokeWidth={1.5} />
+                    <label className={styles.settingLabel}>Auto Export Backup</label>
+                  </div>
+                  <div className={styles.toggleRow}>
+                    <span className={styles.toggleDescription}>
+                      Automatically download a backup of your project at a set interval
+                    </span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={autoExport.enabled}
+                      onClick={() => autoExport.setEnabled(!autoExport.enabled)}
+                      className={`${styles.toggle} ${autoExport.enabled ? styles.toggleOn : ''}`}
+                    >
+                      <span className={styles.toggleThumb} />
+                    </button>
+                  </div>
+                  {autoExport.enabled && (
+                    <div className={styles.settingControl}>
+                      <label className={styles.intervalLabel}>Every</label>
+                      <select
+                        value={autoExport.intervalMinutes}
+                        onChange={(e) => autoExport.setIntervalMinutes(Number(e.target.value))}
+                        className={styles.intervalSelect}
+                      >
+                        <option value={1}>1 minute</option>
+                        <option value={5}>5 minutes</option>
+                        <option value={10}>10 minutes</option>
+                        <option value={15}>15 minutes</option>
+                        <option value={30}>30 minutes</option>
+                        <option value={60}>1 hour</option>
+                      </select>
+                      <button
+                        onClick={autoExport.exportNow}
+                        className={styles.exportNowButton}
+                      >
+                        Export Now
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Danger Zone */}
               <div className={styles.dangerZone}>
