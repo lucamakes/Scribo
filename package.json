@@ -17,6 +17,7 @@
     "@polar-sh/sdk": "^0.42.2",
     "@supabase/supabase-js": "^2.89.0",
     "@tiptap/extension-highlight": "^3.14.0",
+    "@tiptap/extension-image": "^3.22.2",
     "@tiptap/extension-placeholder": "^3.14.0",
     "@tiptap/extension-text-align": "^3.14.0",
     "@tiptap/extension-underline": "^3.14.0",
@@ -37,7 +38,8 @@
     "posthog-js": "^1.313.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "resend": "^6.7.0"
+    "resend": "^6.7.0",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Plus, Trash2, Undo2, Redo2, Circle, ZoomIn, ZoomOut, RotateCcw, Info, Square, ChevronUp, ChevronDown, GripHorizontal, Unlink, Unplug, Link, PenLine } from 'lucide-react';
+import { Trash2, Undo2, Redo2, Circle, ZoomIn, ZoomOut, RotateCcw, Info, Square, ChevronUp, ChevronDown, GripHorizontal, Unlink, Unplug, Link, PenLine, ImagePlus, Loader2 } from 'lucide-react';
+import { uploadCanvasImage, deleteCanvasImage } from '@/lib/services/storageService';
 import styles from './CanvasEditor.module.css';
 
 export interface CanvasNode {
@@ -38,11 +39,21 @@ export interface CanvasConnection {
   to: string;
 }
 
+export interface CanvasImage {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  url: string;
+}
+
 export interface CanvasData {
   nodes: CanvasNode[];
   connections: CanvasConnection[];
   stacks: CanvasStack[];
   shapes: CanvasShape[];
+  images: CanvasImage[];
   viewport?: { x: number; y: number; zoom: number };
 }
 
@@ -68,10 +79,11 @@ function parseCanvasData(content: string): CanvasData {
       connections: data.connections || [],
       stacks: data.stacks || [],
       shapes: data.shapes || [],
+      images: data.images || [],
       viewport: data.viewport || { x: 0, y: 0, zoom: 1 },
     };
   } catch {
-    return { nodes: [], connections: [], stacks: [], shapes: [], viewport: { x: 0, y: 0, zoom: 1 } };
+    return { nodes: [], connections: [], stacks: [], shapes: [], images: [], viewport: { x: 0, y: 0, zoom: 1 } };
   }
 }
 
@@ -96,8 +108,14 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [hoveredConnection, setHoveredConnection] = useState<string | null>(null);
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [draggingImage, setDraggingImage] = useState<string | null>(null);
+  const [resizingImage, setResizingImage] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
   
   const canvasRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
   const panStart = useRef({ x: 0, y: 0, viewX: 0, viewY: 0 });
   const resizeStart = useRef({ x: 0, y: 0, width: 0, height: 0 });
@@ -328,6 +346,94 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
     setHoveredConnection(null);
   }, [data, saveData, pushHistory]);
 
+  const handleImageUpload = useCallback(async (file: File, dropX?: number, dropY?: number) => {
+    setIsUploading(true);
+    try {
+      const url = await uploadCanvasImage(file);
+      
+      const img = new window.Image();
+      img.onload = () => {
+        const maxDim = 300;
+        let w = img.naturalWidth;
+        let h = img.naturalHeight;
+        if (w > maxDim || h > maxDim) {
+          const ratio = Math.min(maxDim / w, maxDim / h);
+          w = Math.round(w * ratio);
+          h = Math.round(h * ratio);
+        }
+
+        let cx: number, cy: number;
+        if (dropX !== undefined && dropY !== undefined) {
+          cx = dropX - w / 2;
+          cy = dropY - h / 2;
+        } else {
+          const rect = canvasRef.current?.getBoundingClientRect();
+          cx = rect ? (rect.width / 2 - viewport.x) / viewport.zoom - w / 2 : 100;
+          cy = rect ? (rect.height / 2 - viewport.y) / viewport.zoom - h / 2 : 100;
+        }
+
+        const newImage: CanvasImage = { id: generateId(), x: cx, y: cy, width: w, height: h, url };
+        saveData({ ...data, images: [...data.images, newImage] });
+        setSelectedImage(newImage.id);
+        setSelectedNode(null);
+        setSelectedShape(null);
+        setIsUploading(false);
+      };
+      img.onerror = () => setIsUploading(false);
+      img.src = url;
+    } catch (err) {
+      console.error('Image upload failed:', err);
+      setIsUploading(false);
+    }
+  }, [data, saveData, viewport]);
+
+  const deleteImage = useCallback(async (imageId: string) => {
+    const image = data.images.find(i => i.id === imageId);
+    if (image) {
+      deleteCanvasImage(image.url).catch(() => {});
+    }
+    saveData({ ...data, images: data.images.filter(i => i.id !== imageId) });
+    setSelectedImage(null);
+  }, [data, saveData]);
+
+  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      handleImageUpload(file);
+    }
+    e.target.value = '';
+  }, [handleImageUpload]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    const hasFiles = e.dataTransfer.types.includes('Files');
+    if (!hasFiles) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    setIsDraggingOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+    setIsDraggingOver(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (rect) {
+      const canvasX = (e.clientX - rect.left - viewport.x) / viewport.zoom;
+      const canvasY = (e.clientY - rect.top - viewport.y) / viewport.zoom;
+      handleImageUpload(file, canvasX, canvasY);
+    } else {
+      handleImageUpload(file);
+    }
+  }, [handleImageUpload, viewport]);
+
   // Get nodes in render order (stacked nodes positioned correctly)
   const getNodePosition = useCallback((node: CanvasNode) => {
     if (node.stackId) {
@@ -350,15 +456,16 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
       if (e.key === 'Tab') { e.preventDefault(); addNode(); }
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNode) { e.preventDefault(); deleteNode(selectedNode); }
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedShape) { e.preventDefault(); deleteShape(selectedShape); }
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedImage) { e.preventDefault(); deleteImage(selectedImage); }
       if (e.key === 'Enter' && selectedNode) { e.preventDefault(); setEditingNode(selectedNode); }
       if (e.key === 'Enter' && selectedShape) { e.preventDefault(); setEditingShape(selectedShape); }
-      if (e.key === 'Escape') { setSelectedNode(null); setSelectedShape(null); setShowColorPicker(false); }
+      if (e.key === 'Escape') { setSelectedNode(null); setSelectedShape(null); setSelectedImage(null); setShowColorPicker(false); }
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
       if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [addNode, deleteNode, deleteShape, selectedNode, selectedShape, editingNode, editingShape, undo, redo]);
+  }, [addNode, deleteNode, deleteShape, deleteImage, selectedNode, selectedShape, selectedImage, editingNode, editingShape, undo, redo]);
 
   const handleNodeMouseDown = useCallback((e: React.MouseEvent, nodeId: string) => {
     if (e.button !== 0) return;
@@ -480,6 +587,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
     setSelectedNode(null);
     setSelectedShape(null);
     setSelectedStack(null);
+    setSelectedImage(null);
     setConnectingFrom(null);
     setEditingNode(null);
     setEditingShape(null);
@@ -494,6 +602,19 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
       return;
     }
 
+    if (resizingImage) {
+      const image = data.images.find(i => i.id === resizingImage);
+      if (image) {
+        const dx = (e.clientX - resizeStart.current.x) / viewport.zoom;
+        const aspectRatio = resizeStart.current.width / resizeStart.current.height;
+        const newWidth = Math.max(50, resizeStart.current.width + dx);
+        const newHeight = newWidth / aspectRatio;
+        const newImages = data.images.map(i => i.id === resizingImage ? { ...i, width: newWidth, height: newHeight } : i);
+        setData(prev => ({ ...prev, images: newImages }));
+      }
+      return;
+    }
+
     if (resizingShape) {
       const dx = (e.clientX - resizeStart.current.x) / viewport.zoom;
       const dy = (e.clientY - resizeStart.current.y) / viewport.zoom;
@@ -501,6 +622,16 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
       const newHeight = Math.max(80, resizeStart.current.height + dy);
       const newShapes = data.shapes.map(s => s.id === resizingShape ? { ...s, width: newWidth, height: newHeight } : s);
       setData(prev => ({ ...prev, shapes: newShapes }));
+      return;
+    }
+
+    if (draggingImage) {
+      const canvasX = (e.clientX - viewport.x) / viewport.zoom;
+      const canvasY = (e.clientY - viewport.y) / viewport.zoom;
+      const newX = canvasX - dragOffset.current.x;
+      const newY = canvasY - dragOffset.current.y;
+      const newImages = data.images.map(i => i.id === draggingImage ? { ...i, x: newX, y: newY } : i);
+      setData(prev => ({ ...prev, images: newImages }));
       return;
     }
 
@@ -552,7 +683,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
     
     const newNodes = data.nodes.map(n => n.id === draggingNode ? { ...n, x: newX, y: newY } : n);
     setData(prev => ({ ...prev, nodes: newNodes }));
-  }, [draggingNode, draggingShape, draggingStackHeader, resizingShape, data, viewport, isPanning, findSnapPosition]);
+  }, [draggingNode, draggingShape, draggingImage, draggingStackHeader, resizingShape, resizingImage, data, viewport, isPanning, findSnapPosition]);
 
   const handleMouseUp = useCallback(() => {
     const node = draggingNode ? data.nodes.find(n => n.id === draggingNode) : null;
@@ -600,7 +731,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
       lastSavedRef.current = json;
       onContentChange(json);
       setSnapPreview(null);
-    } else if (draggingNode || draggingShape || draggingStackHeader || resizingShape) {
+    } else if (draggingNode || draggingShape || draggingImage || draggingStackHeader || resizingShape || resizingImage) {
       const json = JSON.stringify({ ...data, viewport });
       lastSavedRef.current = json;
       onContentChange(json);
@@ -608,11 +739,13 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
     
     setDraggingNode(null);
     setDraggingShape(null);
+    setDraggingImage(null);
     setDraggingStackHeader(null);
     setResizingShape(null);
+    setResizingImage(null);
     setIsPanning(false);
     setSnapPreview(null);
-  }, [draggingNode, draggingShape, draggingStackHeader, resizingShape, snapPreview, data, viewport, onContentChange, pushHistory]);
+  }, [draggingNode, draggingShape, draggingImage, draggingStackHeader, resizingShape, resizingImage, snapPreview, data, viewport, onContentChange, pushHistory]);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
@@ -641,6 +774,21 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
         <button onClick={() => addShape('circle')} className={styles.toolButton} title="Add circle">
           <Circle size={18} strokeWidth={1.5} />
         </button>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className={styles.toolButton}
+          title="Add image"
+          disabled={isUploading}
+        >
+          {isUploading ? <Loader2 size={18} strokeWidth={1.5} className={styles.spinning} /> : <ImagePlus size={18} strokeWidth={1.5} />}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileInputChange}
+          style={{ display: 'none' }}
+        />
         <div className={styles.divider} />
         <button onClick={undo} className={styles.toolButton} disabled={history.length === 0} title="Undo (Ctrl+Z)">
           <Undo2 size={18} strokeWidth={1.5} />
@@ -672,6 +820,14 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
               title="Change color"
             />
             <button onClick={() => deleteShape(selectedShape)} className={styles.toolButton} title="Delete shape">
+              <Trash2 size={18} strokeWidth={1.5} />
+            </button>
+          </>
+        )}
+        {selectedImage && (
+          <>
+            <div className={styles.divider} />
+            <button onClick={() => deleteImage(selectedImage)} className={styles.toolButton} title="Delete image (Del)">
               <Trash2 size={18} strokeWidth={1.5} />
             </button>
           </>
@@ -711,12 +867,15 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
 
       <div
         ref={canvasRef}
-        className={styles.canvas}
+        className={`${styles.canvas} ${isDraggingOver ? styles.canvasDragOver : ''}`}
         onMouseDown={handleCanvasMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onWheel={handleWheel}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         style={{ cursor: isPanning ? 'grabbing' : 'default' }}
       >
         <div
@@ -755,6 +914,50 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
                 <div
                   className={styles.shapeResizeHandle}
                   onMouseDown={(e) => handleShapeResizeStart(e, shape.id)}
+                />
+              )}
+            </div>
+          ))}
+
+          {/* Images */}
+          {data.images.map(image => (
+            <div
+              key={image.id}
+              className={`${styles.canvasImage} ${selectedImage === image.id ? styles.selected : ''}`}
+              style={{
+                left: image.x,
+                top: image.y,
+                width: image.width,
+                height: image.height,
+              }}
+              onMouseDown={(e) => {
+                if (e.button !== 0) return;
+                e.stopPropagation();
+                setSelectedImage(image.id);
+                setSelectedNode(null);
+                setSelectedShape(null);
+                setDraggingImage(image.id);
+                setShowColorPicker(false);
+                const canvasX = (e.clientX - viewport.x) / viewport.zoom;
+                const canvasY = (e.clientY - viewport.y) / viewport.zoom;
+                dragOffset.current = { x: canvasX - image.x, y: canvasY - image.y };
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={image.url}
+                alt=""
+                className={styles.canvasImageImg}
+                draggable={false}
+              />
+              {selectedImage === image.id && (
+                <div
+                  className={styles.imageResizeHandle}
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                    setResizingImage(image.id);
+                    resizeStart.current = { x: e.clientX, y: e.clientY, width: image.width, height: image.height };
+                  }}
                 />
               )}
             </div>
@@ -928,7 +1131,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
           })}
 
           {/* Empty state */}
-          {data.nodes.length === 0 && data.shapes.length === 0 && (
+          {data.nodes.length === 0 && data.shapes.length === 0 && data.images.length === 0 && (
             <div className={styles.emptyState}>
               <p>Double-click to add a note</p>
               <p className={styles.emptyHint}>or press Tab</p>

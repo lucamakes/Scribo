@@ -1,2 +1,2 @@
 export { CanvasEditor } from './CanvasEditor';
-export type { CanvasData, CanvasNode, CanvasConnection } from './CanvasEditor';
+export type { CanvasData, CanvasNode, CanvasConnection, CanvasImage } from './CanvasEditor';
