@@ -261,8 +261,14 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
       const result = await dataService.getItem(item.id);
       if (result.success) {
         const freshItem = dbItemToSidebarItem(result.data as any, ROOT_ID);
-        setItems(prev => prev.map(i => i.id === item.id ? freshItem : i));
-        onSelectItem(freshItem);
+        // Preserve the locally-maintained order and parentId. The DB's
+        // sort_order can have gaps after a move (server only shifts, never
+        // renumbers), while the client has been normalized to sequential
+        // values. Overwriting local order with the DB value would cause
+        // ties with sibling items and randomize the visible order.
+        const merged = { ...freshItem, order: item.order, parentId: item.parentId } as SidebarItemData;
+        setItems(prev => prev.map(i => i.id === item.id ? merged : i));
+        onSelectItem(merged);
         return;
       }
     }
