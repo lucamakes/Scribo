@@ -65,6 +65,8 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
     const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const lastSavedContent = useRef('');
     const selectedItemIdRef = useRef<string | null>(null);
+    // Tracks words pasted since the last save, so they can be excluded from writing goal progress
+    const pastedWordsRef = useRef(0);
 
     const { isPro, percentage, isAtLimit, refresh: refreshSubscription } = useSubscription();
     const { fontSize, lineHeight, textColor } = usePreferences();
@@ -111,6 +113,11 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
         setShowLimitModal(true);
     }, []);
 
+    // Track pasted words so they can be excluded from writing goal progress on the next save
+    const handlePasteWords = useCallback((pastedWordCount: number) => {
+        pastedWordsRef.current += pastedWordCount;
+    }, []);
+
     // Load content when a file or canvas is selected
     useEffect(() => {
         if (selectedItem?.type === 'file' || selectedItem?.type === 'canvas') {
@@ -119,6 +126,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                 setContent(selectedItem.content || '');
                 lastSavedContent.current = selectedItem.content || '';
                 selectedItemIdRef.current = selectedItem.id;
+                pastedWordsRef.current = 0;
                 setSaveStatus('idle');
                 setError(null);
             }
@@ -166,7 +174,12 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
     // Auto-save with debounce
     const saveContent = useCallback(async (newContent: string, skipGoalTracking: boolean = false) => {
         if (!selectedItem || (selectedItem.type !== 'file' && selectedItem.type !== 'canvas')) return;
-        if (newContent === lastSavedContent.current) return;
+        if (newContent === lastSavedContent.current) {
+            // Content unchanged (e.g. user pasted then deleted back to original) - clear paste counter
+            // so it doesn't bleed into the next real save and erase legitimate progress
+            pastedWordsRef.current = 0;
+            return;
+        }
 
         setSaveStatus('saving');
         setError(null);
@@ -179,7 +192,12 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
 
         const previousWordCount = countWords(lastSavedContent.current);
         const newWordCount = countWords(newContent);
-        const wordsAdded = Math.max(0, newWordCount - previousWordCount);
+        const rawWordsAdded = Math.max(0, newWordCount - previousWordCount);
+        // Exclude pasted words from goal-tracking so copy/paste doesn't inflate progress
+        const pastedSinceLastSave = pastedWordsRef.current;
+        const wordsAdded = Math.max(0, rawWordsAdded - pastedSinceLastSave);
+        // Reset paste counter regardless of save outcome - the pasted content is now part of lastSavedContent
+        pastedWordsRef.current = 0;
 
         // Use DataService if available, otherwise use callback for demo
         if (dataService) {
@@ -593,6 +611,7 @@ export function DetailPanel({ selectedItem, projectId, onContentSaved, openInFul
                     isAtLimit={isDemo ? false : isAtLimit}
                     isPro={isDemo ? true : isPro}
                     onLimitBlocked={handleLimitBlocked}
+                    onPaste={handlePasteWords}
                     focusMode={isFocusMode}
                     fontSize={fontSize}
                     lineHeight={lineHeight}

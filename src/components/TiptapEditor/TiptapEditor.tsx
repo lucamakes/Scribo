@@ -37,6 +37,8 @@ interface TiptapEditorProps {
     isPro?: boolean;
     /** Called when typing is blocked due to word limit */
     onLimitBlocked?: () => void;
+    /** Called when text is pasted, with the count of pasted words (used to exclude pasted text from writing goal progress) */
+    onPaste?: (pastedWordCount: number) => void;
     /** Whether focus mode is active (hides toolbar) */
     focusMode?: boolean;
     /** Font size in pixels */
@@ -58,6 +60,7 @@ export function TiptapEditor({
     isAtLimit = false,
     isPro = false,
     onLimitBlocked,
+    onPaste,
     focusMode = false,
     fontSize = 18,
     lineHeight = 2.0,
@@ -101,10 +104,31 @@ export function TiptapEditor({
                 class: styles.editorContent,
             },
             // Block paste when at limit
-            handlePaste: () => {
+            handlePaste: (_view, event, slice) => {
                 if (isAtLimit && !isPro) {
                     onLimitBlocked?.();
                     return true; // Returning true prevents default paste behavior
+                }
+                // Count pasted words so the parent can exclude them from goal tracking
+                if (onPaste) {
+                    let pastedText = '';
+                    // Prefer clipboard text when available (covers plain text paste)
+                    const clipboardText = event.clipboardData?.getData('text/plain');
+                    if (clipboardText) {
+                        pastedText = clipboardText;
+                    } else {
+                        // Fallback: extract text from the ProseMirror slice
+                        slice.content.descendants((node) => {
+                            if (node.isText && node.text) {
+                                pastedText += node.text + ' ';
+                            }
+                            return true;
+                        });
+                    }
+                    const wordCount = countWordsInPlainText(pastedText);
+                    if (wordCount > 0) {
+                        onPaste(wordCount);
+                    }
                 }
                 return false;
             },
@@ -340,6 +364,19 @@ function countWordsInHtml(html: string): number {
     const text = html.replace(/<[^>]*>/g, ' ');
     const words = text
         .replace(/&nbsp;/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .split(' ')
+        .filter((word) => word.length > 0);
+    return words.length;
+}
+
+/**
+ * Count words in plain text (used for pasted content)
+ */
+function countWordsInPlainText(text: string): number {
+    if (!text) return 0;
+    const words = text
         .replace(/\s+/g, ' ')
         .trim()
         .split(' ')
