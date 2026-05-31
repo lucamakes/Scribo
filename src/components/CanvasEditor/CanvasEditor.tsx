@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Trash2, Undo2, Redo2, Circle, ZoomIn, ZoomOut, RotateCcw, Info, Square, ChevronUp, ChevronDown, GripHorizontal, Unlink, Unplug, Link, PenLine, ImagePlus, Loader2 } from 'lucide-react';
+import { Trash2, Undo2, Redo2, Circle, ZoomIn, ZoomOut, RotateCcw, Info, Square, ChevronUp, ChevronDown, GripHorizontal, Unlink, Unplug, Link, PenLine, ImagePlus, Loader2, Pencil, Eraser } from 'lucide-react';
 import { uploadCanvasImage, deleteCanvasImage } from '@/lib/services/storageService';
 import styles from './CanvasEditor.module.css';
 
@@ -48,12 +48,20 @@ export interface CanvasImage {
   url: string;
 }
 
+export interface CanvasDrawing {
+  id: string;
+  points: { x: number; y: number }[];
+  color: string;
+  width: number;
+}
+
 export interface CanvasData {
   nodes: CanvasNode[];
   connections: CanvasConnection[];
   stacks: CanvasStack[];
   shapes: CanvasShape[];
   images: CanvasImage[];
+  drawings: CanvasDrawing[];
   viewport?: { x: number; y: number; zoom: number };
 }
 
@@ -64,11 +72,27 @@ interface CanvasEditorProps {
 
 const NODE_COLORS = ['#e5e5e5', '#fecaca', '#fed7aa', '#fef08a', '#bbf7d0', '#bfdbfe', '#ddd6fe', '#fbcfe8'];
 const SHAPE_COLORS = ['#f5f5f5', '#fef2f2', '#fff7ed', '#fefce8', '#f0fdf4', '#eff6ff', '#f5f3ff', '#fdf2f8'];
+const DRAW_COLORS = ['#1f2937', '#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899'];
+const DRAW_WIDTHS = [2, 4, 8];
 const STACK_SNAP_DISTANCE = 40;
 const NODE_HEIGHT = 44;
 
 function generateId(): string {
   return `id-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+}
+
+function pointsToPath(points: { x: number; y: number }[]): string {
+  if (points.length === 0) return '';
+  if (points.length === 1) {
+    const p = points[0];
+    // A tiny segment so single taps are still visible
+    return `M ${p.x} ${p.y} L ${p.x + 0.01} ${p.y + 0.01}`;
+  }
+  let path = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    path += ` L ${points[i].x} ${points[i].y}`;
+  }
+  return path;
 }
 
 function parseCanvasData(content: string): CanvasData {
@@ -80,10 +104,11 @@ function parseCanvasData(content: string): CanvasData {
       stacks: data.stacks || [],
       shapes: data.shapes || [],
       images: data.images || [],
+      drawings: data.drawings || [],
       viewport: data.viewport || { x: 0, y: 0, zoom: 1 },
     };
   } catch {
-    return { nodes: [], connections: [], stacks: [], shapes: [], images: [], viewport: { x: 0, y: 0, zoom: 1 } };
+    return { nodes: [], connections: [], stacks: [], shapes: [], images: [], drawings: [], viewport: { x: 0, y: 0, zoom: 1 } };
   }
 }
 
@@ -114,6 +139,12 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [isDrawMode, setIsDrawMode] = useState(false);
+  const [isEraseMode, setIsEraseMode] = useState(false);
+  const [drawColor, setDrawColor] = useState(DRAW_COLORS[0]);
+  const [drawWidth, setDrawWidth] = useState(DRAW_WIDTHS[1]);
+  const [currentStroke, setCurrentStroke] = useState<{ x: number; y: number }[] | null>(null);
+  const [showDrawOptions, setShowDrawOptions] = useState(false);
   
   const canvasRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -399,6 +430,10 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
     setSelectedImage(null);
   }, [data, saveData]);
 
+  const eraseDrawing = useCallback((drawingId: string) => {
+    saveData({ ...data, drawings: data.drawings.filter(d => d.id !== drawingId) });
+  }, [data, saveData]);
+
   const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
@@ -462,7 +497,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedImage) { e.preventDefault(); deleteImage(selectedImage); }
       if (e.key === 'Enter' && selectedNode) { e.preventDefault(); setEditingNode(selectedNode); }
       if (e.key === 'Enter' && selectedShape) { e.preventDefault(); setEditingShape(selectedShape); }
-      if (e.key === 'Escape') { setSelectedNode(null); setSelectedShape(null); setSelectedImage(null); setShowColorPicker(false); }
+      if (e.key === 'Escape') { setSelectedNode(null); setSelectedShape(null); setSelectedImage(null); setShowColorPicker(false); setIsDrawMode(false); setIsEraseMode(false); setShowDrawOptions(false); }
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
       if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
     };
@@ -562,13 +597,32 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
 
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    const isCanvasArea = target === canvasRef.current || target.classList.contains(styles.canvasContent);
+    const isCanvasArea = target === canvasRef.current
+      || target.classList.contains(styles.canvasContent)
+      || target.classList.contains(styles.drawOverlay);
     if (!isCanvasArea) return;
     
     if (e.button === 1 || (e.button === 0 && e.altKey)) {
       e.preventDefault();
       setIsPanning(true);
       panStart.current = { x: e.clientX, y: e.clientY, viewX: viewport.x, viewY: viewport.y };
+      return;
+    }
+
+    // Draw mode: begin a freehand stroke instead of panning/adding notes
+    if (isDrawMode && e.button === 0) {
+      e.preventDefault();
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect) {
+        const x = (e.clientX - rect.left - viewport.x) / viewport.zoom;
+        const y = (e.clientY - rect.top - viewport.y) / viewport.zoom;
+        setCurrentStroke([{ x, y }]);
+      }
+      setSelectedNode(null);
+      setSelectedShape(null);
+      setSelectedStack(null);
+      setSelectedImage(null);
+      setShowColorPicker(false);
       return;
     }
 
@@ -595,9 +649,19 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
     setEditingNode(null);
     setEditingShape(null);
     setShowColorPicker(false);
-  }, [viewport, addNode]);
+  }, [viewport, addNode, isDrawMode]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (currentStroke) {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect) {
+        const x = (e.clientX - rect.left - viewport.x) / viewport.zoom;
+        const y = (e.clientY - rect.top - viewport.y) / viewport.zoom;
+        setCurrentStroke(prev => (prev ? [...prev, { x, y }] : [{ x, y }]));
+      }
+      return;
+    }
+
     if (isPanning) {
       const dx = e.clientX - panStart.current.x;
       const dy = e.clientY - panStart.current.y;
@@ -686,9 +750,25 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
     
     const newNodes = data.nodes.map(n => n.id === draggingNode ? { ...n, x: newX, y: newY } : n);
     setData(prev => ({ ...prev, nodes: newNodes }));
-  }, [draggingNode, draggingShape, draggingImage, draggingStackHeader, resizingShape, resizingImage, data, viewport, isPanning, findSnapPosition]);
+  }, [draggingNode, draggingShape, draggingImage, draggingStackHeader, resizingShape, resizingImage, data, viewport, isPanning, findSnapPosition, currentStroke]);
 
   const handleMouseUp = useCallback(() => {
+    // Commit a freehand stroke when finishing a draw gesture
+    if (currentStroke) {
+      if (currentStroke.length > 0) {
+        const newDrawing: CanvasDrawing = {
+          id: generateId(),
+          points: currentStroke,
+          color: drawColor,
+          width: drawWidth,
+        };
+        saveData({ ...data, drawings: [...data.drawings, newDrawing] });
+      }
+      setCurrentStroke(null);
+      setIsPanning(false);
+      return;
+    }
+
     const node = draggingNode ? data.nodes.find(n => n.id === draggingNode) : null;
     
     // Handle stack snapping on drop
@@ -748,7 +828,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
     setResizingImage(null);
     setIsPanning(false);
     setSnapPreview(null);
-  }, [draggingNode, draggingShape, draggingImage, draggingStackHeader, resizingShape, resizingImage, snapPreview, data, viewport, onContentChange, pushHistory]);
+  }, [draggingNode, draggingShape, draggingImage, draggingStackHeader, resizingShape, resizingImage, snapPreview, data, viewport, onContentChange, pushHistory, currentStroke, drawColor, drawWidth, saveData]);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
@@ -792,6 +872,42 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
           onChange={handleFileInputChange}
           style={{ display: 'none' }}
         />
+        <button
+          onClick={() => {
+            setIsDrawMode(m => !m);
+            setIsEraseMode(false);
+            setShowDrawOptions(false);
+            setSelectedNode(null);
+            setSelectedShape(null);
+            setSelectedImage(null);
+          }}
+          className={`${styles.toolButton} ${isDrawMode ? styles.active : ''}`}
+          title="Draw"
+        >
+          <Pencil size={18} strokeWidth={1.5} />
+        </button>
+        <button
+          onClick={() => {
+            setIsEraseMode(m => !m);
+            setIsDrawMode(false);
+            setShowDrawOptions(false);
+            setSelectedNode(null);
+            setSelectedShape(null);
+            setSelectedImage(null);
+          }}
+          className={`${styles.toolButton} ${isEraseMode ? styles.active : ''}`}
+          title="Erase drawings"
+        >
+          <Eraser size={18} strokeWidth={1.5} />
+        </button>
+        {isDrawMode && (
+          <button
+            onClick={() => setShowDrawOptions(v => !v)}
+            className={styles.colorButton}
+            style={{ backgroundColor: drawColor }}
+            title="Pen color & size"
+          />
+        )}
         {uploadError && (
           <div className={styles.uploadError} role="alert" title={uploadError}>
             {uploadError}
@@ -873,6 +989,33 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
         </div>
       )}
 
+      {showDrawOptions && isDrawMode && (
+        <div className={styles.drawOptions}>
+          <div className={styles.drawOptionRow}>
+            {DRAW_COLORS.map(color => (
+              <button
+                key={color}
+                className={`${styles.colorOption} ${drawColor === color ? styles.colorOptionActive : ''}`}
+                style={{ backgroundColor: color }}
+                onClick={() => setDrawColor(color)}
+              />
+            ))}
+          </div>
+          <div className={styles.drawOptionRow}>
+            {DRAW_WIDTHS.map(w => (
+              <button
+                key={w}
+                className={`${styles.widthOption} ${drawWidth === w ? styles.widthOptionActive : ''}`}
+                onClick={() => setDrawWidth(w)}
+                title={`${w}px`}
+              >
+                <span className={styles.widthDot} style={{ width: w + 4, height: w + 4, background: drawColor }} />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div
         ref={canvasRef}
         className={`${styles.canvas} ${isDraggingOver ? styles.canvasDragOver : ''}`}
@@ -884,7 +1027,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        style={{ cursor: isPanning ? 'grabbing' : 'default' }}
+        style={{ cursor: isPanning ? 'grabbing' : (isDrawMode || isEraseMode) ? 'crosshair' : 'default' }}
       >
         <div
           className={styles.canvasContent}
@@ -1138,14 +1281,55 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
             );
           })}
 
+          {/* Drawings layer (freehand strokes, rendered on top) */}
+          <svg className={`${styles.drawings} ${isEraseMode ? styles.drawingsErasable : ''}`}>
+            {data.drawings.map(drawing => (
+              <path
+                key={drawing.id}
+                className={styles.drawingPath}
+                d={pointsToPath(drawing.points)}
+                stroke={drawing.color}
+                strokeWidth={drawing.width}
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                onMouseDown={isEraseMode ? (e) => { e.stopPropagation(); eraseDrawing(drawing.id); } : undefined}
+                onMouseEnter={isEraseMode ? () => eraseDrawing(drawing.id) : undefined}
+              />
+            ))}
+            {currentStroke && currentStroke.length > 0 && (
+              <path
+                className={styles.drawingPath}
+                d={pointsToPath(currentStroke)}
+                stroke={drawColor}
+                strokeWidth={drawWidth}
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            )}
+          </svg>
+
           {/* Empty state */}
-          {data.nodes.length === 0 && data.shapes.length === 0 && data.images.length === 0 && (
+          {data.nodes.length === 0 && data.shapes.length === 0 && data.images.length === 0 && data.drawings.length === 0 && (
             <div className={styles.emptyState}>
               <p>Double-click to add a note</p>
               <p className={styles.emptyHint}>or press Tab</p>
             </div>
           )}
         </div>
+
+        {/* Capture overlay so drawing works over notes and images too */}
+        {isDrawMode && (
+          <div
+            className={styles.drawOverlay}
+            onMouseDown={(e) => { e.stopPropagation(); handleCanvasMouseDown(e); }}
+            onMouseMove={(e) => { e.stopPropagation(); handleMouseMove(e); }}
+            onMouseUp={(e) => { e.stopPropagation(); handleMouseUp(); }}
+            onMouseLeave={() => handleMouseUp()}
+            style={{ cursor: 'crosshair' }}
+          />
+        )}
       </div>
 
       {/* Info button */}
@@ -1191,6 +1375,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
             <li>Hover note → click link icon → click target</li>
             <li>Drag note below another to stack</li>
             <li>Hover connection line to delete</li>
+            <li>Pencil tool to draw, eraser to remove strokes</li>
           </ul>
         </div>
       )}

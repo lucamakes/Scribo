@@ -6,6 +6,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
+import { EditorState } from '@tiptap/pm/state';
 import { useEffect, useCallback, useRef, useState } from 'react';
 import {
     Bold,
@@ -192,7 +193,20 @@ export function TiptapEditor({
             if (currentContent !== content) {
                 editor.commands.setContent(content, { emitUpdate: false });
                 previousContent.current = content;
-                
+
+                // Reset the undo/redo history so Ctrl+Z can't reach back into the
+                // previously opened file's edits. The editor instance is reused
+                // across files (content is swapped rather than remounted), so
+                // without this the ProseMirror history stack carries over and
+                // undo would reconstruct the previous file's content here.
+                const { state } = editor.view;
+                const freshState = EditorState.create({
+                    doc: state.doc,
+                    plugins: state.plugins,
+                    schema: state.schema,
+                });
+                editor.view.updateState(freshState);
+
                 // On mobile, scroll to bottom when loading a new file with content
                 if (isMobile && content && content.length > 100) {
                     // Use a small delay to let the content render

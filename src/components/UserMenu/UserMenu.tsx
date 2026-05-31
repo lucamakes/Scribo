@@ -26,38 +26,61 @@ export function UserMenu() {
     const [showChangePassword, setShowChangePassword] = useState(false);
     const [upgradeLoading, setUpgradeLoading] = useState(false);
     const [imageStorage, setImageStorage] = useState<{ usedBytes: number; limitBytes: number } | null>(null);
+    const [checkoutSuccess, setCheckoutSuccess] = useState(false);
+    const [activating, setActivating] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
+    const isProRef = useRef(isPro);
+    const successHandled = useRef(false);
+
+    // Keep a ref in sync so the polling loop can read the latest value
+    useEffect(() => {
+        isProRef.current = isPro;
+    }, [isPro]);
 
     // Auto-refresh subscription status after successful checkout
     useEffect(() => {
         const success = searchParams.get('success');
-        if (success === 'true') {
-            // Poll for subscription update (webhook may take a moment)
-            let attempts = 0;
-            const maxAttempts = 10;
-            
-            const pollSubscription = async () => {
-                await refresh();
-                attempts++;
-                
-                // Keep polling until we're pro or max attempts reached
-                if (!isPro && attempts < maxAttempts) {
-                    setTimeout(pollSubscription, 1500);
-                } else {
-                    // Clean up URL params after polling
-                    const url = new URL(window.location.href);
-                    url.searchParams.delete('success');
-                    url.searchParams.delete('checkout_id');
-                    url.searchParams.delete('customer_session_token');
-                    window.history.replaceState({}, '', url.pathname);
-                }
-            };
-            
-            // Start polling after a short delay to let webhook process
-            setTimeout(pollSubscription, 1000);
-        }
-    }, [searchParams, refresh, isPro]);
+        if (success !== 'true' || successHandled.current) return;
+
+        // Only run this flow once per return from checkout
+        successHandled.current = true;
+
+        // Clean the URL right away so a refresh doesn't replay this flow
+        const url = new URL(window.location.href);
+        url.searchParams.delete('success');
+        url.searchParams.delete('checkout_id');
+        url.searchParams.delete('customer_session_token');
+        window.history.replaceState({}, '', url.pathname);
+
+        let attempts = 0;
+        const maxAttempts = 10;
+        let timeoutId: ReturnType<typeof setTimeout>;
+
+        setActivating(true);
+        setCheckoutSuccess(true);
+
+        const pollSubscription = async () => {
+            await refresh();
+            attempts++;
+
+            // The webhook flips the DB to "pro"; keep polling until it lands
+            if (isProRef.current) {
+                setActivating(false);
+            } else if (attempts < maxAttempts) {
+                timeoutId = setTimeout(pollSubscription, 1500);
+            } else {
+                // Webhook hasn't landed yet; stop spinning but keep the
+                // confirmation visible so the user isn't left hanging.
+                setActivating(false);
+            }
+        };
+
+        // Start polling after a short delay to let the webhook process
+        timeoutId = setTimeout(pollSubscription, 1000);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchParams, refresh]);
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -345,6 +368,55 @@ export function UserMenu() {
                         </div>
 
                         <p className={styles.pricingFooter}>Cancel anytime. Your writing is always yours.</p>
+                    </div>
+                </div>
+            )}
+
+            {checkoutSuccess && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.successModal}>
+                        {activating ? (
+                            <>
+                                <div className={styles.successSpinner} />
+                                <h2 className={styles.successTitle}>Activating your subscription…</h2>
+                                <p className={styles.successSubtitle}>
+                                    Your payment went through. We&apos;re just confirming things with our payment provider.
+                                </p>
+                            </>
+                        ) : isPro ? (
+                            <>
+                                <div className={styles.successIcon}>
+                                    <Sparkles size={28} strokeWidth={1.5} />
+                                </div>
+                                <h2 className={styles.successTitle}>Welcome to Pro!</h2>
+                                <p className={styles.successSubtitle}>
+                                    Your subscription is active. Enjoy unlimited words and all Pro features.
+                                </p>
+                                <button
+                                    className={styles.successButton}
+                                    onClick={() => setCheckoutSuccess(false)}
+                                >
+                                    Start writing
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <div className={styles.successIcon}>
+                                    <Check size={28} strokeWidth={1.5} />
+                                </div>
+                                <h2 className={styles.successTitle}>Payment received</h2>
+                                <p className={styles.successSubtitle}>
+                                    Thanks! Your subscription is being set up and should be active in a moment.
+                                    If your plan doesn&apos;t update shortly, try refreshing the page.
+                                </p>
+                                <button
+                                    className={styles.successButton}
+                                    onClick={() => setCheckoutSuccess(false)}
+                                >
+                                    Got it
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             )}
