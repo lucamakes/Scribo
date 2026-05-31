@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useSubscription } from '@/lib/hooks/useSubscription';
+import { getImageStorageUsage } from '@/lib/services/storageService';
 import { SettingsModal } from '@/components/SettingsModal/SettingsModal';
 import { SubscriptionModal } from '@/components/SubscriptionModal/SubscriptionModal';
 import IconButton from '@/components/IconButton/IconButton';
@@ -24,6 +25,7 @@ export function UserMenu() {
     const [showSubscription, setShowSubscription] = useState(false);
     const [showChangePassword, setShowChangePassword] = useState(false);
     const [upgradeLoading, setUpgradeLoading] = useState(false);
+    const [imageStorage, setImageStorage] = useState<{ usedBytes: number; limitBytes: number } | null>(null);
     const menuRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -80,6 +82,20 @@ export function UserMenu() {
             clearTimeout(timeoutId);
             document.removeEventListener('mousedown', handleClickOutside);
         };
+    }, [isOpen]);
+
+    // Load image storage usage when the menu opens
+    useEffect(() => {
+        if (!isOpen) return;
+        let cancelled = false;
+        getImageStorageUsage()
+            .then((usage) => {
+                if (!cancelled) {
+                    setImageStorage({ usedBytes: usage.usedBytes, limitBytes: usage.limitBytes });
+                }
+            })
+            .catch((err) => console.error('Failed to load image storage usage:', err));
+        return () => { cancelled = true; };
     }, [isOpen]);
 
     const handleLogout = useCallback(async () => {
@@ -163,6 +179,32 @@ export function UserMenu() {
                                 </span>
                             </div>
                         )}
+
+                        {imageStorage && (() => {
+                            const usedMb = imageStorage.usedBytes / (1024 * 1024);
+                            const limitMb = imageStorage.limitBytes / (1024 * 1024);
+                            const pct = imageStorage.limitBytes > 0
+                                ? Math.min(100, (imageStorage.usedBytes / imageStorage.limitBytes) * 100)
+                                : 0;
+                            const fillClass = pct >= 100
+                                ? styles.storageFillFull
+                                : pct >= 80
+                                    ? styles.storageFillNear
+                                    : '';
+                            return (
+                                <div className={styles.wordCountSection}>
+                                    <div className={styles.wordCountBar}>
+                                        <div
+                                            className={`${styles.wordCountFill} ${fillClass}`}
+                                            style={{ width: `${pct}%` }}
+                                        />
+                                    </div>
+                                    <span className={styles.wordCountText}>
+                                        {usedMb.toFixed(1)} / {limitMb.toFixed(0)} MB images
+                                    </span>
+                                </div>
+                            );
+                        })()}
 
                         <div className={styles.menuItems}>
                             {isPro ? (

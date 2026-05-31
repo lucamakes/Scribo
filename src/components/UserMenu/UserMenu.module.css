@@ -151,6 +151,14 @@
     transition: width 0.3s ease;
 }
 
+.storageFillNear {
+    background: #d97706;
+}
+
+.storageFillFull {
+    background: #dc2626;
+}
+
 .wordCountText {
     font-size: 11px;
     color: var(--color-text-tertiary);

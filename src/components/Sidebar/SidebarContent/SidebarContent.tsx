@@ -11,6 +11,7 @@ export function SidebarContent() {
     project,
     items,
     rootId,
+    getItemChildren,
     selectedItemId,
     expandedIds,
     toggleExpanded,
@@ -24,7 +25,7 @@ export function SidebarContent() {
   } = useSidebar();
 
   const renderItem = useCallback((item: SidebarItemData, depth: number) => {
-    const children = items.filter(i => i.parentId === item.id).sort((a, b) => a.order - b.order);
+    const children = getItemChildren(item.id);
     const isRoot = item.id === rootId;
     return (
       <SidebarItem
@@ -47,7 +48,7 @@ export function SidebarContent() {
         onCancelEdit={cancelEdit}
       />
     );
-  }, [items, handleDrop, actions, rootId, selectedItemId, expandedIds, toggleExpanded, editingId, editName, setEditName, saveEdit, cancelEdit]);
+  }, [items, getItemChildren, handleDrop, actions, rootId, selectedItemId, expandedIds, toggleExpanded, editingId, editName, setEditName, saveEdit, cancelEdit]);
 
   const rootItem: SidebarItemData = useMemo(() => ({
     id: rootId,
@@ -60,7 +61,7 @@ export function SidebarContent() {
     updatedAt: project.createdAt,
   }), [rootId, project]);
 
-  const rootChildren = items.filter(i => i.parentId === rootId).sort((a, b) => a.order - b.order);
+  const rootChildren = getItemChildren(rootId);
 
   return (
     <nav className={styles.content}>

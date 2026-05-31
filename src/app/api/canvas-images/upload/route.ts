@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import sharp from 'sharp';
+import {
+  IMAGE_BUCKET_NAME as BUCKET_NAME,
+  getUserStorageLimit,
+  getUserStorageUsage,
+} from '@/lib/services/imageStorage';
 
 export const dynamic = 'force-dynamic';
 
-const BUCKET_NAME = 'canvas-images';
 const AVIF_QUALITY = 60;
 
 export async function POST(request: NextRequest) {
@@ -37,6 +41,22 @@ export async function POST(request: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const avifBuffer = await sharp(buffer).avif({ quality: AVIF_QUALITY }).toBuffer();
+
+    // Enforce the per-account storage limit before writing the new file.
+    const { limitBytes, limitMb } = await getUserStorageLimit(supabase, user.id);
+    const currentUsage = await getUserStorageUsage(supabase, user.id);
+    if (currentUsage + avifBuffer.length > limitBytes) {
+      const usedMb = (currentUsage / (1024 * 1024)).toFixed(1);
+      return NextResponse.json(
+        {
+          error: `Storage limit reached. You've used ${usedMb} MB of your ${limitMb} MB image storage. Delete some images to free up space.`,
+          code: 'STORAGE_LIMIT_EXCEEDED',
+          limitBytes,
+          usedBytes: currentUsage,
+        },
+        { status: 413 }
+      );
+    }
 
     const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 9)}.avif`;
 

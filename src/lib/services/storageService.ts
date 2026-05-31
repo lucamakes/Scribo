@@ -30,3 +30,26 @@ export async function deleteCanvasImage(url: string): Promise<void> {
 
   await supabase.storage.from(BUCKET_NAME).remove([bucketPath]);
 }
+
+export interface ImageStorageUsage {
+  usedBytes: number;
+  limitBytes: number;
+  limitMb: number;
+  isPro: boolean;
+}
+
+export async function getImageStorageUsage(): Promise<ImageStorageUsage> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not authenticated');
+
+  const res = await fetch('/api/canvas-images/usage', {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || 'Failed to fetch usage');
+  }
+
+  return res.json();
+}

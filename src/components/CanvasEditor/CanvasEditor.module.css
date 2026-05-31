@@ -84,6 +84,59 @@
   50% { opacity: 0.5; }
 }
 
+.uploadError {
+  font-size: 12px;
+  font-weight: 500;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-left: 8px;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.storageMeter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding-left: 12px;
+}
+
+.storageBarTrack {
+  width: 72px;
+  height: 6px;
+  background: #ededed;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.storageBarFill {
+  height: 100%;
+  background: #1565a8;
+  border-radius: 3px;
+  transition: width 0.25s ease, background 0.25s ease;
+}
+
+.storageBarNear {
+  background: #d97706;
+}
+
+.storageBarFull {
+  background: #dc2626;
+}
+
+.storageLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  white-space: nowrap;
+}
+
 /* Zoom controls - bottom right corner */
 .zoomControls {
   position: absolute;

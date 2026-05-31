@@ -3,10 +3,11 @@
    ============================================ */
 
 .sidebar {
+  position: relative;
   display: flex;
   flex-direction: column;
-  min-width: 260px;
-  max-width: 500px;
+  min-width: 220px;
+  max-width: 600px;
   background-color: #ffffff;
   border-right: 1px solid #f0f0f0;
   height: 100%;
@@ -15,12 +16,54 @@
   transition: width 0.2s ease;
 }
 
-/* Mobile: Full width sidebar */
+/* Disable the width transition while actively dragging the handle */
+.sidebar.noTransition {
+  transition: none;
+}
+
+/* ============================================
+   RESIZE HANDLE
+   ============================================ */
+
+.resizeHandle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 20;
+  background: transparent;
+  touch-action: none;
+}
+
+.resizeHandle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+  background-color: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.resizeHandle:hover::after,
+.resizeHandle.resizing::after {
+  background-color: #3b82f6;
+}
+
+/* Mobile: Full width sidebar, no resizing */
 @media (max-width: 768px) {
   .sidebar {
     min-width: 100%;
     max-width: 100%;
     border-right: none;
+    overflow: hidden;
+  }
+
+  .resizeHandle {
+    display: none;
   }
 }
 

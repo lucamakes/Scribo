@@ -44,11 +44,9 @@ export function SidebarItemName({
     );
   }
 
-  const displayName = name.length > 15 ? name.slice(0, 15) + '...' : name;
-
   return (
     <span className={`${styles.name} ${isRoot ? styles.rootName : ''}`}>
-      {displayName}
+      {name}
     </span>
   );
 }

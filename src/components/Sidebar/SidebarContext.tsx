@@ -15,6 +15,13 @@ interface SidebarContextValue {
   items: SidebarItemData[];
   rootId: string;
 
+  /**
+   * Returns the direct children of a given parent id, sorted by order.
+   * Backed by a precomputed map so lookups are O(1) instead of scanning
+   * the full item list on every call.
+   */
+  getItemChildren: (parentId: string) => SidebarItemData[];
+
   // Loading/error state
   loading: boolean;
   error: string | null;
@@ -146,6 +153,32 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Precompute children grouped by parent id so the tree can be rendered
+  // without scanning the entire item list for every node (O(n) build instead
+  // of O(n) per-item filtering, i.e. O(n^2) overall). Each group is sorted by
+  // order once here.
+  const childrenByParent = useMemo(() => {
+    const map = new Map<string, SidebarItemData[]>();
+    for (const item of items) {
+      const key = item.parentId ?? ROOT_ID;
+      const group = map.get(key);
+      if (group) {
+        group.push(item);
+      } else {
+        map.set(key, [item]);
+      }
+    }
+    for (const group of map.values()) {
+      group.sort((a, b) => a.order - b.order);
+    }
+    return map;
+  }, [items, ROOT_ID]);
+
+  const getItemChildren = useCallback(
+    (parentId: string): SidebarItemData[] => childrenByParent.get(parentId) ?? [],
+    [childrenByParent]
+  );
+
   // Load items
   const loadItems = useCallback(async () => {
     setLoading(true);
@@ -218,7 +251,7 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
     const idsToDelete = new Set<string>();
     const collectChildren = (parentId: string) => {
       idsToDelete.add(parentId);
-      items.filter(i => i.parentId === parentId).forEach(child => collectChildren(child.id));
+      getItemChildren(parentId).forEach(child => collectChildren(child.id));
     };
     collectChildren(id);
 
@@ -230,7 +263,7 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
       // Reload to restore state
       loadItems();
     }
-  }, [ROOT_ID, items, dataService, loadItems]);
+  }, [ROOT_ID, getItemChildren, dataService, loadItems]);
 
   // Add
   const handleAdd = useCallback(async (parentId: string, type: SidebarItemType) => {
@@ -357,6 +390,7 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
     project,
     items,
     rootId: ROOT_ID,
+    getItemChildren,
     loading,
     error,
     selectedItemId,
@@ -385,7 +419,7 @@ export function SidebarProvider({ children, project, selectedItemId, onSelectIte
     reloadItems: loadItems,
     isDemo: dataService.isDemo,
   }), [
-    project, items, ROOT_ID, loading, error, selectedItemId,
+    project, items, ROOT_ID, getItemChildren, loading, error, selectedItemId,
     expandedIds, toggleExpanded, editingId, editName, startEditing,
     saveEdit, cancelEdit, actions, handleDrop, showTrash, showExport,
     showSearch, showMenu, addModalParentId, searchQuery, loadItems, dataService.isDemo

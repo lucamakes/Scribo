@@ -112,6 +112,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
   const [draggingImage, setDraggingImage] = useState<string | null>(null);
   const [resizingImage, setResizingImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -348,6 +349,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
 
   const handleImageUpload = useCallback(async (file: File, dropX?: number, dropY?: number) => {
     setIsUploading(true);
+    setUploadError(null);
     try {
       const url = await uploadCanvasImage(file);
       
@@ -383,6 +385,7 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
       img.src = url;
     } catch (err) {
       console.error('Image upload failed:', err);
+      setUploadError(err instanceof Error ? err.message : 'Image upload failed');
       setIsUploading(false);
     }
   }, [data, saveData, viewport]);
@@ -789,6 +792,11 @@ export function CanvasEditor({ content, onContentChange }: CanvasEditorProps) {
           onChange={handleFileInputChange}
           style={{ display: 'none' }}
         />
+        {uploadError && (
+          <div className={styles.uploadError} role="alert" title={uploadError}>
+            {uploadError}
+          </div>
+        )}
         <div className={styles.divider} />
         <button onClick={undo} className={styles.toolButton} disabled={history.length === 0} title="Undo (Ctrl+Z)">
           <Undo2 size={18} strokeWidth={1.5} />

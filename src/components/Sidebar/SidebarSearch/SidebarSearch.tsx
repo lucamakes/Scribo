@@ -12,6 +12,7 @@ export function SidebarSearch() {
     project,
     items,
     rootId,
+    getItemChildren,
     selectedItemId,
     showSearch,
     setShowSearch,
@@ -77,7 +78,7 @@ export function SidebarSearch() {
   }), [actions, setShowSearch, setSearchQuery]);
 
   const renderSearchItem = useCallback((item: SidebarItemData, depth: number) => {
-    const children = items.filter(i => i.parentId === item.id).sort((a, b) => a.order - b.order);
+    const children = getItemChildren(item.id);
     const isRoot = item.id === rootId;
     return (
       <SidebarItem
@@ -100,7 +101,7 @@ export function SidebarSearch() {
         onCancelEdit={cancelEdit}
       />
     );
-  }, [items, handleDrop, searchActions, rootId, selectedItemId, searchExpandedIds, toggleSearchExpanded, editingId, editName, setEditName, saveEdit, cancelEdit]);
+  }, [items, getItemChildren, handleDrop, searchActions, rootId, selectedItemId, searchExpandedIds, toggleSearchExpanded, editingId, editName, setEditName, saveEdit, cancelEdit]);
 
   const rootItem: SidebarItemData = useMemo(() => ({
     id: rootId,
@@ -113,7 +114,7 @@ export function SidebarSearch() {
     updatedAt: project.createdAt,
   }), [rootId, project]);
 
-  const rootChildren = items.filter(i => i.parentId === rootId).sort((a, b) => a.order - b.order);
+  const rootChildren = getItemChildren(rootId);
 
   const getPath = useCallback((itemId: string): string => {
     const currentItem = items.find(i => i.id === itemId);
