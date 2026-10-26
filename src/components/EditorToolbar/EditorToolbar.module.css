@@ -1,0 +1,134 @@
+.toolbarRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 24px 0;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    flex: 1;
+    min-width: 0;
+}
+
+.toolbarGroup {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.divider {
+    width: 1px;
+    height: 24px;
+    background: #e5e5e5;
+    margin: 0 8px;
+}
+
+.toolbarButton,
+.notesToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    background: #f1f1f1;
+    border: none;
+    border-radius: 6px;
+    color: #4a4a4a;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.notesToggle {
+    gap: 6px;
+    flex-shrink: 0;
+    padding: 0 10px;
+}
+
+.toolbarButton:hover:not(:disabled),
+.notesToggle:hover {
+    background: #e5e5e5;
+    color: #1a1a1a;
+}
+
+.toolbarButton:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.toolbarButton.active,
+.notesToggle.active {
+    background: rgba(26, 120, 194, 0.1);
+    color: #1a78c2;
+}
+
+@media (max-width: 768px) {
+    .toolbarRow {
+        padding: 12px 0;
+    }
+
+    .toolbar {
+        gap: 2px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .toolbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .toolbarGroup,
+    .notesToggle {
+        flex-shrink: 0;
+    }
+
+    .notesToggle {
+        margin-left: 0;
+    }
+
+    .toolbarButton,
+    .notesToggle {
+        min-width: 40px;
+        height: 40px;
+        font-size: 15px;
+    }
+
+    .divider {
+        margin: 0 4px;
+        height: 20px;
+        flex-shrink: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .toolbarRow {
+        padding: 10px 0;
+    }
+
+    .toolbar {
+        gap: 2px;
+    }
+
+    .toolbarButton,
+    .notesToggle {
+        min-width: 36px;
+        height: 36px;
+        padding: 0 6px;
+        font-size: 14px;
+    }
+
+    .divider {
+        margin: 0 3px;
+    }
+}

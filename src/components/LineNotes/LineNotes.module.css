@@ -1,0 +1,99 @@
+.column {
+    position: absolute;
+    inset: 0;
+    padding-left: 16px;
+    border-left: 1px solid #f0f0f0;
+}
+
+.align {
+    position: relative;
+    height: 100%;
+}
+
+.note {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 4px 8px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: #5c574f;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.45;
+    resize: none;
+    overflow: auto;
+}
+
+.note::placeholder {
+    color: #c4c0ba;
+}
+
+.note:hover {
+    border-color: #e6e4df;
+    background: rgba(26, 120, 194, 0.04);
+}
+
+.note:focus {
+    outline: none;
+    border-color: rgba(26, 120, 194, 0.45);
+    background: #ffffff;
+}
+
+.noteFilled {
+    background: #f7f6f3;
+    border-color: #eceae6;
+}
+
+.noteActive:not(:focus) {
+    border-color: rgba(26, 120, 194, 0.2);
+}
+
+.note::-webkit-scrollbar {
+    width: 4px;
+}
+
+.note::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 2px;
+}
+
+.stack {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.stackHeading {
+    margin: 0 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #8a8a8a;
+}
+
+.stackItem {
+    margin-bottom: 14px;
+}
+
+.excerpt {
+    margin: 0 0 4px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #8a8a8a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.noteStacked {
+    position: static;
+    display: block;
+    height: auto;
+    min-height: 72px;
+}
