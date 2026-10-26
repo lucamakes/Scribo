@@ -43,7 +43,7 @@ function LineNoteField({ entry, active, stacked, onChange }: LineNoteFieldProps)
 
     const label = entry.excerpt.length > 0
         ? `Note for: ${entry.excerpt}`
-        : 'Note for empty line';
+        : 'Note for this line';
 
     const filled = value.trim().length > 0;
 
@@ -51,7 +51,7 @@ function LineNoteField({ entry, active, stacked, onChange }: LineNoteFieldProps)
         <div className={stacked ? styles.stackItem : undefined}>
             {stacked && (
                 <p className={styles.excerpt}>
-                    {entry.excerpt.length > 0 ? entry.excerpt : 'Empty line'}
+                    {entry.excerpt.length > 0 ? entry.excerpt : 'This line'}
                 </p>
             )}
             <textarea

@@ -2,6 +2,7 @@
 
 import { useSidebar } from '../SidebarContext';
 import { GoalProgress } from '@/components/GoalProgress/GoalProgress';
+import { countWordsInHtml } from '@/lib/editor/wordCount';
 import styles from './SidebarGoals.module.css';
 
 export function SidebarGoals() {
@@ -9,8 +10,7 @@ export function SidebarGoals() {
 
   const currentWordCount = items.reduce((sum, item) => {
     if (item.type === 'file' && item.content) {
-      const plainText = item.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-      return sum + (plainText ? plainText.split(/\s+/).filter(Boolean).length : 0);
+      return sum + countWordsInHtml(item.content);
     }
     return sum;
   }, 0);

@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { countWordsInHtml } from '@/lib/editor/wordCount';
 
 const FREE_WORD_LIMIT = 15000;
 
@@ -40,7 +41,7 @@ export const subscriptionService = {
    * Get user's subscription status.
    */
   async getStatus(userId: string): Promise<ServiceResult<SubscriptionInfo>> {
-    // @ts-ignore - users table may not be in generated types yet
+    // @ts-expect-error - users table may not be in generated types yet
     const { data, error } = await supabase
       .from('users')
       .select('subscription_status, polar_customer_id, subscription_end_date')
@@ -206,24 +207,11 @@ export const subscriptionService = {
 };
 
 /**
- * Count words in HTML content.
- * Strips HTML tags and counts actual words.
+ * Count words in stored manuscript HTML.
+ * Margin notes in attributes are ignored, including notes that contain ">".
  */
 function countWords(html: string): number {
-  if (!html) return 0;
-
-  // Strip HTML tags
-  const text = html.replace(/<[^>]*>/g, ' ');
-
-  // Normalize whitespace and split
-  const words = text
-    .replace(/&nbsp;/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .split(' ')
-    .filter((word) => word.length > 0);
-
-  return words.length;
+  return countWordsInHtml(html);
 }
 
 export { countWords };

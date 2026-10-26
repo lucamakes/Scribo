@@ -45,8 +45,9 @@
 }
 
 .noteFilled {
-    background: #f7f6f3;
-    border-color: #eceae6;
+    background: rgba(26, 120, 194, 0.1);
+    border-color: rgba(26, 120, 194, 0.35);
+    box-shadow: inset 3px 0 0 #1a78c2;
 }
 
 .noteActive:not(:focus) {

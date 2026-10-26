@@ -69,7 +69,7 @@ function activeLinePos(editor: Editor): number | null {
 }
 
 /**
- * Measure each manuscript line so a note field can sit beside it.
+ * Measure each manuscript line that contains text so a note field can sit beside it.
  * `layoutToken` should change when font size or line height changes, because
  * those restyle the text without an editor transaction.
  */
@@ -93,6 +93,10 @@ export function useLineNoteEntries(
         const rootRect = root.getBoundingClientRect();
         const next: LineNoteEntry[] = [];
         forEachLineBlock(editor.state.doc, (node, pos) => {
+            const excerpt = excerptFor(node.textContent);
+            const note = readLineNote(node) ?? '';
+            // Blank lines have no note field. A leftover note on a now-empty line stays visible.
+            if (excerpt.length === 0 && note.length === 0) return;
             const dom = editor.view.nodeDOM(pos);
             if (!(dom instanceof HTMLElement)) return;
             const rect = dom.getBoundingClientRect();
@@ -100,8 +104,8 @@ export function useLineNoteEntries(
                 pos,
                 top: Math.round(rect.top - rootRect.top),
                 height: Math.max(1, Math.round(rect.height)),
-                note: readLineNote(node) ?? '',
-                excerpt: excerptFor(node.textContent),
+                note,
+                excerpt,
             });
         });
 

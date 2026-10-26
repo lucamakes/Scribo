@@ -110,9 +110,11 @@
     text-align: left;
 }
 
-/* Lines that already have a note, visible while the notes column is closed */
-.editor:not(.notesVisible) :global(.tiptap [data-line-note]) {
-    box-shadow: inset 2px 0 0 rgba(26, 120, 194, 0.7);
+/* A line with a note is marked in the manuscript, whether the notes column is open or closed. */
+.editor :global(.tiptap [data-line-note]) {
+    background-color: rgba(26, 120, 194, 0.12);
+    box-shadow: inset 3px 0 0 #1a78c2;
+    border-radius: 3px;
 }
 
 /* Scrollbar */
