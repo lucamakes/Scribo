@@ -39,8 +39,6 @@ interface TiptapEditorProps {
     lineHeight?: number;
     /** Text color */
     textColor?: string;
-    /** Draw the notes list beside the manuscript. Used when the file sidebar is covered. */
-    notesInEditor?: boolean;
 }
 
 /**
@@ -59,7 +57,6 @@ export function TiptapEditor({
     fontSize = 18,
     lineHeight = 2.0,
     textColor = '#4a4a4a',
-    notesInEditor = false,
 }: TiptapEditorProps) {
     const isInitialMount = useRef(true);
     const previousContent = useRef(content);
@@ -230,7 +227,7 @@ export function TiptapEditor({
         }
     }, [editor, onContentChange]);
 
-    useManuscriptNotes(editor, notesInEditor);
+    useManuscriptNotes(editor);
 
     if (!editor) {
         return (
@@ -263,7 +260,7 @@ export function TiptapEditor({
                         </div>
                     </div>
                 </div>
-                {notesInEditor && <ManuscriptNotes layout="panel" />}
+                <ManuscriptNotes />
             </div>
         </div>
     );

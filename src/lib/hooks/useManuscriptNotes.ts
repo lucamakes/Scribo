@@ -9,9 +9,9 @@ import { forEachLineBlock, readLineNote, setLineNote } from '@/lib/editor/lineNo
 import {
     publishManuscriptNotes,
     setManuscriptNoteActions,
-    setManuscriptNotesInEditor,
     clearManuscriptNotes,
 } from '@/lib/editor/manuscriptNotesStore';
+import { setNotesPanelOpen } from '@/lib/editor/notesPanelPreference';
 import type { ManuscriptNoteItem, PendingNote } from '@/lib/editor/manuscriptNotesStore';
 import {
     addSelectionNote,
@@ -81,17 +81,14 @@ function activeIdFor(doc: ProseMirrorNode, from: number, to: number): string | n
 }
 
 /**
- * Keeps the sidebar note list in step with the open manuscript.
+ * Keeps the notes panel in step with the open manuscript.
  * A highlight is remembered when focus moves into the notes list, so writing
  * the note does not lose the selection.
  */
-export function useManuscriptNotes(editor: Editor | null, notesInEditor: boolean): void {
+export function useManuscriptNotes(editor: Editor | null): void {
     const rangeRef = useRef<{ from: number; to: number } | null>(null);
     const clearTimer = useRef<number | null>(null);
-
-    useEffect(() => {
-        setManuscriptNotesInEditor(notesInEditor);
-    }, [notesInEditor]);
+    const pendingKeyRef = useRef<string | null>(null);
 
     useEffect(() => {
         if (!editor || editor.isDestroyed) {
@@ -127,9 +124,14 @@ export function useManuscriptNotes(editor: Editor | null, notesInEditor: boolean
                 rangeRef.current = null;
             }
 
+            const pendingKey = pending ? `${pending.noteId ?? ''}:${pending.excerpt}` : null;
+            if (pendingKey && pendingKey !== pendingKeyRef.current) {
+                setNotesPanelOpen(true);
+            }
+            pendingKeyRef.current = pendingKey;
+
             publishManuscriptNotes({
                 active: true,
-                notesInEditor: false,
                 notes,
                 pending,
                 activeId,

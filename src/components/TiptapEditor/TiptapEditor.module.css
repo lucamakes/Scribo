@@ -79,16 +79,18 @@
     text-align: left;
 }
 
-/* A highlighted passage with a note, including when the line wraps. */
+/* A noted passage. Amber, so it stays distinct from the blue marker. */
 .editor :global(.tiptap span[data-note-id]) {
-    background-color: rgba(26, 120, 194, 0.16);
+    background-color: rgba(214, 168, 54, 0.45);
     border-radius: 2px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
 }
 
 /* Older notes that were stored on a whole line. */
 .editor :global(.tiptap [data-line-note]) {
-    background-color: rgba(26, 120, 194, 0.12);
-    box-shadow: inset 3px 0 0 #1a78c2;
+    background-color: rgba(214, 168, 54, 0.28);
+    box-shadow: inset 3px 0 0 #c4922a;
     border-radius: 3px;
 }
 

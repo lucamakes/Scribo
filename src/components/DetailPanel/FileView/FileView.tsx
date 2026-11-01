@@ -152,7 +152,6 @@ export function FileView(props: FileViewProps) {
                     fontSize={fontSize}
                     lineHeight={lineHeight}
                     textColor={textColor}
-                    notesInEditor={isFullscreen || isMobile}
                 />
             </div>
             {isFullscreen && (

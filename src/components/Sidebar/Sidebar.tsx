@@ -7,7 +7,6 @@ import { SidebarProvider, useSidebar } from './SidebarContext';
 import { SidebarHeader } from './SidebarHeader/SidebarHeader';
 import { SidebarContent } from './SidebarContent/SidebarContent';
 import { SidebarGoals } from './SidebarGoals/SidebarGoals';
-import { SidebarNotes } from './SidebarNotes/SidebarNotes';
 import { SidebarModals } from './SidebarModals/SidebarModals';
 import { SidebarSearch } from './SidebarSearch/SidebarSearch';
 import { AddItemModal } from './AddItemModal/AddItemModal';
@@ -179,7 +178,6 @@ function SidebarInner({ onToggleBlankView, onBackToProjects, onOpenSettings }: {
       {error && <div className={styles.error}>{error}</div>}
       
       <SidebarContent />
-      <SidebarNotes />
       <SidebarGoals />
       <SidebarModals />
       <SidebarSearch />

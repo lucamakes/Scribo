@@ -1,5 +1,5 @@
 /**
- * One saved note shown in the sidebar.
+ * One saved note for the open manuscript.
  */
 export interface ManuscriptNoteItem {
     readonly id: string;
@@ -24,7 +24,6 @@ export interface PendingNote {
  */
 export interface ManuscriptNotesSnapshot {
     readonly active: boolean;
-    readonly notesInEditor: boolean;
     readonly notes: readonly ManuscriptNoteItem[];
     readonly pending: PendingNote | null;
     readonly activeId: string | null;
@@ -41,7 +40,6 @@ export interface ManuscriptNoteActions {
 
 const EMPTY_SNAPSHOT: ManuscriptNotesSnapshot = {
     active: false,
-    notesInEditor: false,
     notes: [],
     pending: null,
     activeId: null,
@@ -49,7 +47,6 @@ const EMPTY_SNAPSHOT: ManuscriptNotesSnapshot = {
 
 const listeners = new Set<() => void>();
 let snapshot: ManuscriptNotesSnapshot = EMPTY_SNAPSHOT;
-let notesInEditorFlag = false;
 let actions: ManuscriptNoteActions | null = null;
 
 function emit(next: ManuscriptNotesSnapshot): void {
@@ -101,28 +98,15 @@ export function getManuscriptNotesServerSnapshot(): ManuscriptNotesSnapshot {
  * Replace the snapshot when the notes, the highlight, or the active row changed.
  */
 export function publishManuscriptNotes(next: ManuscriptNotesSnapshot): void {
-    const withFlag: ManuscriptNotesSnapshot = { ...next, notesInEditor: notesInEditorFlag };
     if (
-        snapshot.active === withFlag.active
-        && snapshot.notesInEditor === withFlag.notesInEditor
-        && snapshot.activeId === withFlag.activeId
-        && samePending(snapshot.pending, withFlag.pending)
-        && sameNotes(snapshot.notes, withFlag.notes)
+        snapshot.active === next.active
+        && snapshot.activeId === next.activeId
+        && samePending(snapshot.pending, next.pending)
+        && sameNotes(snapshot.notes, next.notes)
     ) {
         return;
     }
-    emit(withFlag);
-}
-
-/**
- * Where the list is drawn. Fullscreen and narrow windows cover the file sidebar,
- * so the same list moves beside the manuscript.
- */
-export function setManuscriptNotesInEditor(notesInEditor: boolean): void {
-    if (notesInEditorFlag === notesInEditor) return;
-    notesInEditorFlag = notesInEditor;
-    if (!snapshot.active) return;
-    emit({ ...snapshot, notesInEditor });
+    emit(next);
 }
 
 /**
@@ -145,5 +129,5 @@ export function setManuscriptNoteActions(next: ManuscriptNoteActions | null): vo
 export function clearManuscriptNotes(): void {
     actions = null;
     if (!snapshot.active && snapshot.notes.length === 0 && snapshot.pending === null) return;
-    emit({ ...EMPTY_SNAPSHOT, notesInEditor: notesInEditorFlag });
+    emit(EMPTY_SNAPSHOT);
 }

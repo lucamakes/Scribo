@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useSyncExternalStore } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
     getManuscriptNotesServerSnapshot,
     getManuscriptNotesSnapshot,
@@ -8,12 +9,13 @@ import {
     subscribeManuscriptNotes,
 } from '@/lib/editor/manuscriptNotesStore';
 import type { ManuscriptNoteItem, PendingNote } from '@/lib/editor/manuscriptNotesStore';
+import {
+    getNotesPanelOpenServerSnapshot,
+    getNotesPanelOpenSnapshot,
+    setNotesPanelOpen,
+    subscribeNotesPanelOpen,
+} from '@/lib/editor/notesPanelPreference';
 import styles from './ManuscriptNotes.module.css';
-
-interface ManuscriptNotesProps {
-    /** Sidebar sits under the file tree. Panel sits beside the manuscript when the sidebar is covered. */
-    layout: 'sidebar' | 'panel';
-}
 
 interface ComposerProps {
     pending: PendingNote;
@@ -113,36 +115,62 @@ function NoteRow({ note, active }: NoteRowProps) {
 }
 
 /**
- * Minimal list of notes for the open manuscript.
+ * Collapsible notes for the open manuscript, beside the writing.
  * Highlight text to add one. Click a saved note to scroll to it.
  */
-export function ManuscriptNotes({ layout }: ManuscriptNotesProps) {
+export function ManuscriptNotes() {
     const snapshot = useSyncExternalStore(
         subscribeManuscriptNotes,
         getManuscriptNotesSnapshot,
         getManuscriptNotesServerSnapshot,
     );
+    const open = useSyncExternalStore(
+        subscribeNotesPanelOpen,
+        getNotesPanelOpenSnapshot,
+        getNotesPanelOpenServerSnapshot,
+    );
     if (!snapshot.active) return null;
 
-    const className = layout === 'panel' ? styles.panel : styles.sidebar;
     const notes = snapshot.pending?.noteId
         ? snapshot.notes.filter((note) => note.id !== snapshot.pending?.noteId)
         : snapshot.notes;
+    const className = open ? styles.panel : `${styles.panel} ${styles.collapsed}`;
 
     return (
         <section className={className} data-manuscript-notes="" aria-label="Notes">
-            <h2 className={styles.heading}>Notes</h2>
-            {snapshot.pending ? (
-                <Composer pending={snapshot.pending} />
-            ) : notes.length === 0 ? (
-                <p className={styles.hint}>Highlight text to add a note</p>
-            ) : null}
-            {notes.length > 0 && (
-                <ul className={styles.list}>
-                    {notes.map((note) => (
-                        <NoteRow key={note.id} note={note} active={note.id === snapshot.activeId} />
-                    ))}
-                </ul>
+            <button
+                type="button"
+                className={styles.toggle}
+                aria-expanded={open}
+                aria-label={open ? 'Collapse notes' : 'Expand notes'}
+                onClick={() => setNotesPanelOpen(!open)}
+            >
+                {!open && <ChevronLeft size={14} strokeWidth={1.5} aria-hidden />}
+                <span className={styles.toggleLabel}>Notes</span>
+                {!open && notes.length > 0 && (
+                    <span className={styles.count}>{notes.length}</span>
+                )}
+                {open && <ChevronRight size={14} strokeWidth={1.5} aria-hidden />}
+            </button>
+            {open && (
+                <>
+                    {snapshot.pending ? (
+                        <Composer pending={snapshot.pending} />
+                    ) : notes.length === 0 ? (
+                        <p className={styles.hint}>Highlight text to add a note</p>
+                    ) : null}
+                    {notes.length > 0 && (
+                        <ul className={styles.list}>
+                            {notes.map((note) => (
+                                <NoteRow
+                                    key={note.id}
+                                    note={note}
+                                    active={note.id === snapshot.activeId}
+                                />
+                            ))}
+                        </ul>
+                    )}
+                </>
             )}
         </section>
     );

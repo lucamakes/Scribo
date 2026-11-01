@@ -1,33 +1,55 @@
-.sidebar,
 .panel {
     display: flex;
     flex-direction: column;
+    width: 240px;
+    height: 100%;
     min-height: 0;
+    padding: 12px 14px 20px;
     overflow: auto;
     background: #ffffff;
-}
-
-.sidebar {
-    flex-shrink: 0;
-    max-height: 220px;
-    padding: 10px 16px 12px;
-    border-top: 1px solid #f0f0f0;
-}
-
-.panel {
-    width: 220px;
-    height: 100%;
-    padding: 16px 14px 20px;
     border-left: 1px solid #f0f0f0;
 }
 
-.heading {
-    margin: 0 0 8px;
+.collapsed {
+    width: 40px;
+    padding: 12px 0;
+    overflow: hidden;
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 10px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #8a6a2f;
+}
+
+.collapsed .toggle {
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+}
+
+.toggleLabel {
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: #8a8a8a;
+}
+
+.collapsed .toggleLabel {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+}
+
+.count {
+    font-size: 11px;
+    font-weight: 600;
+    color: #9a6f1a;
 }
 
 .hint,
@@ -62,7 +84,7 @@
 
 .jump:hover,
 .itemActive .jump {
-    color: #1a78c2;
+    color: #9a6f1a;
 }
 
 .composer {
@@ -110,12 +132,10 @@
     border-top: 1px solid #f3f3f3;
 }
 
-.sidebar::-webkit-scrollbar,
 .panel::-webkit-scrollbar {
     width: 4px;
 }
 
-.sidebar::-webkit-scrollbar-thumb,
 .panel::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.12);
     border-radius: 2px;
@@ -125,8 +145,23 @@
     .panel {
         width: auto;
         height: auto;
-        max-height: 180px;
+        max-height: 220px;
         border-left: none;
         border-top: 1px solid #f0f0f0;
+    }
+
+    .collapsed {
+        width: auto;
+        max-height: none;
+        padding: 8px 14px;
+    }
+
+    .collapsed .toggle {
+        flex-direction: row;
+    }
+
+    .collapsed .toggleLabel {
+        writing-mode: horizontal-tb;
+        transform: none;
     }
 }
