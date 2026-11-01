@@ -51,7 +51,7 @@ function shortName(name: string): string {
 
 /**
  * Manuscript editor, word statistics, and the panels that sit over it.
- * The word count ignores markup, so margin notes are not included.
+ * The word count ignores markup, so notes are not included.
  */
 export function FileView(props: FileViewProps) {
     const {
@@ -152,6 +152,7 @@ export function FileView(props: FileViewProps) {
                     fontSize={fontSize}
                     lineHeight={lineHeight}
                     textColor={textColor}
+                    notesInEditor={isFullscreen || isMobile}
                 />
             </div>
             {isFullscreen && (

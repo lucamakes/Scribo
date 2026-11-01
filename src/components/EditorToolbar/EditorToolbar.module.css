@@ -30,8 +30,7 @@
     margin: 0 8px;
 }
 
-.toolbarButton,
-.notesToggle {
+.toolbarButton {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -48,14 +47,7 @@
     transition: background 0.15s ease, color 0.15s ease;
 }
 
-.notesToggle {
-    gap: 6px;
-    flex-shrink: 0;
-    padding: 0 10px;
-}
-
-.toolbarButton:hover:not(:disabled),
-.notesToggle:hover {
+.toolbarButton:hover:not(:disabled) {
     background: #e5e5e5;
     color: #1a1a1a;
 }
@@ -65,8 +57,7 @@
     cursor: not-allowed;
 }
 
-.toolbarButton.active,
-.notesToggle.active {
+.toolbarButton.active {
     background: rgba(26, 120, 194, 0.1);
     color: #1a78c2;
 }
@@ -88,17 +79,11 @@
         display: none;
     }
 
-    .toolbarGroup,
-    .notesToggle {
+    .toolbarGroup {
         flex-shrink: 0;
     }
 
-    .notesToggle {
-        margin-left: 0;
-    }
-
-    .toolbarButton,
-    .notesToggle {
+    .toolbarButton {
         min-width: 40px;
         height: 40px;
         font-size: 15px;
@@ -120,8 +105,7 @@
         gap: 2px;
     }
 
-    .toolbarButton,
-    .notesToggle {
+    .toolbarButton {
         min-width: 36px;
         height: 36px;
         padding: 0 6px;

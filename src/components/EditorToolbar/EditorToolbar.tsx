@@ -16,17 +16,12 @@ import {
     Quote,
     Undo,
     Redo,
-    StickyNote,
 } from 'lucide-react';
 import styles from './EditorToolbar.module.css';
 
 interface EditorToolbarProps {
     /** Active Tiptap editor instance */
     editor: Editor;
-    /** Whether the margin notes column is open */
-    notesOpen: boolean;
-    /** Show or hide the margin notes column */
-    onToggleNotes: () => void;
 }
 
 interface ToolbarButtonProps {
@@ -63,9 +58,9 @@ function ToolbarButton({
 }
 
 /**
- * Formatting controls for the manuscript editor, including the line-notes toggle.
+ * Formatting controls for the manuscript editor.
  */
-export function EditorToolbar({ editor, notesOpen, onToggleNotes }: EditorToolbarProps) {
+export function EditorToolbar({ editor }: EditorToolbarProps) {
     return (
         <div className={styles.toolbarRow}>
         <div className={styles.toolbar}>
@@ -178,18 +173,6 @@ export function EditorToolbar({ editor, notesOpen, onToggleNotes }: EditorToolba
                 </ToolbarButton>
             </div>
         </div>
-
-            <button
-                type="button"
-                className={`${styles.notesToggle} ${notesOpen ? styles.active : ''}`}
-                title={notesOpen ? 'Hide line notes' : 'Show line notes'}
-                aria-label={notesOpen ? 'Hide line notes' : 'Show line notes'}
-                aria-pressed={notesOpen}
-                onClick={onToggleNotes}
-            >
-                <StickyNote size={16} strokeWidth={1.5} />
-                <span>Notes</span>
-            </button>
         </div>
     );
 }

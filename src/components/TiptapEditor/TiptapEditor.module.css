@@ -36,22 +36,11 @@
     margin: 0 auto;
 }
 
-.toolbarFrameWithNotes {
-    max-width: 1088px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 260px;
-    column-gap: 28px;
-    align-items: end;
-}
-
-.notesColumnLabel {
-    margin: 0;
-    padding: 0 0 26px 16px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: #8a8a8a;
+.editorBody {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
 }
 
 /* Editor Content Area */
@@ -72,20 +61,6 @@
 .stage {
     width: 100%;
     max-width: 800px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    align-items: stretch;
-}
-
-.stageWithNotes {
-    max-width: 1088px;
-    grid-template-columns: minmax(0, 1fr) 260px;
-    column-gap: 28px;
-}
-
-.stageStacked {
-    max-width: 800px;
-    grid-template-columns: minmax(0, 1fr);
 }
 
 .manuscript {
@@ -98,19 +73,19 @@
     max-width: none;
 }
 
-.notesSlot {
-    position: relative;
-    min-width: 0;
-    align-self: stretch;
-}
-
 .editorContent {
     outline: none;
     min-height: 100%;
     text-align: left;
 }
 
-/* A line with a note is marked in the manuscript, whether the notes column is open or closed. */
+/* A highlighted passage with a note, including when the line wraps. */
+.editor :global(.tiptap span[data-note-id]) {
+    background-color: rgba(26, 120, 194, 0.16);
+    border-radius: 2px;
+}
+
+/* Older notes that were stored on a whole line. */
 .editor :global(.tiptap [data-line-note]) {
     background-color: rgba(26, 120, 194, 0.12);
     box-shadow: inset 3px 0 0 #1a78c2;
@@ -323,6 +298,10 @@
         top: 0;
         background: #ffffff;
         z-index: 10;
+    }
+
+    .editorBody {
+        flex-direction: column;
     }
 
     .editorScroll {

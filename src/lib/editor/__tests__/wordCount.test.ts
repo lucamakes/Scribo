@@ -6,6 +6,11 @@ describe('countWordsInHtml', () => {
         expect(countWordsInHtml(html)).toBe(5);
     });
 
+    it('does not count a selection note, including one that contains ">"', () => {
+        const html = '<p>Hello <span data-note-id="n1" data-selection-note="alpha > beta gamma">world</span> today</p>';
+        expect(countWordsInHtml(html)).toBe(3);
+    });
+
     it('does not count a margin note, including one that contains ">"', () => {
         const html = '<p data-line-note="see the > symbol and then many extra note words that should not count">actual text</p><p>next line</p>';
         expect(countWordsInHtml(html)).toBe(4);

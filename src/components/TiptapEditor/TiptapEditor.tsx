@@ -7,18 +7,13 @@ import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
 import { EditorState } from '@tiptap/pm/state';
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { LineNote, setLineNote } from '@/lib/editor/lineNoteExtension';
-import {
-    getLineNotesOpenServerSnapshot,
-    getLineNotesOpenSnapshot,
-    setLineNotesOpen,
-    subscribeLineNotesOpen,
-} from '@/lib/editor/lineNotesPreference';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { LineNote } from '@/lib/editor/lineNoteExtension';
+import { SelectionNote } from '@/lib/editor/selectionNote';
 import { countWordsInHtml, countWordsInPlainText } from '@/lib/editor/wordCount';
-import { useLineNoteEntries } from '@/lib/hooks/useLineNoteEntries';
+import { dismissPendingHighlight, useManuscriptNotes } from '@/lib/hooks/useManuscriptNotes';
 import { EditorToolbar } from '@/components/EditorToolbar/EditorToolbar';
-import { LineNotes } from '@/components/LineNotes/LineNotes';
+import { ManuscriptNotes } from '@/components/ManuscriptNotes/ManuscriptNotes';
 import styles from './TiptapEditor.module.css';
 
 interface TiptapEditorProps {
@@ -44,6 +39,8 @@ interface TiptapEditorProps {
     lineHeight?: number;
     /** Text color */
     textColor?: string;
+    /** Draw the notes list beside the manuscript. Used when the file sidebar is covered. */
+    notesInEditor?: boolean;
 }
 
 /**
@@ -61,20 +58,14 @@ export function TiptapEditor({
     focusMode = false,
     fontSize = 18,
     lineHeight = 2.0,
-    textColor = '#4a4a4a'
+    textColor = '#4a4a4a',
+    notesInEditor = false,
 }: TiptapEditorProps) {
     const isInitialMount = useRef(true);
     const previousContent = useRef(content);
     const scrollRef = useRef<HTMLDivElement>(null);
     const manuscriptRef = useRef<HTMLDivElement>(null);
-    const notesLabelId = useId();
     const [isMobile, setIsMobile] = useState(false);
-    const [stackedNotes, setStackedNotes] = useState(false);
-    const notesOpen = useSyncExternalStore(
-        subscribeLineNotesOpen,
-        getLineNotesOpenSnapshot,
-        getLineNotesOpenServerSnapshot,
-    );
 
     // Detect mobile
     useEffect(() => {
@@ -103,6 +94,7 @@ export function TiptapEditor({
                 multicolor: false,
             }),
             LineNote,
+            SelectionNote,
         ],
         content,
         editorProps: {
@@ -211,6 +203,7 @@ export function TiptapEditor({
                     schema: state.schema,
                 });
                 editor.view.updateState(freshState);
+                dismissPendingHighlight();
 
                 // On mobile, scroll to bottom when loading a new file with content
                 if (isMobile && content && content.length > 100) {
@@ -237,32 +230,7 @@ export function TiptapEditor({
         }
     }, [editor, onContentChange]);
 
-    const toggleNotes = useCallback(() => {
-        setLineNotesOpen(!getLineNotesOpenSnapshot());
-    }, []);
-
-    useLayoutEffect(() => {
-        const element = scrollRef.current;
-        if (!element) return;
-
-        const observer = new ResizeObserver(() => {
-            setStackedNotes(element.clientWidth < 760);
-        });
-        observer.observe(element);
-        return () => observer.disconnect();
-    }, [editor]);
-
-    const { entries, activePos } = useLineNoteEntries(
-        editor,
-        manuscriptRef,
-        notesOpen,
-        `${fontSize}:${lineHeight}:${stackedNotes}`,
-    );
-
-    const handleNoteChange = useCallback((pos: number, note: string) => {
-        if (!editor) return;
-        setLineNote(editor, pos, note);
-    }, [editor]);
+    useManuscriptNotes(editor, notesInEditor);
 
     if (!editor) {
         return (
@@ -272,57 +240,30 @@ export function TiptapEditor({
         );
     }
 
-    const notesBesideText = notesOpen && !stackedNotes;
-    const stageClass = [
-        styles.stage,
-        notesOpen ? styles.stageWithNotes : '',
-        notesOpen && stackedNotes ? styles.stageStacked : '',
-    ].filter(Boolean).join(' ');
-
     return (
-        <div
-            className={`${styles.editor} ${notesOpen ? styles.notesVisible : ''}`}
-            onKeyDown={handleKeyDown}
-        >
+        <div className={styles.editor} onKeyDown={handleKeyDown}>
             <div className={`${styles.toolbarWrapper} ${focusMode ? styles.toolbarHidden : ''}`}>
-                <div className={`${styles.toolbarFrame} ${notesBesideText ? styles.toolbarFrameWithNotes : ''}`}>
-                    <EditorToolbar
-                        editor={editor}
-                        notesOpen={notesOpen}
-                        onToggleNotes={toggleNotes}
-                    />
-                    {notesBesideText && (
-                        <p className={styles.notesColumnLabel} id={notesLabelId}>
-                            Notes
-                        </p>
-                    )}
+                <div className={styles.toolbarFrame}>
+                    <EditorToolbar editor={editor} />
                 </div>
             </div>
 
-            <div
-                ref={scrollRef}
-                className={`${styles.editorScroll} ${focusMode ? styles.editorScrollFocus : ''}`}
-            >
-                <div className={stageClass}>
-                    <div
-                        ref={manuscriptRef}
-                        className={styles.manuscript}
-                        style={{ fontSize: `${fontSize}px`, lineHeight, color: textColor }}
-                    >
-                        <EditorContent editor={editor} />
-                    </div>
-                    {notesOpen && (
-                        <div className={styles.notesSlot}>
-                            <LineNotes
-                                entries={entries}
-                                activePos={activePos}
-                                stacked={stackedNotes}
-                                onChange={handleNoteChange}
-                                labelledBy={notesBesideText ? notesLabelId : undefined}
-                            />
+            <div className={styles.editorBody}>
+                <div
+                    ref={scrollRef}
+                    className={`${styles.editorScroll} ${focusMode ? styles.editorScrollFocus : ''}`}
+                >
+                    <div className={styles.stage}>
+                        <div
+                            ref={manuscriptRef}
+                            className={styles.manuscript}
+                            style={{ fontSize: `${fontSize}px`, lineHeight, color: textColor }}
+                        >
+                            <EditorContent editor={editor} />
                         </div>
-                    )}
+                    </div>
                 </div>
+                {notesInEditor && <ManuscriptNotes layout="panel" />}
             </div>
         </div>
     );
