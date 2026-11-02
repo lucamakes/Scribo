@@ -241,7 +241,9 @@ export function TiptapEditor({
         <div className={styles.editor} onKeyDown={handleKeyDown}>
             <div className={`${styles.toolbarWrapper} ${focusMode ? styles.toolbarHidden : ''}`}>
                 <div className={styles.toolbarFrame}>
-                    <EditorToolbar editor={editor} />
+                    <EditorToolbar editor={editor}>
+                        <ManuscriptNotes />
+                    </EditorToolbar>
                 </div>
             </div>
 
@@ -260,7 +262,6 @@ export function TiptapEditor({
                         </div>
                     </div>
                 </div>
-                <ManuscriptNotes />
             </div>
         </div>
     );

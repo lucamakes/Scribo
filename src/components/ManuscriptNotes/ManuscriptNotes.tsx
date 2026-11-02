@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { createPortal } from 'react-dom';
+import { StickyNote } from 'lucide-react';
 import {
     getManuscriptNotesServerSnapshot,
     getManuscriptNotesSnapshot,
@@ -9,12 +10,6 @@ import {
     subscribeManuscriptNotes,
 } from '@/lib/editor/manuscriptNotesStore';
 import type { ManuscriptNoteItem, PendingNote } from '@/lib/editor/manuscriptNotesStore';
-import {
-    getNotesPanelOpenServerSnapshot,
-    getNotesPanelOpenSnapshot,
-    setNotesPanelOpen,
-    subscribeNotesPanelOpen,
-} from '@/lib/editor/notesPanelPreference';
 import styles from './ManuscriptNotes.module.css';
 
 interface ComposerProps {
@@ -114,8 +109,28 @@ function NoteRow({ note, active }: NoteRowProps) {
     );
 }
 
+function isNotesTarget(target: EventTarget | null): boolean {
+    return target instanceof Element && target.closest('[data-manuscript-notes]') !== null;
+}
+
 /**
- * Collapsible notes for the open manuscript, beside the writing.
+ * Place the popover under the toolbar button, flipping above it when the page is short.
+ */
+function placePopover(button: HTMLButtonElement, popover: HTMLElement): void {
+    const rect = button.getBoundingClientRect();
+    const width = popover.offsetWidth;
+    const height = popover.offsetHeight;
+    const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
+    const roomBelow = window.innerHeight - rect.bottom;
+    const top = roomBelow < height + 12 && rect.top > height + 12
+        ? rect.top - height - 6
+        : rect.bottom + 6;
+    popover.style.top = `${top}px`;
+    popover.style.left = `${left}px`;
+}
+
+/**
+ * Notes button in the formatting row. Clicking it opens a small list.
  * Highlight text to add one. Click a saved note to scroll to it.
  */
 export function ManuscriptNotes() {
@@ -124,54 +139,95 @@ export function ManuscriptNotes() {
         getManuscriptNotesSnapshot,
         getManuscriptNotesServerSnapshot,
     );
-    const open = useSyncExternalStore(
-        subscribeNotesPanelOpen,
-        getNotesPanelOpenSnapshot,
-        getNotesPanelOpenServerSnapshot,
-    );
+    const [open, setOpen] = useState(false);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const popoverRef = useRef<HTMLDivElement>(null);
+
+    useLayoutEffect(() => {
+        if (!open) return;
+        const button = buttonRef.current;
+        const popover = popoverRef.current;
+        if (!button || !popover) return;
+
+        const place = () => placePopover(button, popover);
+        place();
+        window.addEventListener('resize', place);
+        window.addEventListener('scroll', place, true);
+        return () => {
+            window.removeEventListener('resize', place);
+            window.removeEventListener('scroll', place, true);
+        };
+    }, [open, snapshot.pending, snapshot.notes.length]);
+
+    useEffect(() => {
+        if (!open) return;
+
+        const onPointerDown = (event: MouseEvent) => {
+            if (!isNotesTarget(event.target)) setOpen(false);
+        };
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') setOpen(false);
+        };
+
+        document.addEventListener('mousedown', onPointerDown);
+        document.addEventListener('keydown', onKeyDown);
+        return () => {
+            document.removeEventListener('mousedown', onPointerDown);
+            document.removeEventListener('keydown', onKeyDown);
+        };
+    }, [open]);
+
     if (!snapshot.active) return null;
 
     const notes = snapshot.pending?.noteId
         ? snapshot.notes.filter((note) => note.id !== snapshot.pending?.noteId)
         : snapshot.notes;
-    const className = open ? styles.panel : `${styles.panel} ${styles.collapsed}`;
+    const popover = open ? (
+        <div
+            ref={popoverRef}
+            className={styles.popover}
+            data-manuscript-notes=""
+            role="dialog"
+            aria-label="Notes"
+        >
+            {snapshot.pending ? (
+                <Composer pending={snapshot.pending} />
+            ) : notes.length === 0 ? (
+                <p className={styles.hint}>Highlight text to add a note</p>
+            ) : null}
+            {notes.length > 0 && (
+                <ul className={styles.list}>
+                    {notes.map((note) => (
+                        <NoteRow
+                            key={note.id}
+                            note={note}
+                            active={note.id === snapshot.activeId}
+                        />
+                    ))}
+                </ul>
+            )}
+        </div>
+    ) : null;
 
     return (
-        <section className={className} data-manuscript-notes="" aria-label="Notes">
+        <>
             <button
+                ref={buttonRef}
                 type="button"
-                className={styles.toggle}
+                className={open ? `${styles.button} ${styles.buttonOpen}` : styles.button}
+                data-manuscript-notes=""
                 aria-expanded={open}
-                aria-label={open ? 'Collapse notes' : 'Expand notes'}
-                onClick={() => setNotesPanelOpen(!open)}
+                aria-haspopup="dialog"
+                aria-label="Notes"
+                title="Notes"
+                onClick={() => setOpen((current) => !current)}
             >
-                {!open && <ChevronLeft size={14} strokeWidth={1.5} aria-hidden />}
-                <span className={styles.toggleLabel}>Notes</span>
-                {!open && notes.length > 0 && (
-                    <span className={styles.count}>{notes.length}</span>
+                <StickyNote size={16} strokeWidth={1.5} />
+                {snapshot.notes.length > 0 && (
+                    <span className={styles.count}>{snapshot.notes.length}</span>
                 )}
-                {open && <ChevronRight size={14} strokeWidth={1.5} aria-hidden />}
             </button>
-            {open && (
-                <>
-                    {snapshot.pending ? (
-                        <Composer pending={snapshot.pending} />
-                    ) : notes.length === 0 ? (
-                        <p className={styles.hint}>Highlight text to add a note</p>
-                    ) : null}
-                    {notes.length > 0 && (
-                        <ul className={styles.list}>
-                            {notes.map((note) => (
-                                <NoteRow
-                                    key={note.id}
-                                    note={note}
-                                    active={note.id === snapshot.activeId}
-                                />
-                            ))}
-                        </ul>
-                    )}
-                </>
-            )}
-        </section>
+            {popover && typeof document !== 'undefined' ? createPortal(popover, document.body) : null}
+        </>
     );
 }

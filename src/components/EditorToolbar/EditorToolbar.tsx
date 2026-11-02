@@ -22,6 +22,8 @@ import styles from './EditorToolbar.module.css';
 interface EditorToolbarProps {
     /** Active Tiptap editor instance */
     editor: Editor;
+    /** Extra controls that sit in the same row, such as the notes button. */
+    children?: ReactNode;
 }
 
 interface ToolbarButtonProps {
@@ -60,7 +62,7 @@ function ToolbarButton({
 /**
  * Formatting controls for the manuscript editor.
  */
-export function EditorToolbar({ editor }: EditorToolbarProps) {
+export function EditorToolbar({ editor, children }: EditorToolbarProps) {
     return (
         <div className={styles.toolbarRow}>
         <div className={styles.toolbar}>
@@ -172,6 +174,12 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
                     <Redo size={16} strokeWidth={1.5} />
                 </ToolbarButton>
             </div>
+            {children && (
+                <>
+                    <div className={styles.divider} />
+                    <div className={styles.toolbarGroup}>{children}</div>
+                </>
+            )}
         </div>
         </div>
     );
