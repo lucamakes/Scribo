@@ -69,7 +69,9 @@ function Composer({ pending }: ComposerProps) {
 }
 
 /**
- * One saved note. The excerpt jumps to the highlight. The text saves on blur.
+ * One saved note. The excerpt jumps to the highlight. The text saves as you type.
+ * An empty note removes the highlight, so that waits until the field loses focus.
+ * Otherwise clearing the field to rewrite a note would delete it mid-edit.
  */
 function NoteRow({ note, active }: NoteRowProps) {
     const [draft, setDraft] = useState<string | null>(null);
@@ -101,9 +103,14 @@ function NoteRow({ note, active }: NoteRowProps) {
                 onChange={(event) => {
                     const next = event.target.value;
                     setDraft(next);
-                    manuscriptNoteActions()?.update(note.id, next);
+                    if (next.trim().length > 0) manuscriptNoteActions()?.update(note.id, next);
                 }}
-                onBlur={() => setDraft(null)}
+                onBlur={() => {
+                    if (draft !== null && draft.trim().length === 0) {
+                        manuscriptNoteActions()?.update(note.id, '');
+                    }
+                    setDraft(null);
+                }}
             />
         </li>
     );
@@ -122,9 +129,11 @@ function placePopover(button: HTMLButtonElement, popover: HTMLElement): void {
     const height = popover.offsetHeight;
     const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
     const roomBelow = window.innerHeight - rect.bottom;
-    const top = roomBelow < height + 12 && rect.top > height + 12
+    const preferred = roomBelow < height + 12 && rect.top > height + 12
         ? rect.top - height - 6
         : rect.bottom + 6;
+    // Keep it on screen when neither side has room, so the notes stay reachable.
+    const top = Math.max(8, Math.min(preferred, window.innerHeight - height - 8));
     popover.style.top = `${top}px`;
     popover.style.left = `${left}px`;
 }
@@ -149,31 +158,59 @@ export function ManuscriptNotes() {
         const popover = popoverRef.current;
         if (!button || !popover) return;
 
-        const place = () => placePopover(button, popover);
-        place();
-        window.addEventListener('resize', place);
-        window.addEventListener('scroll', place, true);
-        return () => {
-            window.removeEventListener('resize', place);
-            window.removeEventListener('scroll', place, true);
+        // Scrolling and resizing fire far faster than the screen refreshes, so place once per frame.
+        // A resize observer covers the popover growing or shrinking as notes come and go.
+        let frame = 0;
+        const place = () => {
+            frame = 0;
+            placePopover(button, popover);
         };
-    }, [open, snapshot.pending, snapshot.notes.length]);
+        const schedule = (event?: Event) => {
+            // Scrolling the list inside the popover does not move the button.
+            if (event?.target instanceof Node && popover.contains(event.target)) return;
+            if (frame === 0) frame = window.requestAnimationFrame(place);
+        };
+
+        placePopover(button, popover);
+        const observer = new ResizeObserver(() => schedule());
+        observer.observe(popover);
+        window.addEventListener('resize', schedule);
+        window.addEventListener('scroll', schedule, true);
+        return () => {
+            if (frame !== 0) window.cancelAnimationFrame(frame);
+            observer.disconnect();
+            window.removeEventListener('resize', schedule);
+            window.removeEventListener('scroll', schedule, true);
+        };
+    }, [open, snapshot.active]);
 
     useEffect(() => {
         if (!open) return;
 
-        const onPointerDown = (event: MouseEvent) => {
-            if (!isNotesTarget(event.target)) setOpen(false);
+        // A field that is removed from the page never reports a blur, so leave it first.
+        // That is when a note row saves an emptied note, which removes it.
+        const close = () => {
+            const focused = document.activeElement;
+            if (focused instanceof HTMLElement && popoverRef.current?.contains(focused)) focused.blur();
+            setOpen(false);
         };
+        const onPointerDown = (event: MouseEvent) => {
+            if (!isNotesTarget(event.target)) close();
+        };
+        // Capture phase on window, so Escape closes the notes before anything behind them reacts.
+        // Fullscreen listens for Escape on the document and would otherwise exit along with the popover.
         const onKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') setOpen(false);
+            if (event.key !== 'Escape' || event.isComposing) return;
+            event.stopPropagation();
+            close();
+            buttonRef.current?.focus();
         };
 
         document.addEventListener('mousedown', onPointerDown);
-        document.addEventListener('keydown', onKeyDown);
+        window.addEventListener('keydown', onKeyDown, true);
         return () => {
             document.removeEventListener('mousedown', onPointerDown);
-            document.removeEventListener('keydown', onKeyDown);
+            window.removeEventListener('keydown', onKeyDown, true);
         };
     }, [open]);
 

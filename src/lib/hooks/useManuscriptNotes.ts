@@ -2,19 +2,18 @@
 
 import { useEffect, useRef } from 'react';
 import type { Editor } from '@tiptap/core';
-import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import type { Transaction } from '@tiptap/pm/state';
 import { ReplaceStep } from '@tiptap/pm/transform';
-import { forEachLineBlock, readLineNote, setLineNote } from '@/lib/editor/lineNoteExtension';
+import { activeNoteId, noteBounds, notesInDocument } from '@/lib/editor/documentNotes';
+import { setLineNote } from '@/lib/editor/lineNoteExtension';
 import {
     publishManuscriptNotes,
     setManuscriptNoteActions,
     clearManuscriptNotes,
 } from '@/lib/editor/manuscriptNotesStore';
-import type { ManuscriptNoteItem, PendingNote } from '@/lib/editor/manuscriptNotesStore';
+import type { PendingNote } from '@/lib/editor/manuscriptNotesStore';
 import {
     addSelectionNote,
-    collectSelectionNotes,
     excerptText,
     rewriteSelectionNote,
     selectionNoteBounds,
@@ -35,48 +34,6 @@ function notesUiHasFocus(): boolean {
     if (typeof document === 'undefined') return false;
     const active = document.activeElement;
     return active instanceof Element && active.closest('[data-manuscript-notes]') !== null;
-}
-
-function lineNotes(doc: ProseMirrorNode): ManuscriptNoteItem[] {
-    const items: ManuscriptNoteItem[] = [];
-    forEachLineBlock(doc, (node, pos) => {
-        const note = readLineNote(node);
-        if (!note) return;
-        const from = pos + 1;
-        const to = Math.max(from, pos + node.nodeSize - 1);
-        items.push({
-            id: `line:${pos}`,
-            kind: 'line',
-            note,
-            excerpt: excerptText(node.textContent),
-            from,
-            to,
-        });
-    });
-    return items;
-}
-
-function notesInDocument(doc: ProseMirrorNode): ManuscriptNoteItem[] {
-    const selection = collectSelectionNotes(doc).map((note): ManuscriptNoteItem => ({
-        id: note.id,
-        kind: 'selection',
-        note: note.note,
-        excerpt: note.excerpt,
-        from: note.from,
-        to: note.to,
-    }));
-    return [...selection, ...lineNotes(doc)].sort((left, right) => left.from - right.from);
-}
-
-function activeIdFor(doc: ProseMirrorNode, from: number, to: number): string | null {
-    const selectionId = selectionNoteIdInRange(doc, from, to);
-    if (selectionId) return selectionId;
-    let lineId: string | null = null;
-    forEachLineBlock(doc, (node, pos) => {
-        if (!readLineNote(node)) return;
-        if (from >= pos && to <= pos + node.nodeSize) lineId = `line:${pos}`;
-    });
-    return lineId;
 }
 
 /**
@@ -101,11 +58,11 @@ export function useManuscriptNotes(editor: Editor | null): void {
             const range = rangeRef.current;
             let pending: PendingNote | null = null;
             const { from, to } = editor.state.selection;
-            let activeId = from !== to ? activeIdFor(doc, from, to) : null;
+            let activeId = from !== to ? activeNoteId(doc, notes, from, to) : null;
 
             if (range && range.to <= doc.content.size && range.from < range.to) {
                 const id = selectionNoteIdInRange(doc, range.from, range.to);
-                const bounds = id ? selectionNoteBounds(doc, id) : null;
+                const bounds = id ? noteBounds(notes, id) : null;
                 const exact = bounds !== null && bounds.from === range.from && bounds.to === range.to;
                 const excerpt = excerptText(doc.textBetween(range.from, range.to, ' '));
                 // Keep the field open while it is focused, even after the highlight is saved.
@@ -216,8 +173,9 @@ export function useManuscriptNotes(editor: Editor | null): void {
                 if (editor.isDestroyed || notesUiHasFocus()) return;
                 const range = rangeRef.current;
                 if (range) {
-                    const id = selectionNoteIdInRange(editor.state.doc, range.from, range.to);
-                    const bounds = id ? selectionNoteBounds(editor.state.doc, id) : null;
+                    const doc = editor.state.doc;
+                    const id = selectionNoteIdInRange(doc, range.from, range.to);
+                    const bounds = id ? noteBounds(notesInDocument(doc), id) : null;
                     const exact = bounds !== null && bounds.from === range.from && bounds.to === range.to;
                     if (exact) rangeRef.current = null;
                 }

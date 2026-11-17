@@ -59,7 +59,14 @@ function sameNotes(left: readonly ManuscriptNoteItem[], right: readonly Manuscri
     for (let index = 0; index < left.length; index += 1) {
         const a = left[index];
         const b = right[index];
-        if (a.id !== b.id || a.kind !== b.kind || a.note !== b.note || a.excerpt !== b.excerpt || a.from !== b.from) {
+        if (
+            a.id !== b.id
+            || a.kind !== b.kind
+            || a.note !== b.note
+            || a.excerpt !== b.excerpt
+            || a.from !== b.from
+            || a.to !== b.to
+        ) {
             return false;
         }
     }

@@ -31,7 +31,8 @@
 
 .popover {
     position: fixed;
-    z-index: 40;
+    /* Above the fullscreen editor overlay (1000), below modals (1100+). */
+    z-index: 1050;
     display: flex;
     flex-direction: column;
     width: 280px;
